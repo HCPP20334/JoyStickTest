@@ -17,6 +17,7 @@ int64_t FillBuffer(int64_t fXpos,int64_t fYpos,int64_t r,int64_t g,int64_t b,HWN
 	SetPixel(GetDC(fHwnd),fXpos,fYpos,RGB(r,g,b));
 };
 };
+
 fPrint fConsole;
 uint64_t fDataMemUsage()
 {
@@ -106,8 +107,10 @@ int main(int argc, char *argv[])
   int64_t fP6 = 0;
   int64_t fTimeUsed = 1;
   int64_t fHour = 0;
-  int64_t fColorBar = 30;
+  int64_t fColorBar = 139;
   int64_t fExP = 0;
+  int64_t fDebugIgnoreXiputError = 0;
+  ///
   char fChUp = 24;
   char fChDn = 25;
   bool fDebugger = false;
@@ -115,9 +118,12 @@ int main(int argc, char *argv[])
   bool fXCon;
   bool fAxisTest = false;
   bool kbEmu = false;
-  bool xControllerState;
+  bool xControllerState = true;
   bool fClear = true;
   bool fExSh = false;
+  bool fDebugMode = true;
+  //
+  HDC fDC = GetDC(GetConsoleWindow());
   string fXinput_Status;
   char *fFileText0 = "R/Text0.txt";
   char *fFileText1 = "R/Text1.txt"; 
@@ -271,21 +277,50 @@ int main(int argc, char *argv[])
   		fP6 = 1;
 	  }
   	SetColorAMD64(11);
- gRenderText(fFileText0,16);
+ gRenderText(fFileText0,18);
  SetColorAMD64(15);
+ if(GetAsyncKeyState('1'))
+ {
+ 	Sleep(80);
+ 	system("start https://github.io/HCPP20334/JoyStickTest");
+ }
+ if(GetAsyncKeyState('2'))
+ {
+ 	Sleep(80);
+ 	system("start https://hcpp20334.github.io");
+ }
  c1 = (fTextLoad  / 4);
  if(c1 > 24)
  {
  	c1 = 24;
  }
- if(!fXCon)
+  if(!fDebugMode)
+  {
+  	if(!fXCon)
  {
  	cout<<"Error Xbox360 Controller not Connected!![error code:0x0F]"<<endl;
+ 	
  	fTextLoad  = 10;
  	if(fTextLoad > 10)
  	{
  		fTextLoad = 10;
 	}
+ }
+  }
+  if(fDebugMode)
+ {
+ 	cout<<"Error Xbox360 Controller not Connected!![error code:0x0F]"<<endl;
+ 	
+ 	if(fTextLoad > 100)
+ 	{
+ 		fTextLoad = 100;
+	}
+ }
+ if(GetAsyncKeyState('L'))
+ {
+ 	cout<<" Debug Enable..."<<endl;
+ 	fDebugMode = true;
+ 	  fTextLoad = 1000;
  }
  if(!GetAsyncKeyState(VK_ESCAPE))
  {
@@ -325,7 +360,14 @@ int main(int argc, char *argv[])
  }
 cout<<" Xinput Status:"<<fXinput_Status<<endl;
 cout<<" Battery Level:"<<fBatLevel<<endl;
-cout<<"Exit Hold Esc"<<fBar[fExP];
+cout<<"Exit Hold Esc";
+ SetColorAMD64(131);
+cout<<fBar[fExP]<<endl;
+SetColorAMD64(15);
+cout<<"             ";
+ SetColorAMD64(131);
+cout<<fBar[fExP]<<endl;
+SetColorAMD64(15);
  cout<<"Loading Xinput.dll.. "<<fTextLoad<<"%"<<endl;
  SetColorAMD64(131);
  cout<<fBar[c1];
@@ -334,7 +376,7 @@ cout<<"Exit Hold Esc"<<fBar[fExP];
   SetColorAMD64(131);
  cout<<fBar[c1]<<endl;
  SetColorAMD64(15);
- cout<<" Test Bar Press (B)"<<endl;
+ cout<<" Test Bar Press (B) and R key Mouse"<<endl;
 SetColorAMD64(130);
 cout<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<endl;
 cout<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<endl;
@@ -356,13 +398,37 @@ SetColorAMD64(15);
  {
  	cout<<" Press (A) to skip Loading"<<endl;
  }
+  if(!xController1->IsConnected())
+  {
+  	if(GetAsyncKeyState(VK_RBUTTON))
+  	{
+  		   		fAnimDuration++;
+ 	if(fAnimDuration == 1)
+ 	{
+ 		  fTestYBar++;
+               if(fTestYBar >= 8)
+               {
+               	fTestYBar = 8;
+			   }
+			   fAnimDuration = 0;
+	 }
+	  }
+	  if(!GetAsyncKeyState(VK_RBUTTON))
+	  {
+	  	fTestYBar--;
+               if(fTestYBar < 0)
+               {
+               	fTestYBar = 0;
+			   }
+	  }
+  }
   if(xController1->IsConnected())
   {
   	 if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A)
      {
                 fTextLoad = 1000;
      }
-      if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_B)
+      if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_B && GetAsyncKeyState(VK_RBUTTON))
      {
      		fAnimDuration++;
  	if(fAnimDuration == 1)
@@ -377,7 +443,7 @@ SetColorAMD64(15);
 
 			    
      }
-     if(xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_B)
+     if(xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_B && GetAsyncKeyState(VK_RBUTTON))
      {
                fTestYBar--;
                if(fTestYBar < 0)
@@ -458,16 +524,23 @@ SetColorAMD64(15);
 			fTimeUsed = 1;
 		}
 		fTimeStr = to_string(fHour)+":"+to_string(fTimeUsed)+":"+to_string(fClocksCPU);
-	if(xController1->IsConnected())
-  	{
-  		fXCon = true;
-  		fXinput_Status = "Controller 1 is Connected!!";
-	}
-	else
-  	{
-  		fXCon = false;
-  		fXinput_Status = "Controller 1 not Connected!!";
-	}
+        if(!fDebugMode)
+        {
+        	if(xController1->IsConnected())
+  	        {
+  		        fXCon = true;
+  	        	fXinput_Status = "Controller 1 is Connected!!";
+	    }
+	    else
+  	    {
+  		        fXCon = false;
+  		        fXinput_Status = "Controller 1 not Connected!!";
+	    }
+		}
+		if(fDebugMode)
+        {
+        	fXCon = true;
+        }
 		fLXPos = (xController1->GetState().Gamepad.sThumbLX) ;
 		fLYPos = (xController1->GetState().Gamepad.sThumbLY) ;
 		fRXPos = (xController1->GetState().Gamepad.sThumbRX) ;
@@ -514,6 +587,19 @@ SetColorAMD64(15);
 			fTime_00 = 0;
 		}
 		//GetAsyncButtonState('F');
+		if(GetAsyncKeyState('L'))
+     {
+     	fDebugIgnoreXiputError++;
+     	if(fDebugIgnoreXiputError == 0)
+     	{
+     	fXCon = true;
+     	system("cls");
+        }
+        if(fDebugIgnoreXiputError == 1)
+        {
+     	fXCon = false;
+        }
+     }
 		cls(fGetWindow);//
 		if(!fXCon)
 		{
@@ -538,6 +624,7 @@ SetColorAMD64(15);
 
      cls(fGetWindow);//
 			fErrorColor = 158;
+			cout<<(char)10<<endl;
 	  	SetColorAMD64(15);
   	cout<<"\n\n\n";
   	SetColorAMD64(15);
@@ -686,6 +773,7 @@ SetColorAMD64(15);
 	    	{
 	    	cout<<"Y"<<fBar[fLY]<<endl;
 	        cout<<"X"<<fBar[fLX]<<endl;
+	        TextOut(fDC,fLX,fLY," ",1);
 			}
 		}
 		if(fDebugger)

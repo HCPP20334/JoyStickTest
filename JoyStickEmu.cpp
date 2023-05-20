@@ -110,6 +110,7 @@ int main(int argc, char *argv[])
   int64_t fColorBar = 139;
   int64_t fExP = 0;
   int64_t fDebugIgnoreXiputError = 0;
+  int64_t fBPoint = 0;
   ///
   char fChUp = 24;
   char fChDn = 25;
@@ -118,10 +119,11 @@ int main(int argc, char *argv[])
   bool fXCon;
   bool fAxisTest = false;
   bool kbEmu = false;
-  bool xControllerState = true;
+  bool xControllerState = false;
   bool fClear = true;
   bool fExSh = false;
-  bool fDebugMode = true;
+  bool fDebugMode = false;
+  bool fBarS;
   //
   HDC fDC = GetDC(GetConsoleWindow());
   string fXinput_Status;
@@ -309,7 +311,7 @@ int main(int argc, char *argv[])
   }
   if(fDebugMode)
  {
- 	cout<<"Error Xbox360 Controller not Connected!![error code:0x0F]"<<endl;
+ 	cout<<"JoyStickEmu Debugger                                      "<<endl;
  	
  	if(fTextLoad > 100)
  	{
@@ -318,10 +320,27 @@ int main(int argc, char *argv[])
  }
  if(GetAsyncKeyState('L'))
  {
+ 	system("cls");
  	cout<<" Debug Enable..."<<endl;
  	fDebugMode = true;
- 	  fTextLoad = 1000;
+ 	fXCon = true;
  }
+ if(GetAsyncKeyState('B'))
+	{
+		fBPoint++;
+		if(fBPoint > 1)
+		{
+			fBPoint = 0;
+		}
+		if(fBPoint == 0)
+		{
+			fBarS = false;
+		}
+		if(fBPoint == 1)
+		{
+			fBarS = true;
+		}
+	}
  if(!GetAsyncKeyState(VK_ESCAPE))
  {
  	fExP--;
@@ -344,7 +363,7 @@ int main(int argc, char *argv[])
     		system("cls");
     	   	//	xController1->Vibrate(10000,10000);
        		cout<<"_______________________________________________________________"<<endl;
-       		SetColorAMD64(71);
+       		SetColorAMD64(240);
        		if(fExSh)
        		{
        			cout<<"                                                               "<<endl;
@@ -352,10 +371,10 @@ int main(int argc, char *argv[])
        		cout<<"               Thanks!! How to used my Program!!               "<<endl;
        		cout<<"                                                               "<<endl;
        		cout<<"                                                               "<<endl;
-			   }
        		cout<<"_______________________________________________________________"<<endl;
        		SetColorAMD64(15);
        	       exit(0);  
+       	    }
 	}
  }
 cout<<" Xinput Status:"<<fXinput_Status<<endl;
@@ -377,7 +396,11 @@ SetColorAMD64(15);
  cout<<fBar[c1]<<endl;
  SetColorAMD64(15);
  cout<<" Test Bar Press (B) and R key Mouse"<<endl;
-SetColorAMD64(130);
+
+//
+if(!fBarS)
+{
+	SetColorAMD64(138);
 cout<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<endl;
 cout<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<endl;
 cout<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]<<endl;
@@ -385,14 +408,20 @@ cout<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fB
 cout<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]<<endl;
 cout<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]<<endl;
 cout<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]<<endl;
-//
-//<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]
-//<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]
-//<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]
-//<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]
-//<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]
-//<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]
-//<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]
+}
+if(fBarS)
+{
+		SetColorAMD64(138);
+cout<<fBarY[fP6]<<fBarY[fP0]<<fBarY[fP6]<<fBarY[fP0]<<fBarY[fP6]<<fBarY[fP0]<<fBarY[fP6]<<fBarY[fP0]<<fBarY[fP6]<<fBarY[fP0]<<fBarY[fP6]<<fBarY[fP0]<<fBarY[fP6]<<fBarY[fP0]<<fBarY[fP6]<<fBarY[fP0]<<endl;
+cout<<fBarY[fP5]<<fBarY[fP1]<<fBarY[fP5]<<fBarY[fP1]<<fBarY[fP5]<<fBarY[fP1]<<fBarY[fP5]<<fBarY[fP1]<<fBarY[fP5]<<fBarY[fP1]<<fBarY[fP5]<<fBarY[fP1]<<fBarY[fP5]<<fBarY[fP1]<<fBarY[fP5]<<fBarY[fP1]<<endl;
+cout<<fBarY[fP4]<<fBarY[fP2]<<fBarY[fP4]<<fBarY[fP2]<<fBarY[fP4]<<fBarY[fP2]<<fBarY[fP4]<<fBarY[fP2]<<fBarY[fP4]<<fBarY[fP2]<<fBarY[fP4]<<fBarY[fP2]<<fBarY[fP4]<<fBarY[fP2]<<fBarY[fP4]<<fBarY[fP2]<<endl;
+cout<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<endl;
+cout<<fBarY[fP2]<<fBarY[fP4]<<fBarY[fP2]<<fBarY[fP4]<<fBarY[fP2]<<fBarY[fP4]<<fBarY[fP2]<<fBarY[fP4]<<fBarY[fP2]<<fBarY[fP4]<<fBarY[fP2]<<fBarY[fP4]<<fBarY[fP2]<<fBarY[fP4]<<fBarY[fP2]<<fBarY[fP4]<<endl;
+cout<<fBarY[fP1]<<fBarY[fP5]<<fBarY[fP1]<<fBarY[fP5]<<fBarY[fP1]<<fBarY[fP5]<<fBarY[fP1]<<fBarY[fP5]<<fBarY[fP1]<<fBarY[fP5]<<fBarY[fP1]<<fBarY[fP5]<<fBarY[fP1]<<fBarY[fP5]<<fBarY[fP1]<<fBarY[fP5]<<endl;
+cout<<fBarY[fP0]<<fBarY[fP6]<<fBarY[fP0]<<fBarY[fP6]<<fBarY[fP0]<<fBarY[fP6]<<fBarY[fP0]<<fBarY[fP6]<<fBarY[fP0]<<fBarY[fP6]<<fBarY[fP0]<<fBarY[fP6]<<fBarY[fP0]<<fBarY[fP6]<<fBarY[fP0]<<fBarY[fP6]<<endl;
+
+}
+
 SetColorAMD64(15);
  if(fXCon)
  {

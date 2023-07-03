@@ -48,7 +48,7 @@ string fEnString()
 
 int main(int argc, char *argv[])
 {
-	system("mode con cols=108 lines=37");
+	system("mode con cols=44 lines=32");
   //data_t 
   int64_t fMemory = 0;
   int64_t fKeyWin = 0;
@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
   int64_t fB = 0;
   int64_t fColorLine_00 = 113;
   int64_t fTime_00 = 0;
-  int64_t fColor_00 = 158;
+  int64_t fColor_00 = 138;
   int64_t fBatLevel = 0; 
   int64_t xLXBuffer = 0;
   int64_t fLXPos = 0;//
@@ -124,6 +124,10 @@ int main(int argc, char *argv[])
   int64_t fJEYSize  = 30;
   int64_t fColorStatus = 12;
   int64_t fDgFreq = 0;
+  //Main Cycles
+  int64_t fTextLoad1 = 1;
+  int64_t fTextLoad = 1;
+  //
   // Color Modes Menu
   int64_t fColorsMSet = 1;
   int64_t fCMl0 = 47;
@@ -172,9 +176,34 @@ int main(int argc, char *argv[])
 	int64_t GetLatencyToFrame = 0;
 	int64_t fFrames = 0;
 	int64_t fGetFrames = 0;
+	// JE DEBUGGER
+	int64_t fJE_Menu = 0;
+	int64_t fJEDebCol_0 = 0;
+	int64_t fJEDebCol_1 = 0;
+	int64_t fJEDebCol_2 = 0;
+	int64_t fJEKeyDelay = 0;
+	int64_t fThread_0 = 0;
+	int64_t fCpuCode = 0;
+	int64_t f_rnd  = 0;
+	int64_t f_Kb0 = 0;
+	int64_t f_Kb1 = 0;
+	int64_t f_Kb2 = 0;
+	int64_t f_Kb3 = 0;
+	int64_t fJEKbDelayD = 0;
+	int64_t fJEKbDelay = 0;
+	//
 	//string
 	string fBuffer0;
+	string fStrLX = "   ";
+	string fStrLY = "   ";
+	string fStrRX = "   ";
+	string fStrRY = "   ";
+	string fSLx;
+	string fSLy;
+	string fSRx;
+	string fSRy;
 	//
+	
   char fChUp = 24;
   char fChDn = 25;
   bool fDebugger = false;
@@ -191,11 +220,10 @@ int main(int argc, char *argv[])
   bool fTestBars = false;
   bool fCheckFiles  = false;
   bool fCR_Error = false;
+  bool fJEInfoF = false;
   //
   HDC fDC = GetDC(GetConsoleWindow());
   string fXinput_Status;
-  char *fFileText0 = "R/Text0.txt";
-  //char *fFileText1 = "R/Text1.txt"; 
   CXBOXController* xController1;
   CXBOXController* xController2;
   string fTimeStr;
@@ -269,43 +297,44 @@ int main(int argc, char *argv[])
   char fL4 = 192;//angleR left
   char fL5 = 217;// angle Rght
   //
+  string fCM_0 = "-debug";
+  string fVperfMode = "high";
   HANDLE fGetWindow = GetStdHandle(STD_OUTPUT_HANDLE);
   HWND fHwcon = GetConsoleWindow();
   xController1 = new CXBOXController(1);
   xController2 = new CXBOXController(2);
   xControllerState = (xController1->IsConnected());
   SetWindowLong(fHwcon, GWL_STYLE, GetWindowLong(fHwcon, GWL_STYLE) & WS_VISIBLE);
-  	 ifstream fCheckFiles0(fFileText0);
-  while(getline(fCheckFiles0,fBuffer0))
+    	       fCpuCode = fCPUinfo();
+  string fStrCA;
+  string f_FrSpace;
+  if(fCpuCode == 1){ fStrCA = "Intel x86";}
+  if(fCpuCode == 2){ fStrCA = "Intel x64";}
+  if(fCpuCode == 3){ fStrCA = "AMD x64";}
+  if(fCpuCode == 4){ fStrCA = "AMD x86";}
+  	cout<<" Warning!! Flash Colors"<<endl;
+	Sleep(1000);
+  for(int64_t fLoadFInfr = 1;fLoadFInfr <= 30;fLoadFInfr++)
   {
-  	 	if(fBuffer0.size() > 2160)
-  	 	{
-  	 			fCheckFiles = true;
-		   }
-  	 	cls(fGetWindow);
-  	 	cout<<"Check Files..."<<endl;
-      if(fCheckFiles0.is_open())
-  	  {
-  		fFiles0 = 1;
-  		cout<<"File0:OK"<<endl;
-	  }
-	  if(!fCheckFiles0.is_open())
-  	  {
-  		fCheckFiles = false;
-  		cout<<"File0:Error"<<endl;
-	  }
-	  	fAllSize = fAllSize + fBuffer0.size();
-	  cout<<"File0:Size:"<<fAllSize<<"/2098"<<endl;
-	   }
-	    if(fCheckFiles)
-	  {
-	  	fCheckFiles0.close();
-	  	cout<<"Size: "<<fAllSize<<endl;
-	  	cout<<"Tab any Key!!"<<endl;
-	  	_getch();
-	  }
+  		system("mode con cols=120 lines=32");
+  	 f_rnd = rand() & 143-130;
+  	cls(GetStdHandle(STD_OUTPUT_HANDLE));
+  	SetColorAMD64(f_rnd);
+  	fLoadMemA("R/Text0.txt",12);
+  	cout<<f_rnd<<endl;
+  		SetColorAMD64(15);
+				cout<<" :::          CPU            :::: "<<endl;
+				cout<< "Arch:"<<fStrCA<<f_FrSpace<<endl;
+				cout<<" Cores:"<<fCPUCores()<<endl;
+				cout<<" Size Buffer: "<<fdwPageSize()<<endl;
+				cout<<" Allocation Granularity:"<<fdwAllocationGranularity()<<endl;
+				cout<<" Revision:"<<fwProcessorInfo(2)<<endl;
+				cout<<" RAM :"<<fM_Offset()<<endl;
+				cout<<" Cycles :"<<fLoadFInfr<<endl;
+  }//
+  	system("mode con cols=44 lines=32");
   system("cls");
-  for(int64_t fTextLoad = 1;fTextLoad <= 100; fTextLoad++)
+  for(fTextLoad = 1;fTextLoad <= 100; fTextLoad++)
   {
   	fAnimPoint = (fTextLoad / 10) - 1;
   	if(xController1->IsConnected())
@@ -313,14 +342,14 @@ int main(int argc, char *argv[])
   		fXCon = true;
   		fXinput_Status = "Controller 1 is Connected!!";
   		fJEText = fStatus[2];
-  		fColorStatus = 10;
+  		fColorStatus = 138;
 	}
 	else
   	{
   		fXCon = false;
   		fXinput_Status = "Controller 1 not Connected!!";
   		fDebugMode = false;
-  		fColorStatus = 12;
+  		fColorStatus = 140;
   		
 	}
   	//Sleep(16);
@@ -408,9 +437,8 @@ int main(int argc, char *argv[])
 	  }
 	  SetColorAMD64(15);
 	   srand(time(0));
-	   cout<<fL1;
-  	SetColorAMD64(fColorText);
- fLoadMemA(fFileText0,18);
+  	SetColorAMD64(10);
+ //fLoadMemA(fFileText0,18);
  SetColorAMD64(15);
  if(GetAsyncKeyState('1'))
  {
@@ -441,55 +469,39 @@ int main(int argc, char *argv[])
 	}
  }
 }
-   if(!fDebugMode)
+  if(fDebugMode)
+  {
+  	if(fXCon)
  {
- 	 	SetColorAMD64(15);
- 	 //(fFileText1,11);
-	cout<<fL2<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL3<<endl;
-	cout<<fL1<<" Loading Libs...            "<<fL1<<endl;
- cout<<fL1;
-  SetColorAMD64(131);
- cout<<fBar[c1];
- SetColorAMD64(15);
- cout<<fL1<<endl;
- cout<<fL4<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL5<<endl;
- 	SetColorAMD64(15);
- 	 cout<<fL2<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL3<<endl;
- cout<<fL1;
- SetColorAMD64(fColorStatus);
- cout<<fJEText;
- SetColorAMD64(15);
- cout<<fL1<<endl;
- cout<<fL4<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL5<<endl;
+    fErrorText = fErrors[0];
+    fJEText = fErrors[0];
+ 	
+ 	fTextLoad  = 10;
  	if(fTextLoad > 100)
  	{
  		fTextLoad = 100;
 	}
  }
-  if(fDebugMode)
+}
+ if(GetAsyncKeyState('L'))
  {
- 	//fXCon = true;
- 	fJEText = fStatus[2];
- 	 	SetColorAMD64(15);
- 	 //(fFileText1,11);
-	cout<<fL2<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL3<<endl;
-	cout<<fL1<<" Debugger....               "<<fL1<<endl;
- cout<<fL1;
-  SetColorAMD64(131);
- cout<<fBar[c1];
- SetColorAMD64(15);
- cout<<fL1<<endl;
- cout<<fL4<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL5<<endl;
- 	SetColorAMD64(15);
- 	if(fTextLoad > 100)
- 	{
- 		fTextLoad = 100;
-	}
+ 	fTextLoad = 100;
+    fXCon = true;
  }
  if(GetKeyState('J') > 0)
  {
  	fXCon = true;
  	fDebugMode = true;
+ 		fJEText = fErrors[6];
+ 		if(fTextLoad > 100)
+ 	{
+ 		fTextLoad = 100;
+    }
+ }
+  if(argv[1] == "-debug")
+ {
+ 		fJEText = fErrors[6];
+ 		cout<<"arg_0 = "<<argv[1]<<endl;
  }
  if(GetKeyState('J') < 0)
  {
@@ -514,405 +526,6 @@ int main(int argc, char *argv[])
  		fColorsMSet = 1;
 	}
  }
- if(fJEColorSetMenu)
- {
-  for(fColorsMSet = 1; fColorsMSet > 0;fColorsMSet++)
- 	{
- 	fRv0++;
-  	if(fRv0 == 6)
-  	{
-  		fRv0 = 0;
-  		fRv1++;
-  		fColorSet = fRv1;
-	}
-  	if(fRv1 > 9)
-  	{
-  		fRv1 = 0;
-	}
- 		if(fCMlPoint == 0)
- 		{
- 			 fCMl0A = 130;
-			 fCMl1A = 139;
-			 fCMl2A = 139;
-			 fCMl3A = 139;
-			 fCMl4A = 139;
-			 fCMl5A = 139;
-			 fCMl6A = 139;
-			 fCMl7A = 139;
-			 fCMl8A = 139;
-			 fCMl9A = 139;
-			 fCMlAA = 139;
-			 fCMlBA = 139;
-			 fColorText = fCMl0;
-		 }
-		 if(fCMlPoint == 1)
- 		{
- 			 fCMl0A = 139;
-			 fCMl1A = 130;
-			 fCMl2A = 139;
-			 fCMl3A = 139;
-			 fCMl4A = 139;
-			 fCMl5A = 139;
-			 fCMl6A = 139;
-			 fCMl7A = 139;
-			 fCMl8A = 139;
-			 fCMl9A = 139;
-			 fCMlAA = 139;
-			 fCMlBA = 139;
-			 fColorText = fCMl1;
-		 }
-		 if(fCMlPoint == 2)
- 		{
- 			 fCMl0A = 139;
-			 fCMl1A = 139;
-			 fCMl2A = 130;
-			 fCMl3A = 139;
-			 fCMl4A = 139;
-			 fCMl5A = 139;
-			 fCMl6A = 139;
-			 fCMl7A = 139;
-			 fCMl8A = 139;
-			 fCMl9A = 139;
-			 fCMlAA = 139;
-			 fCMlBA = 139;
-			 fColorText = fCMl2;
-		 }
-		 if(fCMlPoint == 3)
- 		{
- 			 fCMl0A = 139;
-			 fCMl1A = 139;
-			 fCMl2A = 139;
-			 fCMl3A = 130;
-			 fCMl4A = 139;
-			 fCMl5A = 139;
-			 fCMl6A = 139;
-			 fCMl7A = 139;
-			 fCMl8A = 139;
-			 fCMl9A = 139;
-			 fCMlAA = 139;
-			 fCMlBA = 139;
-			 fColorText = fCMl3;
-		 }
-		 if(fCMlPoint == 4)
- 		{
- 			 fCMl0A = 139;
-			 fCMl1A = 139;
-			 fCMl2A = 139;
-			 fCMl3A = 139;
-			 fCMl4A = 130;
-			 fCMl5A = 139;
-			 fCMl6A = 139;
-			 fCMl7A = 139;
-			 fCMl8A = 139;
-			 fCMl9A = 139;
-			 fCMlAA = 139;
-			 fCMlBA = 139;
-			 fColorText = fCMl4;
-		 }
-		  if(fCMlPoint == 5)
- 		{
- 			 fCMl0A = 139;
-			 fCMl1A = 139;
-			 fCMl2A = 139;
-			 fCMl3A = 139;
-			 fCMl4A = 139;
-			 fCMl5A = 130;
-			 fCMl6A = 139;
-			 fCMl7A = 139;
-			 fCMl8A = 139;
-			 fCMl9A = 139;
-			 fCMlAA = 139;
-			 fCMlBA = 139;
-			 fColorText = fCMl5;
-		 }
-		 if(fCMlPoint == 6)
- 		{	
- 			 fCMl0A = 139;
-			 fCMl1A = 139;
-			 fCMl2A = 139;
-			 fCMl3A = 139;
-			 fCMl4A = 139;
-			 fCMl5A = 139;
-			 fCMl6A = 130;
-			 fCMl7A = 139;
-			 fCMl8A = 139;
-			 fCMl9A = 139;
-			 fCMlAA = 139;
-			 fCMlBA = 139;
-			 fColorText = fCMl6;
-		 }
-		 if(fCMlPoint == 7)
- 		{
- 			 fCMl0A = 139;
-			 fCMl1A = 139;
-			 fCMl2A = 139;
-			 fCMl3A = 139;
-			 fCMl4A = 139;
-			 fCMl5A = 139;
-			 fCMl6A = 139;
-			 fCMl7A = 130;
-			 fCMl8A = 139;
-			 fCMl9A = 139;
-			 fCMlAA = 139;
-			 fCMlBA = 139;
-			 fColorText = fCMl7;
-			
-		 }
-		 if(fCMlPoint == 8)
- 		{
- 			 fCMl0A = 139;
-			 fCMl1A = 139;
-			 fCMl2A = 139;
-			 fCMl3A = 139;
-			 fCMl4A = 139;
-			 fCMl5A = 139;
-			 fCMl6A = 139;
-			 fCMl7A = 139;
-			 fCMl8A = 130;
-			 fCMl9A = 139;
-			 fCMlAA = 139;
-			 fCMlBA = 139;
-			 fColorText = fCMl8;
-		 }
-		  if(fCMlPoint == 9)
- 		{
- 			 fCMl0A = 139;
-			 fCMl1A = 139;
-			 fCMl2A = 139;
-			 fCMl3A = 139;
-			 fCMl4A = 139;
-			 fCMl5A = 139;
-			 fCMl6A = 139;
-			 fCMl7A = 139;
-			 fCMl8A = 139;
-			 fCMl9A = 130;
-			 fCMlAA = 139;
-			 fCMlBA = 139;
-			 fColorText = fCMl9;
-		 }
-		  if(fCMlPoint == 10)
- 		{
- 			 fCMl0A = 139;
-			 fCMl1A = 139;
-			 fCMl2A = 139;
-			 fCMl3A = 139;
-			 fCMl4A = 139;
-			 fCMl5A = 139;
-			 fCMl6A = 139;
-			 fCMl7A = 139;
-			 fCMl8A = 139;
-			 fCMl9A = 139;
-			 fCMlAA = 130;
-			 fCMlBA = 139;
-			 fColorText = fCMlA;
-		 }
-		  if(fCMlPoint == 11)
- 		{
- 			 fCMl0A = 139;
-			 fCMl1A = 139;
-			 fCMl2A = 139;
-			 fCMl3A = 139;
-			 fCMl4A = 139;
-			 fCMl5A = 139;
-			 fCMl6A = 139;
-			 fCMl7A = 139;
-			 fCMl8A = 139;
-			 fCMl9A = 139;
-			 fCMlAA = 139;
-			 fCMlBA = 130;
-			 fColorText = fCMlB;
-		 }
-
- 		cls(fGetWindow);
- 		SetColorAMD64(135);  
- 		cout<<"       Color Settings         "<<endl;
- 		SetColorAMD64(130 + fColorSet);  
- 		cout<<fL2<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL3<<endl;
- 		SetColorAMD64(130 + fColorSet); 
- 		cout<<fL1;
- 		SetColorAMD64(fCMl0A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(fCMl0);
- 		cout<<" Green-white  ";
- 		SetColorAMD64(fCMl0A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(130 + fColorSet); 
- 		cout<<fL1<<endl;
- 		SetColorAMD64(130 + fColorSet); 
- 		cout<<fL1;
- 		SetColorAMD64(fCMl1A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(fCMl1);
- 		cout<<" Blue-white   ";
- 		SetColorAMD64(fCMl1A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(130 + fColorSet); 
- 		cout<<fL1<<endl;
- 		SetColorAMD64(130 + fColorSet); 
- 		cout<<fL1;
- 		SetColorAMD64(fCMl2A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(fCMl2);
- 		cout<<" Red-white    ";
- 		SetColorAMD64(fCMl2A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(130 + fColorSet); 
- 		cout<<fL1<<endl;
- 		SetColorAMD64(130 + fColorSet); 
- 		cout<<fL1;
- 		SetColorAMD64(fCMl3A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(fCMl3);
- 		cout<<" L-Gray-black ";
- 		SetColorAMD64(fCMl3A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(130 + fColorSet); 
- 		cout<<fL1<<endl;
- 		SetColorAMD64(130 + fColorSet); 
- 		cout<<fL1;
- 		SetColorAMD64(fCMl4A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(fCMl4);
- 		cout<<" L-Gray-blue  ";
- 		SetColorAMD64(fCMl4A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(240);
- 	    SetColorAMD64(130 + fColorSet); 
- 		cout<<fL1<<endl;
- 		SetColorAMD64(130 + fColorSet); 
- 		cout<<fL1;
- 		SetColorAMD64(fCMl5A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(fCMl5);
- 		cout<<" D-Gray-green ";
- 		SetColorAMD64(fCMl5A);
- 		cout<<"   Û   ";
- 	    SetColorAMD64(130 + fColorSet); 
- 		cout<<fL1<<endl;
- 		SetColorAMD64(130 + fColorSet); 
- 		cout<<fL1;
- 		SetColorAMD64(fCMl6A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(fCMl6);
- 		cout<<" D-Gray-cyan  ";
- 		SetColorAMD64(fCMl6A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(130 + fColorSet); 
- 		cout<<fL1<<endl;
- 		SetColorAMD64(130 + fColorSet); 
- 		cout<<fL1;
- 		SetColorAMD64(fCMl7A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(fCMl7);
- 		cout<<" D-Gray-blue  ";
- 		SetColorAMD64(fCMl7A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(130 + fColorSet); ;
- 		cout<<fL1<<endl;
- 		SetColorAMD64(130 + fColorSet); 
- 		cout<<fL1;
- 		SetColorAMD64(fCMl8A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(fCMl8);
- 		cout<<" White-black  ";
- 		SetColorAMD64(fCMl8A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(130 + fColorSet); 
- 		cout<<fL1<<endl;
- 		SetColorAMD64(130 + fColorSet); 
- 		cout<<fL1;
- 		SetColorAMD64(fCMl9A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(fCMl9);
- 		cout<<" White-black  ";
- 		SetColorAMD64(fCMl9A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(130 + fColorSet); 
- 		cout<<fL1<<endl;
- 		SetColorAMD64(130 + fColorSet); 
- 		cout<<fL1;
- 		SetColorAMD64(fCMlAA);
- 		cout<<"   Û   ";
- 		SetColorAMD64(fCMlA);
- 		cout<<" White-black  ";
- 		SetColorAMD64(fCMlAA);
- 		cout<<"   Û   ";
- 		SetColorAMD64(130 + fColorSet); 
- 		cout<<fL1<<endl;
- 		SetColorAMD64(130 + fColorSet); 
- 		cout<<fL1;
- 		SetColorAMD64(fCMlBA);
- 		cout<<"   Û   ";
- 		SetColorAMD64(fCMlB);
- 		cout<<" White-black  ";
- 		SetColorAMD64(fCMlBA);
- 		cout<<"   Û   ";
- 		SetColorAMD64(130 + fColorSet); 
- 		cout<<fL1<<endl;
- 		cout<<fL4<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL5<<endl;
- 		SetColorAMD64(134);                //
- 		cout<<"       [ENTER]/(A) - OK       "<<endl;
-		cout<<"       [W]/(UP) - UP          "<<endl;
-		cout<<"       [S]/(DOWN) - Down      "<<endl;
-		cout<<"       [R]/(B) - Random       "<<endl;//
-		SetColorAMD64(15);
-		cout<<"fStack=0x"<<fRegister<<endl;
-		cout<<(char)fRegister<<endl;
-		if(GetAsyncKeyState('A'))
-		{
-			Sleep(40);
-			fRegister++;
-		}
-		if(GetAsyncKeyState('D'))
-		{
-			Sleep(40);
-			fRegister--;
-		}
- 		if(GetAsyncKeyState('R'))
- 		{
- 			srand(time(0));
- 			fCMlPoint = rand() % 11;
-		 }
- 		if(GetAsyncKeyState(VK_RETURN) || xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A)
- 		{
- 			system("cls");
- 			fColorsMSet = -1;
- 			fJEColorSetMenu = false;	
-		 }
- 		if(GetAsyncKeyState('W') || xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP)
- 		{
- 			fClA++;
- 			if(fClA > 3)
- 			{
- 				fClA = 0;
-			 }
- 			if(fClA  == 3)
- 			{
- 				fCMlPoint--;
- 			}
- 			if(fCMlPoint < 0)
- 			{
- 				fCMlPoint = 11;
-			 }
-		}
-		if(GetAsyncKeyState('S') || xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN)
- 		{
- 			fClA++;
- 			if(fClA > 3)
- 			{
- 				fClA = 0;
-			 }
- 			if(fClA  == 3)
- 			{
- 				fCMlPoint++;
- 			}
- 			if(fCMlPoint > 11)
- 			{
- 				fCMlPoint = 0;
-			 }
-		}
-	 }
- }
  if(GetAsyncKeyState('L'))
  {
  	system("cls");
@@ -922,10 +535,60 @@ int main(int argc, char *argv[])
  	fXCon = true;
  	
  }
- cout<<fL2<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL3<<endl;
- cout<<fL1<<"Build 1.0.9"<<fL1<<endl;
- cout<<fL4<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL5<<endl;
- if(GetAsyncKeyState('B'))
+  if(fVperfMode == "min")
+  {
+  	f_rnd = 15;
+  }
+   if(fVperfMode == "Rand")
+  {
+  	f_rnd = rand() & 13;
+  }
+   if(fVperfMode == "High")
+  {
+  	f_rnd = 143;
+  }
+  f_rnd = 143;
+	cls(fGetWindow);
+	            SetColorAMD64(f_rnd);
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
+				cout<<"                 JE v1.1.2                  "<<endl;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
+				cout<<"                                            "<<endl;
+				cout<<"                                            "<<endl;
+				cout<<"                                            "<<endl;
+			    cout<<" JoySTickEmu Build 1.1.2 28.06.23 21:35     "<<endl;
+			    cout<<" Writtein in C++ // By HCPP                 "<<endl;
+			    cout<<" Files Main - JoyStick.cpp [2374]           "<<endl;
+			    cout<<" Header JoyStick.h and Colors.h             "<<endl;
+			    cout<<" Uses Lib Xinput  1.4                       "<<endl;
+			    cout<<"     Check...                               "<<endl;
+			    cout<<"  "<<fBar[c1]<<"              "<<endl;
+			    cout<<"   HCPP Studio 2021-2023                    "<<endl;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
+				cout<<"               Log's'                       "<<endl;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
+				SetColorAMD64(fColorStatus);
+				cout<<"    "<<fJEText<<endl;
+				SetColorAMD64(f_rnd);
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
+				cout<<"JE Used RAM:"<<(float)fDataMemUsage() / 1024<<":MiB CPU"<<fStrCA<<f_FrSpace<<endl;//
+				cout<<" Press (A)/[ENTER]                          "<<endl;
+    if(GetAsyncKeyState('B'))
 	{
 		fBPoint++; 
 		if(fBPoint > 1)
@@ -960,6 +623,7 @@ int main(int argc, char *argv[])
 	 }
     if(fExP == 24)
     {
+    	system("mode con cols=58 lines=7");
     		system("cls");
     	   	//	xController1->Vibrate(10000,10000);
     	   		SetColorAMD64(15);
@@ -1103,573 +767,10 @@ SetColorAMD64(15);
      }
   }
   }
-  system("cls");
-    for(int64_t fTextLoad1 = 1;fTextLoad1 <= 10000; fTextLoad1++)
-  {
-  	 if(fJEColorSetMenu)
- {
- for(fColorsMSet = 1; fColorsMSet > 0;fColorsMSet++)
- 	{
- 			 if(fCMlPoint == 0)
- 		{
- 			 fCMl0A = 132;
-			 fCMl1A = 139;
-			 fCMl2A = 139;
-			 fCMl3A = 139;
-			 fCMl4A = 139;
-			 fCMl5A = 139;
-			 fCMl6A = 139;
-			 fCMl7A = 139;
-			 fCMl8A = 139;
-			 fCMl9A = 139;
-			 fCMlAA = 139;
-			 fCMlBA = 139;
-			 fColorText = fCMl0;
-		 }
-		 if(fCMlPoint == 1)
- 		{
- 			 fCMl0A = 139;
-			 fCMl1A = 132;
-			 fCMl2A = 139;
-			 fCMl3A = 139;
-			 fCMl4A = 139;
-			 fCMl5A = 139;
-			 fCMl6A = 139;
-			 fCMl7A = 139;
-			 fCMl8A = 139;
-			 fCMl9A = 139;
-			 fCMlAA = 139;
-			 fCMlBA = 139;
-			 fColorText = fCMl1;
-		 }
-		 if(fCMlPoint == 2)
- 		{
- 			 fCMl0A = 139;
-			 fCMl1A = 139;
-			 fCMl2A = 132;
-			 fCMl3A = 139;
-			 fCMl4A = 139;
-			 fCMl5A = 139;
-			 fCMl6A = 139;
-			 fCMl7A = 139;
-			 fCMl8A = 139;
-			 fCMl9A = 139;
-			 fCMlAA = 139;
-			 fCMlBA = 139;
-			 fColorText = fCMl2;
-		 }
-		 if(fCMlPoint == 3)
- 		{
- 			 fCMl0A = 139;
-			 fCMl1A = 139;
-			 fCMl2A = 139;
-			 fCMl3A = 132;
-			 fCMl4A = 139;
-			 fCMl5A = 139;
-			 fCMl6A = 139;
-			 fCMl7A = 139;
-			 fCMl8A = 139;
-			 fCMl9A = 139;
-			 fCMlAA = 139;
-			 fCMlBA = 139;
-			 fColorText = fCMl3;
-		 }
-		 if(fCMlPoint == 4)
- 		{
- 			 fCMl0A = 139;
-			 fCMl1A = 139;
-			 fCMl2A = 139;
-			 fCMl3A = 139;
-			 fCMl4A = 132;
-			 fCMl5A = 139;
-			 fCMl6A = 139;
-			 fCMl7A = 139;
-			 fCMl8A = 139;
-			 fCMl9A = 139;
-			 fCMlAA = 139;
-			 fCMlBA = 139;
-			 fColorText = fCMl4;
-		 }
-		  if(fCMlPoint == 5)
- 		{
- 			 fCMl0A = 139;
-			 fCMl1A = 139;
-			 fCMl2A = 139;
-			 fCMl3A = 139;
-			 fCMl4A = 139;
-			 fCMl5A = 132;
-			 fCMl6A = 139;
-			 fCMl7A = 139;
-			 fCMl8A = 139;
-			 fCMl9A = 139;
-			 fCMlAA = 139;
-			 fCMlBA = 139;
-			 fColorText = fCMl5;
-		 }
-		 if(fCMlPoint == 6)
- 		{	
- 			 fCMl0A = 139;
-			 fCMl1A = 139;
-			 fCMl2A = 139;
-			 fCMl3A = 139;
-			 fCMl4A = 139;
-			 fCMl5A = 139;
-			 fCMl6A = 132;
-			 fCMl7A = 139;
-			 fCMl8A = 139;
-			 fCMl9A = 139;
-			 fCMlAA = 139;
-			 fCMlBA = 139;
-			 fColorText = fCMl6;
-		 }
-		 if(fCMlPoint == 7)
- 		{
- 			 fCMl0A = 139;
-			 fCMl1A = 139;
-			 fCMl2A = 139;
-			 fCMl3A = 139;
-			 fCMl4A = 139;
-			 fCMl5A = 139;
-			 fCMl6A = 139;
-			 fCMl7A = 132;
-			 fCMl8A = 139;
-			 fCMl9A = 139;
-			 fCMlAA = 139;
-			 fCMlBA = 139;
-			 fColorText = fCMl7;
-			
-		 }
-		 if(fCMlPoint == 8)
- 		{
- 			 fCMl0A = 139;
-			 fCMl1A = 139;
-			 fCMl2A = 139;
-			 fCMl3A = 139;
-			 fCMl4A = 139;
-			 fCMl5A = 139;
-			 fCMl6A = 139;
-			 fCMl7A = 139;
-			 fCMl8A = 132;
-			 fCMl9A = 139;
-			 fCMlAA = 139;
-			 fCMlBA = 139;
-			 fColorText = fCMl8;
-		 }
-		  if(fCMlPoint == 9)
- 		{
- 			 fCMl0A = 139;
-			 fCMl1A = 139;
-			 fCMl2A = 139;
-			 fCMl3A = 139;
-			 fCMl4A = 139;
-			 fCMl5A = 139;
-			 fCMl6A = 139;
-			 fCMl7A = 139;
-			 fCMl8A = 139;
-			 fCMl9A = 132;
-			 fCMlAA = 139;
-			 fCMlBA = 139;
-			 fColorText = fCMl9;
-		 }
-		  if(fCMlPoint == 10)
- 		{
- 			 fCMl0A = 139;
-			 fCMl1A = 139;
-			 fCMl2A = 139;
-			 fCMl3A = 139;
-			 fCMl4A = 139;
-			 fCMl5A = 139;
-			 fCMl6A = 139;
-			 fCMl7A = 139;
-			 fCMl8A = 139;
-			 fCMl9A = 139;
-			 fCMlAA = 132;
-			 fCMlBA = 139;
-			 fColorText = fCMlA;
-		 }
-		  if(fCMlPoint == 11)
- 		{
- 			 fCMl0A = 139;
-			 fCMl1A = 139;
-			 fCMl2A = 139;
-			 fCMl3A = 139;
-			 fCMl4A = 139;
-			 fCMl5A = 139;
-			 fCMl6A = 139;
-			 fCMl7A = 139;
-			 fCMl8A = 139;
-			 fCMl9A = 139;
-			 fCMlAA = 139;
-			 fCMlBA = 132;
-			 fColorText = fCMlB;
-		 }
-
- 		cls(fGetWindow);
- 		SetColorAMD64(135);  
- 		cout<<"       Color Settings         "<<endl;
- 		SetColorAMD64(138);  
- 		cout<<fL2<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL3<<endl;
- 		SetColorAMD64(138);
- 		cout<<fL1;
- 		SetColorAMD64(fCMl0A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(fCMl0);
- 		cout<<" Green-white  ";
- 		SetColorAMD64(fCMl0A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(138);
- 		cout<<fL1<<endl;
- 		SetColorAMD64(138);
- 		cout<<fL1;
- 		SetColorAMD64(fCMl1A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(fCMl1);
- 		cout<<" Blue-white   ";
- 		SetColorAMD64(fCMl1A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(138);
- 		cout<<fL1<<endl;
- 		SetColorAMD64(138);
- 		cout<<fL1;
- 		SetColorAMD64(fCMl2A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(fCMl2);
- 		cout<<" Red-white    ";
- 		SetColorAMD64(fCMl2A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(138);
- 		cout<<fL1<<endl;
- 		SetColorAMD64(138);
- 		cout<<fL1;
- 		SetColorAMD64(fCMl3A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(fCMl3);
- 		cout<<" L-Gray-black ";
- 		SetColorAMD64(fCMl3A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(138);
- 		cout<<fL1<<endl;
- 		SetColorAMD64(138);
- 		cout<<fL1;
- 		SetColorAMD64(fCMl4A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(fCMl4);
- 		cout<<" L-Gray-blue  ";
- 		SetColorAMD64(fCMl4A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(240);
- 	    SetColorAMD64(138);
- 		cout<<fL1<<endl;
- 		SetColorAMD64(138);
- 		cout<<fL1;
- 		SetColorAMD64(fCMl5A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(fCMl5);
- 		cout<<" D-Gray-green ";
- 		SetColorAMD64(fCMl5A);
- 		cout<<"   Û   ";
- 	    SetColorAMD64(138);
- 		cout<<fL1<<endl;
- 		SetColorAMD64(138);
- 		cout<<fL1;
- 		SetColorAMD64(fCMl6A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(fCMl6);
- 		cout<<" D-Gray-cyan  ";
- 		SetColorAMD64(fCMl6A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(138);
- 		cout<<fL1<<endl;
- 		SetColorAMD64(138);
- 		cout<<fL1;
- 		SetColorAMD64(fCMl7A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(fCMl7);
- 		cout<<" D-Gray-blue  ";
- 		SetColorAMD64(fCMl7A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(138);
- 		cout<<fL1<<endl;
- 		SetColorAMD64(138);
- 		cout<<fL1;
- 		SetColorAMD64(fCMl8A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(fCMl8);
- 		cout<<" White-black  ";
- 		SetColorAMD64(fCMl8A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(138);
- 		cout<<fL1<<endl;
- 		SetColorAMD64(138);
- 		cout<<fL1;
- 		SetColorAMD64(fCMl9A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(fCMl9);
- 		cout<<" White-black  ";
- 		SetColorAMD64(fCMl9A);
- 		cout<<"   Û   ";
- 		SetColorAMD64(138);
- 		cout<<fL1<<endl;
- 		SetColorAMD64(138);
- 		cout<<fL1;
- 		SetColorAMD64(fCMlAA);
- 		cout<<"   Û   ";
- 		SetColorAMD64(fCMlA);
- 		cout<<" White-black  ";
- 		SetColorAMD64(fCMlAA);
- 		cout<<"   Û   ";
- 		SetColorAMD64(138);
- 		cout<<fL1<<endl;
- 		SetColorAMD64(138);
- 		cout<<fL1;
- 		SetColorAMD64(fCMlBA);
- 		cout<<"   Û   ";
- 		SetColorAMD64(fCMlB);
- 		cout<<" White-black  ";
- 		SetColorAMD64(fCMlBA);
- 		cout<<"   Û   ";
- 		SetColorAMD64(138);
- 		cout<<fL1<<endl;
- 		cout<<fL4<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL5<<endl;
- 		SetColorAMD64(134);                //
- 		cout<<"       [ENTER]/(A) - OK       "<<endl;
-		cout<<"       [W]/(UP) - UP          "<<endl;
-		cout<<"       [S]/(DOWN) - Down      "<<endl;
-		cout<<"       [R]/(B) - Random       "<<endl;//
-		SetColorAMD64(15);
-		cout<<"fStack=0x"<<fRegister<<endl;
-		cout<<(char)fRegister<<endl;
-		if(GetAsyncKeyState('A'))
-		{
-			Sleep(40);
-			fRegister++;
-		}
-		if(GetAsyncKeyState('D'))
-		{
-			Sleep(40);
-			fRegister--;
-		}
- 		if(GetAsyncKeyState('R'))
- 		{
- 			srand(time(0));
- 			fCMlPoint = rand() % 11;
-		 }
- 		if(GetAsyncKeyState(VK_RETURN) || xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A)
- 		{
- 			system("cls");
- 			fColorsMSet = -1;
- 			fJEColorSetMenu = false;	
-		 }
- 		if(GetAsyncKeyState('W') || xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP)
- 		{
- 			fClA++;
- 			if(fClA > 3)
- 			{
- 				fClA = 0;
-			 }
- 			if(fClA  == 3)
- 			{
- 				fCMlPoint--;
- 			}
- 			if(fCMlPoint < 0)
- 			{
- 				fCMlPoint = 11;
-			 }
-		}
-		if(GetAsyncKeyState('S') || xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN)
- 		{
- 			fClA++;
- 			if(fClA > 3)
- 			{
- 				fClA = 0;
-			 }
- 			if(fClA  == 3)
- 			{
- 				fCMlPoint++;
- 			}
- 			if(fCMlPoint > 11)
- 			{
- 				fCMlPoint = 0;
-			 }
-		} 
-		 
-	 }   
-	     
-}
-		  if(fTestYBar == 0){fP0 = 0;fP1 = 0;fP2 = 0;fP3 = 0;fP4 = 0;fP5 = 0;fP6 = 0;}    
-          if(fTestYBar == 1){fP0 = 0;fP1 = 0;fP2 = 0;fP3 = 0;fP4 = 0;fP5 = 0;fP6 = 1;}
- 	      if(fTestYBar == 2){fP0 = 0;fP1 = 0;fP2 = 0;fP3 = 0;fP4 = 0;fP5 = 1;fP6 = 1;}
-	  	  if(fTestYBar == 3){fP0 = 0;fP1 = 0;fP2 = 0;fP3 = 0;fP4 = 1;fP5 = 1;fP6 = 1;}
-		  if(fTestYBar == 4){fP0 = 0;fP1 = 0;fP2 = 0;fP3 = 1;fP4 = 1;fP5 = 1;fP6 = 1;}    
-          if(fTestYBar == 5){fP0 = 0;fP1 = 0;fP2 = 1;fP3 = 1;fP4 = 1;fP5 = 1;fP6 = 1;}
- 	      if(fTestYBar == 6){fP0 = 0;fP1 = 1;fP2 = 1;fP3 = 1;fP4 = 1;fP5 = 1;fP6 = 1;}
-	  	  if(fTestYBar == 7){fP0 = 1;fP1 = 1;fP2 = 1;fP3 = 1;fP4 = 1;fP5 = 1;fP6 = 1;}
-  		cls(fGetWindow);//
-  	SetColorAMD64(15);
-  	cout<<"\n\n\n";
-  	SetColorAMD64(15);
-  	cout<<"\t\t\t";
-  	SetColorAMD64(fColorText);
-  	cout<<"                                                       "<<endl;
-  	SetColorAMD64(15);
-  	cout<<"\t\t\t";
-  	SetColorAMD64(fColorText);
-  	cout<<"  JoyTest by HCPP                                      "<<endl;
-  	SetColorAMD64(15);
-  	cout<<"\t\t\t";
-  	SetColorAMD64(fColorText);
-  	cout<<"  Program to License GNU OpenSource                    "<<endl;
-  	SetColorAMD64(15);
-  	cout<<"\t\t\t";
-  	SetColorAMD64(fColorText);
-  	cout<<"  Writtein C++ ->std=c++11 release                     "<<endl;
-  	SetColorAMD64(15);
-  	cout<<"\t\t\t";
-  	SetColorAMD64(fColorText);
-  	cout<<"   Press Button ";
-  	SetColorAMD64(158);
-	  cout<<"(A)";
-	  SetColorAMD64(fColorText);
-	  cout<<" to Skip                            "<<endl;
-  	SetColorAMD64(15);
-  	cout<<"\t\t\t";
-  	SetColorAMD64(fColorText);
-  	cout<<"                                                       "<<endl;
-  		SetColorAMD64(15);
-  	cout<<"\t\t\t";
-  	SetColorAMD64(fColorText);
-  	cout<<"                                                       "<<endl;
-  	SetColorAMD64(15);
-  			SetColorAMD64(15);
-  	cout<<"\t\t\t";
-  	SetColorAMD64(fColorText);
-  	cout<<"                                                       "<<endl;
-  	SetColorAMD64(15);
-  	SetColorAMD64(11);
- SetColorAMD64(15);
- 	cout<<fL2<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL3<<endl;
-	cout<<fL1<<"     Test Bar   "<<fL1<<endl;
-	SetColorAMD64(15);
-cout<<fL1;
-	SetColorAMD64(138);
-cout<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0]<<fBarY[fP0];
-SetColorAMD64(15);
-cout<<fL1<<endl;
-cout<<fL1;
-	SetColorAMD64(138);
-cout<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1]<<fBarY[fP1];
-SetColorAMD64(15);
-cout<<fL1<<endl;
-cout<<fL1;
-	SetColorAMD64(138);
-cout<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2]<<fBarY[fP2];
-SetColorAMD64(15);
-cout<<fL1<<endl;
-cout<<fL1;
-	SetColorAMD64(138);
-cout<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3]<<fBarY[fP3];
-SetColorAMD64(15);
-cout<<fL1<<endl;
-cout<<fL1;
-	SetColorAMD64(138);
-cout<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4]<<fBarY[fP4];
-SetColorAMD64(15);
-cout<<fL1<<endl;
-cout<<fL1;
-	SetColorAMD64(138);
-cout<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5]<<fBarY[fP5];
-SetColorAMD64(15);
-cout<<fL1<<endl;
-cout<<fL1;
-	SetColorAMD64(138);
-cout<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6]<<fBarY[fP6];
-SetColorAMD64(15);
-cout<<fL1<<endl;
-SetColorAMD64(15);
-	cout<<fL4<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL5<<endl;
-	cout<<"Press (B) to test bar"<<endl;
-	if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_B || GetAsyncKeyState(VK_RBUTTON))
-     {
-     		fAnimDuration++;
- 	if(fAnimDuration == 1)
- 	{
- 		  fTestYBar++;
-               if(fTestYBar >= 8)
-               {
-               	fTestYBar = 8;
-			   }
-			   fAnimDuration = 0;
-	 }
-
-			    
-     }
-     if(xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_B || GetAsyncKeyState(VK_RBUTTON))
-     {
-               fTestYBar--;
-               if(fTestYBar < 0)
-               {
-               	fTestYBar = 0;
-			   }
-     }
-  if(GetAsyncKeyState(VK_F6) || xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER)
- {
- 	if(fJEColorSettings > 1)
- 	{
- 		fJEColorSettings = 0;
-	 }
- 	fJEColorSettings++;
- 	if(fJEColorSettings == 0)
- 	{
- 		fJEColorSetMenu = false;
- 		fColorsMSet = -1;
-	}
-	if(fJEColorSettings == 1)
- 	{
- 		fJEColorSetMenu = true;
- 		fColorsMSet = 1;
-	}
- }
- 	/// XInputEnable(true);
-  if(xController1->IsConnected())
-  {
-  	fRv3++;
-  	if(fRv3 > 4)
-  	{
-  		fRv3 = 0;
-  		fRv2++;
-  		if(fRv2 > 1) 
-  		{
-  			fRv2 = 0;
-		}
-		if(fRv2 == 0)
-		{
-			fCv0 = 15;
-		}
-		if(fRv2 == 1)
-		{
-			fCv0 = 0;
-		} 
-	  }
-  	SetColorAMD64(fCv0);
-  	cout<<" Press Button (A) to Skip"<<endl;
-  	 if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A)
-     {
-                fTextLoad1 = fTextLoad1 + 2000;
-     }
-  }
-  else
-  {
-  	cout<<" Skip [SPACE]"<<endl;
-  	cout<<" Color REF:"<<RGB(30,30,30)<<endl;
-  	 if(GetAsyncKeyState(VK_SPACE))
-     {
- 	fTextLoad1 = fTextLoad1 + 1000;
-     }
-  }
-  }
-  system("cls");
+  system("cls");//
 	for(int64_t fClocksCPU = 1;fClocksCPU > 0;fClocksCPU++)
 	{
+		 fClocksCPU = fThread_0;
 		if(fClocksCPU == 60){fClocksCPU = 1;fTimeUsed++;}
 		if(fTimeUsed == 60)
 		{
@@ -1684,6 +785,10 @@ SetColorAMD64(15);
   	        {
   		        fXCon = true;
   	        	fXinput_Status = "Controller 1 is Connected!!";
+  	        	fStrLX = "0000";
+		        fStrLY = "0000";
+		        fStrRX = "0000";
+		        fStrRY = "0000";
 	    }
 	    else
   	    {
@@ -1705,6 +810,10 @@ SetColorAMD64(15);
 		fLY = fLYPos / 100;
 		fRX = fRXPos / 100;
 		fRY = fRYPos / 100;
+		fStrLX = to_string(fLX);
+		fStrLY = to_string(fLY);
+		fStrRX = to_string(fRX);
+		fStrRY = to_string(fRY);
 		if(fLX < 0)
 		{
 			fLXAxisPoint = (fLXPos * (-1)) / 100;
@@ -1777,37 +886,32 @@ SetColorAMD64(15);
 //		  }
 //	    }
      cls(fGetWindow);//
-			fErrorColor = 158;
-			cout<<(char)10<<endl;
-	  	SetColorAMD64(15);
+	SetColorAMD64(15);
   	cout<<"\n\n\n";
-  	SetColorAMD64(15);
-  	cout<<"\t";
-  	SetColorAMD64(158);
-  	cout<<"                                                       "<<endl;
-  	SetColorAMD64(15);
-  	cout<<"\t";
-  	SetColorAMD64(158);
-  	cout<<"      Please plug to Xbox360 Controller!!               "<<endl;
-  	SetColorAMD64(15);
-  	SetColorAMD64(15);
-  	cout<<"\t";
-  	SetColorAMD64(158);
-  	cout<<"                                                       "<<endl;
-  	SetColorAMD64(15);
-  	SetColorAMD64(15);
-  	cout<<"\t";
-  	SetColorAMD64(158);
-  	cout<<"                                                       "<<endl;
-  	SetColorAMD64(15);
-  	cout<<"AnimPoint:"<<fAnimDuration0<<endl;
+  	SetColorAMD64(71);
+  	cout<<"                                            "<<endl;
+  	cout<<"                                            "<<endl;
+  	cout<<"                                            "<<endl;
+  	cout<<"                                            "<<endl;
+  	SetColorAMD64(71);
+  	cout<<"      Please plug to Xbox360 Controller!!   "<<endl;
+  	cout<<"                                            "<<endl;
+  	cout<<"                                            "<<endl;
+    cout<<"                                            "<<endl;
+  	cout<<"                                            "<<endl;
+  	cout<<"                                            "<<endl;
+  	cout<<"                                            "<<endl;
+  	cout<<"                                            "<<endl;
+  	cout<<"                                            "<<endl;
+  	cout<<"                                            "<<endl;
+  	cout<<"                                            "<<endl;
 		}
 		SetColorAMD64(15);
 		cout<<"\n\n";
 		SetColorAMD64(15);
 		if(fXCon)
 		{
-	if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER && xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER)
+	if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER && xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER || GetAsyncKeyState(VK_F6))
  {
  	if(fJEColorSettings > 1)
  	{
@@ -1829,199 +933,18 @@ SetColorAMD64(15);
  {
  	for(fColorsMSet = 1; fColorsMSet > 0;fColorsMSet++)
  	{
- 			 if(fCMlPoint == 0)
- 		{
- 			 fCMl0A = 132;
-			 fCMl1A = 139;
-			 fCMl2A = 139;
-			 fCMl3A = 139;
-			 fCMl4A = 139;
-			 fCMl5A = 139;
-			 fCMl6A = 139;
-			 fCMl7A = 139;
-			 fCMl8A = 139;
-			 fCMl9A = 139;
-			 fCMlAA = 139;
-			 fCMlBA = 139;
-			 fColorText = fCMl0;
-		 }
-		 if(fCMlPoint == 1)
- 		{
- 			 fCMl0A = 139;
-			 fCMl1A = 132;
-			 fCMl2A = 139;
-			 fCMl3A = 139;
-			 fCMl4A = 139;
-			 fCMl5A = 139;
-			 fCMl6A = 139;
-			 fCMl7A = 139;
-			 fCMl8A = 139;
-			 fCMl9A = 139;
-			 fCMlAA = 139;
-			 fCMlBA = 139;
-			 fColorText = fCMl1;
-		 }
-		 if(fCMlPoint == 2)
- 		{
- 			 fCMl0A = 139;
-			 fCMl1A = 139;
-			 fCMl2A = 132;
-			 fCMl3A = 139;
-			 fCMl4A = 139;
-			 fCMl5A = 139;
-			 fCMl6A = 139;
-			 fCMl7A = 139;
-			 fCMl8A = 139;
-			 fCMl9A = 139;
-			 fCMlAA = 139;
-			 fCMlBA = 139;
-			 fColorText = fCMl2;
-		 }
-		 if(fCMlPoint == 3)
- 		{
- 			 fCMl0A = 139;
-			 fCMl1A = 139;
-			 fCMl2A = 139;
-			 fCMl3A = 132;
-			 fCMl4A = 139;
-			 fCMl5A = 139;
-			 fCMl6A = 139;
-			 fCMl7A = 139;
-			 fCMl8A = 139;
-			 fCMl9A = 139;
-			 fCMlAA = 139;
-			 fCMlBA = 139;
-			 fColorText = fCMl3;
-		 }
-		 if(fCMlPoint == 4)
- 		{
- 			 fCMl0A = 139;
-			 fCMl1A = 139;
-			 fCMl2A = 139;
-			 fCMl3A = 139;
-			 fCMl4A = 132;
-			 fCMl5A = 139;
-			 fCMl6A = 139;
-			 fCMl7A = 139;
-			 fCMl8A = 139;
-			 fCMl9A = 139;
-			 fCMlAA = 139;
-			 fCMlBA = 139;
-			 fColorText = fCMl4;
-		 }
-		  if(fCMlPoint == 5)
- 		{
- 			 fCMl0A = 139;
-			 fCMl1A = 139;
-			 fCMl2A = 139;
-			 fCMl3A = 139;
-			 fCMl4A = 139;
-			 fCMl5A = 132;
-			 fCMl6A = 139;
-			 fCMl7A = 139;
-			 fCMl8A = 139;
-			 fCMl9A = 139;
-			 fCMlAA = 139;
-			 fCMlBA = 139;
-			 fColorText = fCMl5;
-		 }
-		 if(fCMlPoint == 6)
- 		{	
- 			 fCMl0A = 139;
-			 fCMl1A = 139;
-			 fCMl2A = 139;
-			 fCMl3A = 139;
-			 fCMl4A = 139;
-			 fCMl5A = 139;
-			 fCMl6A = 132;
-			 fCMl7A = 139;
-			 fCMl8A = 139;
-			 fCMl9A = 139;
-			 fCMlAA = 139;
-			 fCMlBA = 139;
-			 fColorText = fCMl6;
-		 }
-		 if(fCMlPoint == 7)
- 		{
- 			 fCMl0A = 139;
-			 fCMl1A = 139;
-			 fCMl2A = 139;
-			 fCMl3A = 139;
-			 fCMl4A = 139;
-			 fCMl5A = 139;
-			 fCMl6A = 139;
-			 fCMl7A = 132;
-			 fCMl8A = 139;
-			 fCMl9A = 139;
-			 fCMlAA = 139;
-			 fCMlBA = 139;
-			 fColorText = fCMl7;
-			
-		 }
-		 if(fCMlPoint == 8)
- 		{
- 			 fCMl0A = 139;
-			 fCMl1A = 139;
-			 fCMl2A = 139;
-			 fCMl3A = 139;
-			 fCMl4A = 139;
-			 fCMl5A = 139;
-			 fCMl6A = 139;
-			 fCMl7A = 139;
-			 fCMl8A = 132;
-			 fCMl9A = 139;
-			 fCMlAA = 139;
-			 fCMlBA = 139;
-			 fColorText = fCMl8;
-		 }
-		  if(fCMlPoint == 9)
- 		{
- 			 fCMl0A = 139;
-			 fCMl1A = 139;
-			 fCMl2A = 139;
-			 fCMl3A = 139;
-			 fCMl4A = 139;
-			 fCMl5A = 139;
-			 fCMl6A = 139;
-			 fCMl7A = 139;
-			 fCMl8A = 139;
-			 fCMl9A = 132;
-			 fCMlAA = 139;
-			 fCMlBA = 139;
-			 fColorText = fCMl9;
-		 }
-		  if(fCMlPoint == 10)
- 		{
- 			 fCMl0A = 139;
-			 fCMl1A = 139;
-			 fCMl2A = 139;
-			 fCMl3A = 139;
-			 fCMl4A = 139;
-			 fCMl5A = 139;
-			 fCMl6A = 139;
-			 fCMl7A = 139;
-			 fCMl8A = 139;
-			 fCMl9A = 139;
-			 fCMlAA = 132;
-			 fCMlBA = 139;
-			 fColorText = fCMlA;
-		 }
-		  if(fCMlPoint == 11)
- 		{
- 			 fCMl0A = 139;
-			 fCMl1A = 139;
-			 fCMl2A = 139;
-			 fCMl3A = 139;
-			 fCMl4A = 139;
-			 fCMl5A = 139;
-			 fCMl6A = 139;
-			 fCMl7A = 139;
-			 fCMl8A = 139;
-			 fCMl9A = 139;
-			 fCMlAA = 139;
-			 fCMlBA = 132;
-			 fColorText = fCMlB;
-		 }
+ 		if(fCMlPoint == 0){fCMl0A = 132;fCMl1A = 139;fCMl2A = 139;fCMl3A = 139;fCMl4A = 139;fCMl5A = 139;fCMl6A = 139;fCMl7A = 139;fCMl8A = 139;fCMl9A = 139;fCMlAA = 139;fCMlBA = 139;fColorText = fCMl0;}
+		if(fCMlPoint == 1){fCMl0A = 139;fCMl1A = 132;fCMl2A = 139;fCMl3A = 139;fCMl4A = 139;fCMl5A = 139;fCMl6A = 139;fCMl7A = 139;fCMl8A = 139;fCMl9A = 139;fCMlAA = 139;fCMlBA = 139;fColorText = fCMl1;}
+		if(fCMlPoint == 2){fCMl0A = 139;fCMl1A = 139;fCMl2A = 132;fCMl3A = 139;fCMl4A = 139;fCMl5A = 139;fCMl6A = 139;fCMl7A = 139;fCMl8A = 139;fCMl9A = 139;fCMlAA = 139;fCMlBA = 139;fColorText = fCMl2;}
+		if(fCMlPoint == 3){fCMl0A = 139;fCMl1A = 139;fCMl2A = 139;fCMl3A = 132;fCMl4A = 139;fCMl5A = 139;fCMl6A = 139;fCMl7A = 139;fCMl8A = 139;fCMl9A = 139;fCMlAA = 139;fCMlBA = 139;fColorText = fCMl3;}
+		if(fCMlPoint == 4){fCMl0A = 139;fCMl1A = 139;fCMl2A = 139;fCMl3A = 139;fCMl4A = 132;fCMl5A = 139;fCMl6A = 139;fCMl7A = 139;fCMl8A = 139;fCMl9A = 139;fCMlAA = 139;fCMlBA = 139;fColorText = fCMl4;}
+		if(fCMlPoint == 5){fCMl0A = 139;fCMl1A = 139;fCMl2A = 139;fCMl3A = 139;fCMl4A = 139;fCMl5A = 132;fCMl6A = 139;fCMl7A = 139;fCMl8A = 139;fCMl9A = 139;fCMlAA = 139;fCMlBA = 139;fColorText = fCMl5;}
+		if(fCMlPoint == 6){fCMl0A = 139;fCMl1A = 139;fCMl2A = 139;fCMl3A = 139;fCMl4A = 139;fCMl5A = 139;fCMl6A = 132;fCMl7A = 139;fCMl8A = 139;fCMl9A = 139;fCMlAA = 139;fCMlBA = 139;fColorText = fCMl6;}
+		if(fCMlPoint == 7){fCMl0A = 139;fCMl1A = 139;fCMl2A = 139;fCMl3A = 139;fCMl4A = 139;fCMl5A = 139;fCMl6A = 139;fCMl7A = 132;fCMl8A = 139;fCMl9A = 139;fCMlAA = 139;fCMlBA = 139;fColorText = fCMl7;}
+		if(fCMlPoint == 8){fCMl0A = 139;fCMl1A = 139;fCMl2A = 139;fCMl3A = 139;fCMl4A = 139;fCMl5A = 139;fCMl6A = 139;fCMl7A = 139;fCMl8A = 132;fCMl9A = 139;fCMlAA = 139;fCMlBA = 139;fColorText = fCMl8;}
+		if(fCMlPoint == 9){fCMl0A = 139;fCMl1A = 139;fCMl2A = 139;fCMl3A = 139;fCMl4A = 139;fCMl5A = 139;fCMl6A = 139;fCMl7A = 139;fCMl8A = 139;fCMl9A = 132;fCMlAA = 139;fCMlBA = 139;fColorText = fCMl9;}
+		if(fCMlPoint == 10){fCMl0A = 139;fCMl1A = 139;fCMl2A = 139;fCMl3A = 139;fCMl4A = 139;fCMl5A = 139;fCMl6A = 139;fCMl7A = 139;fCMl8A = 139;fCMl9A = 139;fCMlAA = 132;fCMlBA = 139;fColorText = fCMlA;}
+		if(fCMlPoint == 11){fCMl0A = 139;fCMl1A = 139;fCMl2A = 139;fCMl3A = 139;fCMl4A = 139;fCMl5A = 139;fCMl6A = 139;fCMl7A = 139;fCMl8A = 139;fCMl9A = 139;fCMlAA = 139;fCMlBA = 132;fColorText = fCMlB;}
 
  		cls(fGetWindow);
  		SetColorAMD64(135);  
@@ -2150,7 +1073,7 @@ SetColorAMD64(15);
  		SetColorAMD64(138);
  		cout<<fL1<<endl;
  		cout<<fL4<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL5<<endl;
- 		SetColorAMD64(134);                //
+ 		SetColorAMD64(143);                //
  		cout<<"       [ENTER]/(A) - OK       "<<endl;
 		cout<<"       [W]/(UP) - UP          "<<endl;
 		cout<<"       [S]/(DOWN) - Down      "<<endl;
@@ -2167,6 +1090,21 @@ SetColorAMD64(15);
 		 }
  		if(GetAsyncKeyState(VK_RETURN) || xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A)
  		{
+ 			cls(fGetWindow);
+ 				 SetColorAMD64(30);
+			    	cout<<"\n";
+			    	SetColorAMD64(30);
+			    cout<<fL2<<"                     "<<fL3<<endl;
+			    SetColorAMD64(30);
+			    cout<<fL1<<"                     "<<fL1<<endl;
+			    SetColorAMD64(30);
+			    cout<<fL1<<"      LOADING..      "<<fL1<<endl;
+			    SetColorAMD64(30);
+			    cout<<fL1<<"                     "<<fL1<<endl;
+			    SetColorAMD64(30);
+			    cout<<fL4<<"                     "<<fL5<<endl;
+			    SetColorAMD64(15);
+					Sleep(1000);
  			system("cls");
  			fColorsMSet = -1;
  			fJEColorSetMenu = false;	
@@ -2208,41 +1146,184 @@ SetColorAMD64(15);
 	 }
 	 system("cls");
  }
+ if(fJEInfoF)
+ {
+ 	system("cls");
+ 	for(int64_t fJEInfo = 1;fJEInfo > 0; fJEInfo++)
+ 	{
+ 		cls(fGetWindow);
+ 		SetColorAMD64(143);
+ 		cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
+				cout<<"    Xbox "<<fL1<<" DS4/3                           "<<endl;
+				cout<<"     (A) "<<fL1<<" (X)                              "<<endl;
+				cout<<"     (B) "<<fL1<<" (O)                              "<<endl;
+				cout<<"     (Y) "<<fL1<<" (Triagle)                        "<<endl;
+				cout<<"     (X) "<<fL1<<" (Square)                         "<<endl;
+				cout<<"                                            "<<endl;
+				cout<<"                                            "<<endl;
+				cout<<"     (A) - Back                             "<<endl;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
+				SetColorAMD64(15);
+				if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A)
+				{
+					fJEInfo = -1;
+					fJEInfoF = false;
+					system("cls");
+				}
+				
+	 }
+ }
  if(fCR_Error)
 		{
 			Beep(60,1000);
 		//	system("cls");
 			for(int64_t fRenderWindow_Error = 1;fRenderWindow_Error > 0; fRenderWindow_Error++)
 			{
-				SetColorAMD64(71);
-				cls(fGetWindow);
-				cout<<"Occured Value!! Exception: Stack_frame:"<<&fY<<endl;
-				cout<<"Occured Value!! Exception: Stack_frame:"<<&fX<<endl;
-				cout<<"Occured Value!! Exception: Stack_frame:"<<&fA<<endl;
-				cout<<"Occured Value!! Exception: Stack_frame:"<<&fB<<endl;
-				cout<<"Occured Value!! Exception: Stack_frame:"<<&fU<<endl;
-				cout<<"Occured Value!! Exception: Stack_frame:"<<&fD<<endl;
-				cout<<"Occured Value!! Exception: Stack_frame:"<<&fR<<endl;
-				cout<<"Occured Value!! Exception: Stack_frame:"<<&fL<<endl;
-				cout<<"Occured Value!! Exception: Stack_frame:"<<&fRBPoint<<endl;
-				cout<<"Occured Value!! Exception: Stack_frame:"<<&fLBPoint<<endl;
-				cout<<"Occured Value!! Exception: Stack_frame:"<<&fLY<<endl;
-				cout<<"Occured Value!! Exception: Stack_frame:"<<&fRY<<endl;
-				cout<<"Occured Value!! Exception: Stack_frame:"<<&fLX<<endl;
-				cout<<"Occured Value!! Exception: Stack_frame:"<<&fRX<<endl;
-				SetColorAMD64(15);
-				cout<<" Press [ENTER] To Restart   [SPACE]  - Continue [Z + X] - Continue and Fix         "<<endl;
-				if(GetAsyncKeyState(VK_RETURN))
+				if(fJE_Menu == 0)
 				{
+					fJEDebCol_0 = 97;
+					fJEDebCol_1 = 0;
+					fJEDebCol_2 = 0;
+					
+				}
+				if(fJE_Menu == 1)
+				{
+					fJEDebCol_0 = 0;
+					fJEDebCol_1 = 97;
+					fJEDebCol_2 = 0;
+					
+				}
+				if(fJE_Menu == 2)
+				{
+					fJEDebCol_0 = 0;
+					fJEDebCol_1 = 0;
+					fJEDebCol_2 = 97;
+					
+				}
+			
+				SetColorAMD64(143);
+				cls(fGetWindow);
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
+				cout<<"         JE Runtime Debugger v1.0           "<<endl;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
+				SetColorAMD64(143+fJEDebCol_0);
+				cout<<"          Restart                           "<<endl;
+				SetColorAMD64(143);
+				cout<<"                                            "<<endl;
+				SetColorAMD64(143+fJEDebCol_1);
+				cout<<"          Continue                          "<<endl;
+				SetColorAMD64(143);
+				cout<<"                                            "<<endl;
+				SetColorAMD64(143+fJEDebCol_2);
+				cout<<"          Continue and Fix                  "<<endl;
+				SetColorAMD64(143);
+				cout<<"                                            "<<endl;
+				SetColorAMD64(143);
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
+				cout<<"          Occured Registers                  "<<endl;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
+				SetColorAMD64(140);
+				cout<<" Exception: Stack_frame:"<<&fY<<"            "<<endl;
+				cout<<" Exception: Stack_frame:"<<&fX<<"            "<<endl;
+				cout<<" Exception: Stack_frame:"<<&fA<<"            "<<endl;
+				cout<<" Exception: Stack_frame:"<<&fB<<"            "<<endl;
+				cout<<" Exception: Stack_frame:"<<&fU<<"            "<<endl;
+				cout<<" Exception: Stack_frame:"<<&fD<<"            "<<endl;
+				cout<<" Exception: Stack_frame:"<<&fR<<"            "<<endl;
+				cout<<" Exception: Stack_frame:"<<&fL<<"            "<<endl;
+				cout<<" Exception: Stack_frame:"<<&fRBPoint<<"            "<<endl;
+				cout<<" Exception: Stack_frame:"<<&fLBPoint<<"            "<<endl;
+				cout<<" Exception: Stack_frame:"<<&fLY<<"            "<<endl;
+				cout<<" Exception: Stack_frame:"<<&fRY<<"            "<<endl;
+				cout<<" Exception: Stack_frame:"<<&fLX<<"            "<<endl;
+				cout<<" Exception: Stack_frame:"<<&fRX<<"            "<<endl;
+				SetColorAMD64(143);
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
+				SetColorAMD64(15);
+				
+				 if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP || GetAsyncKeyState('W'))
+				 {
+				 	fJEKeyDelay++;
+				 	if(fJEKeyDelay > 2)
+				 	{
+				 		fJE_Menu--;
+				 		fJEKeyDelay = 0;
+					 }
+				 	if(fJE_Menu < 0)
+				 	{
+				 		fJE_Menu = 2;
+					 }
+				 }
+				 if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN || GetAsyncKeyState('S'))
+				 {
+				 	fJEKeyDelay++;
+				 	if(fJEKeyDelay > 2)
+				 	{
+				 		fJE_Menu++;
+				 		fJEKeyDelay = 0;
+					 }
+				 	if(fJE_Menu > 2)
+				 	{
+				 		fJE_Menu = 0;
+					 }
+				 }
+			    if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A || GetAsyncKeyState(VK_RETURN))
+			    {
+			    	cls(fGetWindow);
+			    	 SetColorAMD64(30);
+			    	cout<<"\n\n\n\t";
+			    	SetColorAMD64(30);
+			    cout<<fL2<<"                     "<<fL3<<endl;
+			     SetColorAMD64(15);
+			    cout<<"\t";
+			    SetColorAMD64(30);
+			    cout<<fL1<<"                     "<<fL1<<endl;
+			     SetColorAMD64(15);
+			    cout<<"\t";
+			    SetColorAMD64(30);
+			    cout<<fL1<<"      LOADING..      "<<fL1<<endl;
+			     SetColorAMD64(15);
+			    cout<<"\t";
+			    SetColorAMD64(30);
+			    cout<<fL1<<"                     "<<fL1<<endl;
+			     SetColorAMD64(15);
+			    cout<<"\t";
+			    SetColorAMD64(30);
+			    cout<<fL4<<"                     "<<fL5<<endl;
+			    SetColorAMD64(15);
+					Sleep(1000);
+			    if(fJE_Menu == 0)
+			    {
 					main(0,(char**)"JE");
 				}
-				if(GetAsyncKeyState(VK_SPACE))
+				if(fJE_Menu == 1)
 				{
 					fCR_Error = false;
 					fRenderWindow_Error = -1;
 					
 				}
-				if(GetAsyncKeyState('Z') && GetAsyncKeyState('X'))
+				if(fJE_Menu == 2)
 				{
 					fCR_Error = false;
 					fRenderWindow_Error = -1;
@@ -2263,9 +1344,23 @@ SetColorAMD64(15);
 					cout<<" Loading.."<<endl;
 					Sleep(100);
 				}
+				}
 			}
 			system("cls");
 		}
+		// if == 1
+		if(fStrLX.size() == 1){fSLx = "   ";}if(fStrRX.size() == 1){fSRx = "   ";}
+		if(fStrLY.size() == 1){fSLy = "   ";}if(fStrRY.size() == 1){fSRy = "   ";}
+		// if == 2
+		if(fStrLX.size() == 2){fSLx = "  ";}if(fStrRX.size() == 2){fSRx = "  ";}
+		if(fStrLY.size() == 2){fSLy = "  ";}if(fStrRY.size() == 2){fSRy = "  ";}
+		// if == 3
+		if(fStrLX.size() == 3){fSLx = " ";}if(fStrRX.size() == 3){fSRx = " ";}
+		if(fStrLY.size() == 3){fSLy = " ";}if(fStrRY.size() == 3){fSRy = " ";}
+		//if == 4
+		if(fStrLX.size() == 4){fSLx = "";}if(fStrRX.size() == 4){fSRx = "";}
+		if(fStrLY.size() == 4){fSLy = "";}if(fStrRY.size() == 4){fSRy = "";}
+		//
 		if(fY > 24){fCR_Error = true;} else{fCR_Error = false;}
 		if(fB > 24){fCR_Error = true;} else{fCR_Error = false;}
 		if(fX > 24){fCR_Error = true;} else{fCR_Error = false;}
@@ -2276,138 +1371,109 @@ SetColorAMD64(15);
 		if(fR > 24){fCR_Error = true;} else{fCR_Error = false;}
 		if(fRBPoint > 24){fCR_Error = true;} else{fCR_Error = false;}
 		if(fLBPoint > 24){fCR_Error = true;} else{fCR_Error = false;}
-		if(fLY > 24){fCR_Error = true;} else{fCR_Error = false;}
-		if(fRY > 24){fCR_Error = true;} else{fCR_Error = false;}
-		if(fLX > 24){fCR_Error = true;} else{fCR_Error = false;}
-		if(fRX > 24){fCR_Error = true;} else{fCR_Error = false;}
-		cout<<"Time Used:"<<fTimeStr<<endl;
-		cout<<"FPS:"<<fGetFrames<<endl;
-		SetColorAMD64(139);
-		cout<<"Program->RAM:"<<fDataMemUsage()<<"block memory: Address="<<&fClocksCPU<<endl;
-	       xController1->Vibrate(fLTPos * 100,fRTPos * 100);
-			fErrorColor = 0;
-		SetColorAMD64(fColor_00);
-	    cout<<" Button Up                               Button (A)                "<<endl;
-		SetColorAMD64(fColorBar);
-		cout<<fBar[fU];
-		SetColorAMD64(fColor_00);
-		cout<<"         ";
-		SetColorAMD64(fColorBar);
-		cout<<fBar[fA]<<endl;
-			SetColorAMD64(fColor_00);
-	    cout<<" Button Down                             Button (X)                "<<endl;
-		SetColorAMD64(fColorBar);
-		cout<<fBar[fD];
-		SetColorAMD64(fColor_00);
-		cout<<"         ";
-		SetColorAMD64(fColorBar);
-		cout<<fBar[fX]<<endl;
-			SetColorAMD64(fColor_00);
-	    cout<<" Button Left                             Button (Y)                "<<endl;
-		SetColorAMD64(fColorBar);
-		cout<<fBar[fL];
-		SetColorAMD64(fColor_00);
-		cout<<"         ";
-		SetColorAMD64(fColorBar);
-		cout<<fBar[fY]<<endl;
-			SetColorAMD64(fColor_00);
-	    cout<<" Button Right                            Button (B)                "<<endl;
-		SetColorAMD64(fColorBar);
-		cout<<fBar[fR];
-		SetColorAMD64(fColor_00);
-		cout<<"         ";
-		SetColorAMD64(fColorBar);
-		cout<<fBar[fB]<<endl;
-			SetColorAMD64(fColor_00);
-	    cout<<" axis LT                                 axis (RT)                 "<<endl;
-		SetColorAMD64(fColorBar);
-		cout<<fBar[fLTPoint];
-		SetColorAMD64(fColor_00);
-		cout<<"         ";
-		SetColorAMD64(fColorBar);
-		cout<<fBar[fRTPoint]<<endl;
-			SetColorAMD64(fColor_00);
-	    cout<<" Button LB                              Button RB                "<<endl;
-		SetColorAMD64(fColorBar);
-		cout<<fBar[fLBPoint];
-		SetColorAMD64(fColor_00);
-		cout<<"         ";
-		SetColorAMD64(139);
-		cout<<fBar[fRBPoint]<<endl;
-		SetColorAMD64(15);
-		cout<<"LX+:"<<fLX<<" LY+:"<<fLY<<" RX+:"<<fRX<<" RY+:"<<fRY<<endl;
-		cout<<"LX-:"<<fLXAxisPoint<<" LY-:"<<fLYAxisPoint<<" RX-:"<<fRXAxisPoint<<" RY-:"<<fRYAxisPoint<<endl;
-		cout<<"LT:"<<fLTPos<<" RT:"<<fRTPos<<" LT Point:"<<(fLTPos / 10)<<" RT Point:"<<(fRTPos / 10)<<endl;
-		cout<<fL1<<"Xbox ";
-		SetColorAMD64(10);
-		cout<<"(A)";
-		SetColorAMD64(15);
-		cout<<" -> (";
-		SetColorAMD64(11);
-		cout<<"X";
-		SetColorAMD64(15);
-		cout<<") DualShock "<<fL1<<endl;
-			cout<<fL1<<"Xbox ";
-			SetColorAMD64(3);
-		cout<<"(X)";
-		cout<<" -> (";
-		SetColorAMD64(4);
-		cout<<(char)254;
-		SetColorAMD64(15);
-		cout<<") DualShock "<<fL1<<endl;
-			cout<<fL1<<"Xbox ";
-			SetColorAMD64(14);
-		cout<<"(Y)";
-		cout<<" -> (";
-		SetColorAMD64(11);
-		cout<<(char)30;
-		SetColorAMD64(15);
-		cout<<") DualShock "<<fL1<<endl;
-				cout<<fL1<<"Xbox ";
-				SetColorAMD64(4);
-		cout<<"(B)";
-		SetColorAMD64(15);
-		cout<<" -> (";
-		SetColorAMD64(4);
-		cout<<"O";
-		SetColorAMD64(15);
-		cout<<") DualShock "<<fL1<<endl;
+		SetColorAMD64(143);
+				cls(fGetWindow);
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
+				cout<<"                  JE v 1.1.2                "<<endl;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
+				SetColorAMD64(143);
+				cout<<" A  ";
+				SetColorAMD64(fColor_00);
+				cout<<fBar[fA]<<"            "<<endl;
+				SetColorAMD64(143);
+				cout<<" B  ";
+				SetColorAMD64(fColor_00);
+				cout<<fBar[fB]<<"            "<<endl;
+				SetColorAMD64(143);
+				cout<<" X  ";
+				SetColorAMD64(fColor_00);
+				cout<<fBar[fX]<<"            "<<endl;
+				SetColorAMD64(143);
+				cout<<" Y  ";
+				SetColorAMD64(fColor_00);
+				cout<<fBar[fY]<<"            "<<endl;
+				SetColorAMD64(143);
+				cout<<" U  ";
+				SetColorAMD64(fColor_00);
+				cout<<fBar[fU]<<"            "<<endl;
+				SetColorAMD64(143);
+				cout<<" D  ";
+				SetColorAMD64(fColor_00);
+				cout<<fBar[fD]<<"            "<<endl;
+				SetColorAMD64(143);
+				cout<<" R  ";
+				SetColorAMD64(fColor_00);
+				cout<<fBar[fR]<<"            "<<endl;
+				SetColorAMD64(143);
+				cout<<" L  ";
+				SetColorAMD64(fColor_00);
+				cout<<fBar[fL]<<"            "<<endl;
+				SetColorAMD64(143);
+				cout<<" RB ";
+				SetColorAMD64(fColor_00);
+				cout<<fBar[fRBPoint]<<"            "<<endl;
+				SetColorAMD64(143);
+				cout<<" LB ";
+				SetColorAMD64(fColor_00);
+				cout<<fBar[fLBPoint]<<"            "<<endl;
+				SetColorAMD64(143);
+				cout<<" RT ";
+				SetColorAMD64(fColor_00);
+				cout<<fBar[fRTPoint]<<"            "<<endl;
+				SetColorAMD64(143);
+				cout<<" LT ";
+				SetColorAMD64(fColor_00);
+				cout<<fBar[fLTPoint]<<"            "<<endl;
+				SetColorAMD64(fColor_00);
+				cout<<"                                            "<<endl;
+				SetColorAMD64(143);
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
+				cout<<"            Axis LX,LY,RX,RY                "<<endl;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
+				SetColorAMD64(143);
+				cout<<" LX Value:"<<fStrLX<<"                              "<<fSLx<<endl;
+				cout<<" LY Value:"<<fStrLY<<"                              "<<fSLy<<endl;
+				cout<<" RX Value:"<<fStrRX<<"                              "<<fSRx<<endl;
+				cout<<" RY Value:"<<fStrRY<<"                              "<<fSRy<<endl;
+				SetColorAMD64(143);
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
+				cout<<"                 HotKeys                    "<<endl;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
+				cout<<"    (F8)   Show Controls                    "<<endl;
+				cout<<"F1 - RESET PROGRAM (BACK)/[ESC]- Exit Press "<<endl;
+				cout<<"Build 1.1.2 | (LB) + (RB) - Color Settings  "<<endl;
+				SetColorAMD64(143);
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
+				cout<<"JE Used RAM:"<<(float)fDataMemUsage() / 1024<<":MiB     Address="<<&fClocksCPU<<endl;
 	    }
-	    SetColorAMD64(15);
- cout<<fL2<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL3<<endl;
- cout<<fL1<<"Build 1.0.9 | (LS) + (RS) - Color Settings  "<<fL1<<endl;
- cout<<fL1<<" F1 - RESET PROGRAM (BACK)/[ESC]- Exit Press"<<fL1<<endl;
- cout<<fL1<<"("<<fChUp<<") + LX axis to 32 - to DevMode            "<<fL1<<endl;
- cout<<fL4<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL5<<endl;
-	    if(fAxisTest)
+	    if(GetAsyncKeyState(VK_F8))
 	    {
-	    	if(fLY > 24)
-	    	{
-	    		fLY = 24;
-			}
-			if(fLX > 24)
-	    	{
-	    		fLX = 24;
-			}
-			if(fLX < 0)
-			{
-				fLXM = fLX * (-1);
-				SetColorAMD64(fLXM + 100);
-				cout<<"-X"<<fBar[fLXM]<<endl;
-				SetColorAMD64(15);
-			}
-			if(fLX < 0)
-			{
-				fLXM = fLX * (-1);
-				cout<<"-Y"<<fBar[fLYM]<<endl;
-			}
-	    	if(fLX > 0)
-	    	{
-	    	cout<<"Y"<<fBar[fLY]<<endl;
-	        cout<<"X"<<fBar[fLX]<<endl;
-	        TextOut(fDC,fLX,fLY," ",1);
-			}
+	    	fJEInfoF = true;
+	    	system("cls");
 		}
+	    SetColorAMD64(15);
+	    
 	     if(GetAsyncKeyState('N'))
 	     {
 	     	fCR_Error = true;
@@ -2415,7 +1481,7 @@ SetColorAMD64(15);
 		 }
 		 if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A && xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_B)
 		 {
-		 		fY = 24;
+		 		    fY = 24;
 					fB = 24;
 					fX = 24;
 					fA = 24;
@@ -2430,71 +1496,71 @@ SetColorAMD64(15);
 					fLBPoint = 24;
 					fRBPoint = 24;
 		 }
-		if(fDebugger)
-		{
-			fDebugColorMode0 = fColor_00;
-			fDebugColorMode = 0;
-			SetColorAMD64(7 - fDebugColorMode);
-			cout<<"("<<fChUp<<")";
-			SetColorAMD64(15 - fDebugColorMode);
-			cout<<" + ";
-			SetColorAMD64(10 - fDebugColorMode);
-			cout<<"(A)";
-			SetColorAMD64(15 - fDebugColorMode);
-			cout<<" - to Color++"<<endl;
-			SetColorAMD64(7 - fDebugColorMode);
-			cout<<"("<<fChDn<<")";
-			SetColorAMD64(15 - fDebugColorMode);
-			cout<<" + ";
-			SetColorAMD64(10 - fDebugColorMode);
-			cout<<"(A)";
-			SetColorAMD64(15 - fDebugColorMode);
-			cout<<" - to Color--"<<endl;
-			cout<<"ColorOffset:"<<fColor_00<<endl;
-			if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A)
-       	    {
-		    	if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP)
-       	        {
-       	        	Sleep(50);
-		    		fColorBar++;
-				}
-				if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN)
-       	        {
-       	        	Sleep(50);
-		    		fColorBar--;
-				}
-		   }
-		}
 		if(GetAsyncKeyState('P'))
 		{
 		MessageBox(GetConsoleWindow(),(fErrors[1].c_str()),"JE:Error!! Bulid: 1.0.9",MB_ICONWARNING);
 		cout<<"Exception Error ->fStack_frame0="<<GetConsoleWindow()<<endl;
 		cout<<"Exception Error ->fStack_frame1="<<GetDC(GetConsoleWindow())<<endl;
 		cout<<"Exception Error ->fStack_frame2="<<&xController1<<"->JoyStick.h"<<endl;
+		fCR_Error = true;
 		}
 		if(GetAsyncKeyState('O'))
 		{
 			for(int64_t fkbEmuAccept = 1;fkbEmuAccept > 0;fkbEmuAccept++)
 			{
 				cls(fGetWindow);
-				cout<<"  Function Joy2KeyBd not stable!!"<<endl;
-				cout<<" [ Yes](A)                 [No](B)"<<endl;
-				if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A)
+						SetColorAMD64(143);
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
+				cout<<"            Settings JE                "<<endl;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
+			    cout<<"Button (A) - >"<<(char)f_Kb0<<"            "<<endl;
+			    cout<<"Button (B) - >"<<(char)f_Kb1<<"            "<<endl;
+			    cout<<"Button (X) - >"<<(char)f_Kb2<<"            "<<endl;
+			    cout<<"Button (Y) - >"<<(char)f_Kb3<<"            "<<endl;
+				SetColorAMD64(143);
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
+				if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A){f_Kb0 = getch();}
+				if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_B){f_Kb1 = getch();}
+				if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_X){f_Kb2 = getch();}
+				if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_Y){f_Kb3 = getch();}
+				cout<<"Press Button on Bind | [ESC] - Save end Enable JE, [ENTER] - Disable JE"<<endl;
+				if(GetAsyncKeyState(VK_SPACE))
 				{
 					kbEmu = true;
 					cout<<"Emulator Enable!!"<<endl;
 					fkbEmuAccept = -1;
 				}
-				if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_B)
+				if(GetAsyncKeyState(VK_RETURN))
 				{
 					kbEmu = false;
-					cout<<"Emulator Disable!!"<<endl;
+					cout<<"Emulator Disable!!"<<endl;                                          
 					fkbEmuAccept = -1;
 				}
 			}
 			system("cls");
 		}
-				cout<<"Frames:"<<fFrames<<endl;
+
+			if(kbEmu)
+			{
+			if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A){fJEKbDelay++;if(fJEKbDelay == 2){keybd_event((char)f_Kb0,0,0,KEYEVENTF_KEYUP);fJEKbDelay = 0;}}
+			if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_B){fJEKbDelay++;if(fJEKbDelay == 2){keybd_event((char)f_Kb1,0,0,KEYEVENTF_KEYUP);fJEKbDelay = 0;}}
+			if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_Y){fJEKbDelay++;if(fJEKbDelay == 2){keybd_event((char)f_Kb2,0,0,KEYEVENTF_KEYUP);fJEKbDelay = 0;}}
+			if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_X){fJEKbDelay++;if(fJEKbDelay == 2){keybd_event((char)f_Kb3,0,0,KEYEVENTF_KEYUP);fJEKbDelay = 0;}}
+			if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP){fJEKbDelayD++;if(fJEKbDelayD == 2){keybd_event((char)'W',0,0,KEYEVENTF_KEYUP);fJEKbDelayD = 0;}}
+			if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN){fJEKbDelayD++;if(fJEKbDelayD == 2){keybd_event((char)f_Kb1,0,0,KEYEVENTF_KEYUP);fJEKbDelayD = 0;}}
+			if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT){fJEKbDelayD++;if(fJEKbDelayD == 2){keybd_event((char)f_Kb2,0,0,KEYEVENTF_KEYUP);fJEKbDelayD = 0;}}
+			if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT){fJEKbDelayD++;if(fJEKbDelayD == 2){keybd_event((char)f_Kb3,0,0,KEYEVENTF_KEYUP);fJEKbDelayD = 0;}}
+			}
+		
 		if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_BACK || GetAsyncKeyState(VK_ESCAPE))
        	{
        		system("cls");

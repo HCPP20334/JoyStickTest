@@ -124,6 +124,8 @@ int main(int argc, char *argv[])
   int64_t fJEYSize  = 30;
   int64_t fColorStatus = 12;
   int64_t fDgFreq = 0;
+  int64_t fJEAxis2MouseCoordLX = 0;
+  int64_t fJEAxis2MouseCoordLY = 0;
   //Main Cycles
   int64_t fTextLoad1 = 1;
   int64_t fTextLoad = 1;
@@ -224,8 +226,8 @@ int main(int argc, char *argv[])
   //
   HDC fDC = GetDC(GetConsoleWindow());
   string fXinput_Status;
-  CXBOXController* xController1;
-  CXBOXController* xController2;
+  JoyStickAPI* xController1;
+  JoyStickAPI* xController2;
   string fTimeStr;
   string fJEText;
   string fBar[] = 
@@ -301,8 +303,8 @@ int main(int argc, char *argv[])
   string fVperfMode = "high";
   HANDLE fGetWindow = GetStdHandle(STD_OUTPUT_HANDLE);
   HWND fHwcon = GetConsoleWindow();
-  xController1 = new CXBOXController(1);
-  xController2 = new CXBOXController(2);
+  xController1 = new JoyStickAPI(1);
+  xController2 = new JoyStickAPI(2);
   xControllerState = (xController1->IsConnected());
   SetWindowLong(fHwcon, GWL_STYLE, GetWindowLong(fHwcon, GWL_STYLE) & WS_VISIBLE);
     	       fCpuCode = fCPUinfo();
@@ -314,7 +316,7 @@ int main(int argc, char *argv[])
   if(fCpuCode == 4){ fStrCA = "AMD x86";}
   	cout<<" Warning!! Flash Colors"<<endl;
 	Sleep(1000);
-  for(int64_t fLoadFInfr = 1;fLoadFInfr <= 30;fLoadFInfr++)
+  for(int64_t fLoadFInfr = 1;fLoadFInfr <= 20;fLoadFInfr++)
   {
   		system("mode con cols=120 lines=32");
   	 f_rnd = rand() & 143-130;
@@ -492,16 +494,11 @@ int main(int argc, char *argv[])
  {
  	fXCon = true;
  	fDebugMode = true;
- 		fJEText = fErrors[6];
+ 	//	fJEText = fErrors[6];
  		if(fTextLoad > 100)
  	{
  		fTextLoad = 100;
     }
- }
-  if(argv[1] == "-debug")
- {
- 		fJEText = fErrors[6];
- 		cout<<"arg_0 = "<<argv[1]<<endl;
  }
  if(GetKeyState('J') < 0)
  {
@@ -587,7 +584,12 @@ int main(int argc, char *argv[])
 				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
 				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
 				cout<<"JE Used RAM:"<<(float)fDataMemUsage() / 1024<<":MiB CPU"<<fStrCA<<f_FrSpace<<endl;//
-				cout<<" Press (A)/[ENTER]                          "<<endl;
+				SetColorAMD64(15);
+				cout<<" Press (A)/[ENTER]  [Q] - Update Screen                       "<<endl;
+				if(GetAsyncKeyState('Q'))
+				{
+					system("cls");
+				}
     if(GetAsyncKeyState('B'))
 	{
 		fBPoint++; 
@@ -806,6 +808,8 @@ SetColorAMD64(15);
 		fRYPos = (xController1->GetState().Gamepad.sThumbRY) ;
 		fLTPos = (xController1->GetState().Gamepad.bLeftTrigger);
 		fRTPos = (xController1->GetState().Gamepad.bRightTrigger);
+		fJEAxis2MouseCoordLX = fLXPos / 10;
+		fJEAxis2MouseCoordLY = (fLYPos / 10) * -1;
 		fLX = fLXPos / 100;
 		fLY = fLYPos / 100;
 		fRX = fRXPos / 100;
@@ -1506,6 +1510,11 @@ SetColorAMD64(15);
 		}
 		if(GetAsyncKeyState('O'))
 		{
+			system("cls");
+			f_Kb0 = 113;
+			f_Kb1 = 113;
+			f_Kb2 = 113;
+			f_Kb3 = 113;
 			for(int64_t fkbEmuAccept = 1;fkbEmuAccept > 0;fkbEmuAccept++)
 			{
 				cls(fGetWindow);
@@ -1514,25 +1523,54 @@ SetColorAMD64(15);
 				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
 				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
 				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
-				cout<<"            Settings JE                "<<endl;
+				cout<<"                 Settings JE                "<<endl;
 				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
 				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
 				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
 				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
-			    cout<<"Button (A) - >"<<(char)f_Kb0<<"            "<<endl;
-			    cout<<"Button (B) - >"<<(char)f_Kb1<<"            "<<endl;
-			    cout<<"Button (X) - >"<<(char)f_Kb2<<"            "<<endl;
-			    cout<<"Button (Y) - >"<<(char)f_Kb3<<"            "<<endl;
+			    cout<<"Button (A) ->:"<<(char)f_Kb0<<"                             "<<endl;
+			    cout<<"Button (B) ->:"<<(char)f_Kb1<<"                             "<<endl;
+			    cout<<"Button (X) ->:"<<(char)f_Kb2<<"                             "<<endl;
+			    cout<<"Button (Y) ->:"<<(char)f_Kb3<<"                             "<<endl;
+			    cout<<"                                            "<<endl;
+			    cout<<"                                            "<<endl;
+			    cout<<"                                            "<<endl;
+			    cout<<"                                            "<<endl;
+			    cout<<"                                            "<<endl;
+			    cout<<"                                            "<<endl;
+			    cout<<"                                            "<<endl;
+			    cout<<"                                            "<<endl;
+			    cout<<"                                            "<<endl;
+			    cout<<"                                            "<<endl;
+			    cout<<"                                            "<<endl;
+			    cout<<"         Press Button on Bind !!            "<<endl;
+			    cout<<"                                            "<<endl;
+			    cout<<"                                            "<<endl;
+			    cout<<"                                            "<<endl;
+			    cout<<"                                            "<<endl;
+			    cout<<"                                            "<<endl;
+			    cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
+			    cout<<"                Controls                    "<<endl;
+		        cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
+				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
+			    cout<<"      [ENTER] - Disable JE                  "<<endl;
+			    cout<<"     [ESC] - Save end Enable JE             "<<endl;
 				SetColorAMD64(143);
 				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
 				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
 				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
 				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
-				if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A){f_Kb0 = getch();}
-				if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_B){f_Kb1 = getch();}
-				if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_X){f_Kb2 = getch();}
-				if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_Y){f_Kb3 = getch();}
-				cout<<"Press Button on Bind | [ESC] - Save end Enable JE, [ENTER] - Disable JE"<<endl;
+				cout<<"JE Used RAM:"<<(float)fDataMemUsage() / 1024<<":MiB     Address="<<&fClocksCPU<<endl;
+				SetColorAMD64(15);
+				if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A){f_Kb0 = getch();cout<<"Edit (A)?.."<<endl;}
+				if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_B){f_Kb1 = getch();cout<<"Edit (B)?.."<<endl;}
+				if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_X){f_Kb2 = getch();cout<<"Edit (X)?.."<<endl;}
+				if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_Y){f_Kb3 = getch();cout<<"Edit (Y)?.."<<endl;}
 				if(GetAsyncKeyState(VK_SPACE))
 				{
 					kbEmu = true;
@@ -1551,14 +1589,15 @@ SetColorAMD64(15);
 
 			if(kbEmu)
 			{
+			//	SetCursorPos(fJEAxis2MouseCoordLX,fJEAxis2MouseCoordLY);
 			if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A){fJEKbDelay++;if(fJEKbDelay == 2){keybd_event((char)f_Kb0,0,0,KEYEVENTF_KEYUP);fJEKbDelay = 0;}}
-			if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_B){fJEKbDelay++;if(fJEKbDelay == 2){keybd_event((char)f_Kb1,0,0,KEYEVENTF_KEYUP);fJEKbDelay = 0;}}
+			if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_B){fJEKbDelay++;if(fJEKbDelay == 2){keybd_event((char)VK_LBUTTON,0,0,KEYEVENTF_KEYUP);fJEKbDelay = 0;}}
 			if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_Y){fJEKbDelay++;if(fJEKbDelay == 2){keybd_event((char)f_Kb2,0,0,KEYEVENTF_KEYUP);fJEKbDelay = 0;}}
 			if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_X){fJEKbDelay++;if(fJEKbDelay == 2){keybd_event((char)f_Kb3,0,0,KEYEVENTF_KEYUP);fJEKbDelay = 0;}}
 			if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP){fJEKbDelayD++;if(fJEKbDelayD == 2){keybd_event((char)'W',0,0,KEYEVENTF_KEYUP);fJEKbDelayD = 0;}}
-			if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN){fJEKbDelayD++;if(fJEKbDelayD == 2){keybd_event((char)f_Kb1,0,0,KEYEVENTF_KEYUP);fJEKbDelayD = 0;}}
-			if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT){fJEKbDelayD++;if(fJEKbDelayD == 2){keybd_event((char)f_Kb2,0,0,KEYEVENTF_KEYUP);fJEKbDelayD = 0;}}
-			if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT){fJEKbDelayD++;if(fJEKbDelayD == 2){keybd_event((char)f_Kb3,0,0,KEYEVENTF_KEYUP);fJEKbDelayD = 0;}}
+			if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN){fJEKbDelayD++;if(fJEKbDelayD == 2){keybd_event((char)'S',0,0,KEYEVENTF_KEYUP);fJEKbDelayD = 0;}}
+			if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT){fJEKbDelayD++;if(fJEKbDelayD == 2){keybd_event((char)'D',0,0,KEYEVENTF_KEYUP);fJEKbDelayD = 0;}}
+			if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT){fJEKbDelayD++;if(fJEKbDelayD == 2){keybd_event((char)'A',0,0,KEYEVENTF_KEYUP);fJEKbDelayD = 0;}}
 			}
 		
 		if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_BACK || GetAsyncKeyState(VK_ESCAPE))

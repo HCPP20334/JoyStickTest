@@ -1,6 +1,6 @@
 #include "xinput.h"
 #include <Windows.h>
-class CXBOXController
+class JoyStickAPI
 {
 private:
     XINPUT_STATE _controllerState;
@@ -9,19 +9,19 @@ private:
     int64_t BatteryLevel;
     //int64_t fBatteryLevel;
 public:
-    CXBOXController(int64_t playerNumber);
+    JoyStickAPI(int64_t playerNumber);
     XINPUT_STATE GetState();
     XINPUT_BATTERY_INFORMATION BatteryState();
     bool IsConnected();
     void Vibrate(int64_t leftVal = 0, int64_t rightVal = 0);
     int64_t BatLevel();
 };
-CXBOXController::CXBOXController(int64_t playerNumber)
+JoyStickAPI::JoyStickAPI(int64_t playerNumber)
 {
     // Set the Controller Number
     _controllerNum = playerNumber - 1;
 }
-XINPUT_STATE CXBOXController::GetState()
+XINPUT_STATE JoyStickAPI::GetState()
 {
     // Zeroise the state
     ZeroMemory(&_controllerState, sizeof(XINPUT_STATE));
@@ -31,7 +31,7 @@ XINPUT_STATE CXBOXController::GetState()
 
     return _controllerState;
 }
-bool CXBOXController::IsConnected()
+bool JoyStickAPI::IsConnected()
 {
     // Zeroise the state
     ZeroMemory(&_controllerState, sizeof(XINPUT_STATE));
@@ -48,7 +48,7 @@ bool CXBOXController::IsConnected()
         return false;
     }
 }
-int64_t CXBOXController::BatLevel()
+int64_t JoyStickAPI::BatLevel()
 {
     // Create a Vibraton State
     _XINPUT_BATTERY_INFORMATION Battery;
@@ -64,7 +64,7 @@ bool USBJoyState()
 {
 	
 }
-void CXBOXController::Vibrate(int64_t  leftVal, int64_t rightVal)
+void JoyStickAPI::Vibrate(int64_t  leftVal, int64_t rightVal)
 {
     // Create a Vibraton State
     XINPUT_VIBRATION Vibration;

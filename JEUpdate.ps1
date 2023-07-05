@@ -1,2 +1,2 @@
-Invoke-WebRequest 'http://hcpp20334.github.io/JoyStickEmu.exe' -OutFile './JoyStickEmu.exe'
+Invoke-WebRequest 'http://hcpp20334.github.io/update/JoyStickEmu.exe' -OutFile './JoyStickEmu.exe'
 

@@ -1,4 +1,12 @@
-  подключаем библиотеку #include "JoyStick.h"
+JoyStickAPI by HCPP
+//
+13.08.23
+//
+JoyStickAPI документация
+//
+
+
+подключаем библиотеку #include "JoyStick.h"
   DevC++ нужно в параметрах проекта подключить libxinput_1.4.a
   в Visual Studio #pragma comment("xinput_1.4.lib");
   скачать xinput.h

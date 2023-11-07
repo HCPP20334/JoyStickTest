@@ -24,3 +24,6 @@ i3 2100 - нормально
 i7 3770 - неизвестно
 ----------------------------------------------------
 HCPP Studio 2023
+English Spec
+![image](https://github.com/HCPP20334/JoyStickTest/assets/76736848/03f1165b-2cc3-4d65-a172-867cd252e03e)
+

@@ -12,6 +12,7 @@
 #include "int128.h"//Not
 #include <thread>
 #include "dSys.h"///-
+int64_t  fErrText(string fStrTxt,int64_t fColor_id);
 using namespace std;
 //
   int64_t fLX = 0;
@@ -226,15 +227,14 @@ int64_t JEException(HANDLE hWindow)
 	  	system("cls");
 	ofstream JElog("JECrash.log");
 	JElog.is_open();
-  JElog<<" :: JE Exception                                          (ESC) - back        "<<endl;
   SetColorAMD64(71);
-  JElog<<" --  JE application crashed!                                                  "<<endl;  
-  JElog<<" ** JE.exe  **Address:"<<GetCurrentProcess()<<"                      "<<endl;
-  JElog<<" ** Error Address : "<<&fLX<<" xController1->GetState().Gamepad.sThumbLX"<<endl;
-  JElog<<" ** Error Address : "<<&fRX<<" xController1->GetState().Gamepad.sThumbRX"<<endl;
-  JElog<<" ** Error Address : "<<&fRY<<" xController1->GetState().Gamepad.sThumbRY"<<endl;
-  JElog<<" ** Error Address : "<<&fLY<<" xController1->GetState().Gamepad.sThumbLY"<<endl;
-  JElog<<"fCpu_id:"<<fCPUType()<<" cpu_tick:"<<GetTickCount()<<" "<<fLTime(0)<<":"<<fLTime(1)<<":"<<fLTime(2)<<endl;//
+JElog<<" --  JE application crashed!                                                  "<<endl;  
+JElog<<" ** JE.exe  **Address:"<<GetCurrentProcess()<<"                      "<<endl;
+JElog<<" ** Error Address : "<<&fLX<<" xController1->GetState().Gamepad.sThumbLX"<<endl;
+JElog<<" ** Error Address : "<<&fRX<<" xController1->GetState().Gamepad.sThumbRX"<<endl;
+JElog<<" ** Error Address : "<<&fRY<<" xController1->GetState().Gamepad.sThumbRY"<<endl;
+JElog<<" ** Error Address : "<<&fLY<<" xController1->GetState().Gamepad.sThumbLY"<<endl;
+JElog<<"fCpu_id:"<<fCPUType()<<" cpu_tick:"<<GetTickCount()<<" "<<fLTime(0)<<":"<<fLTime(1)<<":"<<fLTime(2)<<endl;//
 JElog<<"---------------------------------------------"<<endl;
 JElog<<"mem_dwLength:"<<fMemStatus(0)<<" "<<"mem_dwMemoryLoad:"<<fMemStatus(1)<<endl;
 JElog<<"mem_ullAvailExtendedVirtual:"<<fMemStatus(2)<<endl;
@@ -304,7 +304,7 @@ bool Asleep(int64_t Value)
 		fCurrentPointDelay = 0;
 		return true;
 	}
-}
+}//
 
 string fEnString()
 {
@@ -320,33 +320,44 @@ int64_t EmuCPU(int64_t fCPUType_a)
 		return 0;
 	}
 }
+int64_t  fLdWin()
+{
+	SetColorAMD64(159);
+	SetFontA(L"Consolas",20,60);
+	SzWindow(480,610);
+	cls(GetStdHandle(STD_OUTPUT_HANDLE)); 
+	SetColorAMD64(159);
+	cout<<"\n\n\nHCPP Studio"<<endl;//
+	Sleep(1000);
+	system("cls");
+}
+int64_t  fErrText(string fStrTxt,int64_t fColor_id)
+{
+	SetColorAMD64(fColor_id);
+	SetFontA(L"Consolas",20,60);
+	SzWindow(480,610);
+	cls(GetStdHandle(STD_OUTPUT_HANDLE)); 
+	SetColorAMD64(fColor_id);
+	cout<<"\n\n\n"<<fStrTxt<<endl;//
+	Sleep(1000);
+	system("cls");
+}
 //
 int main(int argc, char *argv[])
 {
+	GetFontA();
+	 fLdWin();
 		SetFontA(L"Consolas",5,20);
 	SetColorAMD64(15);
-cout<<" WARNING!! JE it's not correctly work to Windows Terminal!!"<<endl;
-cout<<"HCPP"<<endl;
-cout<<"JE SysData"<<endl;
+	SzWindow(800,610);
+cout<<"JE build 1.1.5.3(stable) github.com/HCPP20334/JoyStickTest"<<endl;
+cout<<"for JE min SSE 4A instruction\nWinXPx64 and more..\n Visual Studio C++ 2011 x64 runtime \n"<<endl;
 cout<<"fCpu_id:"<<fCPUType()<<" cpu_tick:"<<GetTickCount()<<" "<<fLTime(0)<<":"<<fLTime(1)<<":"<<fLTime(2)<<endl;//
 cout<<"---------------------------------------------"<<endl;
 cout<<"mem_dwLength:"<<fMemStatus(0)<<" "<<"mem_dwMemoryLoad:"<<fMemStatus(1)<<" "<<"mem_ullAvailExtendedVirtual:"<<fMemStatus(2)<<endl;
 cout<<"---------------------------------------------"<<endl;
-cout<<"mem_ullAvailPageFile:"<<fMemStatus(3)<<" mem_ullAvailPhys:"<<fMemStatus(4)<<" mem_ullAvailVirtual:"<<fMemStatus(5)<<endl;
-cout<<"---------------------------------------------"<<endl;
-cout<<"mem_ullTotalPageFile:"<<fMemStatus(6)<<" mem_ullTotalPhys:"<<fMemStatus(7)<<" mem_ullTotalVirtual:"<<fMemStatus(8)<<endl;
-cout<<"---------------------------------------------"<<endl;
-cout<<"CommitLimit:"<<fPerfomanceInfo(1)<<" CommitTotal:"<<fPerfomanceInfo(2)<<" CommitPeak:"<<fPerfomanceInfo(3)<<" KernelNonpaged:"<<fPerfomanceInfo(4)<<" "<<endl;
-cout<<"---------------------------------------------"<<endl;
-cout<<"KernelPaged:"<<fPerfomanceInfo(5)<<" KernelTotal:"<<fPerfomanceInfo(6)<<" PageSize:"<<fPerfomanceInfo(7)<<" "<<endl;
-cout<<"---------------------------------------------"<<endl;
-cout<<"PhysicalAvailable:"<<fPerfomanceInfo(8)<<" PhysicalTotal:"<<fPerfomanceInfo(9)<<" ProcessCount:"<<fPerfomanceInfo(10)<<" "<<endl;
-cout<<"---------------------------------------------"<<endl;
-cout<<"SystemCache:"<<fPerfomanceInfo(11)<<" ThreadCount:"<<fPerfomanceInfo(12)<<endl;
-cout<<"---------------------------------------------"<<endl;
-cout<<" FaultingPc:"<<ps_apiL(0)<<" FaultingVa:"<<ps_apiL(1)<<endl;
-
 Sleep(2000);
+system("cls");
   //data_t 
   int64_t fMemory = 0;
   int64_t fKeyWin = 0;
@@ -620,14 +631,14 @@ fPrevWindow = false;
   		fXCon = true;
   		fXinput_Status = "Controller 1 is Connected!!";
   		fJEText = fStatus[2];
-  		fColorStatus = 143;
+  		fColorStatus = 138;
 	}
 	else
   	{
   		fXCon = false;
   		fXinput_Status = "Controller 1 not Connected!!";
   		fDebugMode = false;
-  		fColorStatus = 71;
+  		fColorStatus = 140;
   		
 	}
   	//Sleep(16);
@@ -786,19 +797,16 @@ BoolDb = false;
 				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
 				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
 				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
-			    cout<<"                                            "<<endl;
 	            cout<<"                                            "<<endl;
 	            cout<<"                                            "<<endl;
-				 cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
-				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
-				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
-				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
 			    cout<<"   [] [][][]                                "<<endl;
 			    cout<<"   [] []                                    "<<endl;
 			    cout<<"   [] [][][]    Powered JoyStickAPI by HCPP "<<endl;
 			    cout<<"   [] [][][]    JoYStickAPI Writein C++     "<<endl;
 			    cout<<"   [] []       GNU Project                  "<<endl;
 			    cout<<"[][][ [][][]                                "<<endl;
+			    cout<<"                                            "<<endl;
+	            cout<<"                                            "<<endl;
 			    cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
 				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
 				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
@@ -812,13 +820,12 @@ BoolDb = false;
 				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
 				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
 				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
-				cout<<"               Log's'                       "<<endl;
-				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
-				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
-				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
-				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
+				SetColorAMD64(142);
+				cout<<" ::Events                                   "<<endl;
 				SetColorAMD64(fColorStatus);
+				cout<<"                                            "<<endl;
 				cout<<"    "<<fJEText<<endl;
+				cout<<"                                            "<<endl;
 				SetColorAMD64(f_rnd);
 				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
 				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
@@ -828,15 +835,14 @@ BoolDb = false;
 				cout<<" (C) - About to My API (JoyStickAPI)        "<<endl;
 				cout<<" (T) - Theme Sel                            "<<endl;
 				SetColorAMD64(240);
-				cout<<"JE Used RAM:";
+				cout<<"JE mem_usage:";
 					SetColorAMD64(159);
 				cout<<(float)fDataMemUsage() / 1024<<":MiB";
 					SetColorAMD64(240);
-				cout<<"      Address="<<&fTextLoad<<endl;
+				cout<<"    Address="<<&fTextLoad<<endl;
 				SetColorAMD64(15);
 				cout<<"cpu_type:"<<fCPUType()<<" cpu_tick:"<<GetTickCount()<<" "<<fLTime(0)<<":"<<fLTime(1)<<":"<<fLTime(2)<<endl;//
 				cout<<"---------------------------------------------"<<endl;
-				cout<<"mem_usage:"<<(double)fDataMemUsage() / 1024<<"/"<<(float)fMemStatus(7) / 1024<<""<<endl;
 				if(GetAsyncKeyState(VK_F3))
 				{
 					system("cls");//
@@ -1164,6 +1170,7 @@ fExP = rand() % 8;
   system("cls");//
 	for(int64_t fClocksCPU = 1;fClocksCPU > 0;fClocksCPU++)
 	{
+			SetFontA(L"Consolas",5,20);
 		 fClocksCPU = fThread_0;
 		if(fClocksCPU == 60){fClocksCPU = 1;fTimeUsed++;}
 		if(fTimeUsed == 60)
@@ -1282,7 +1289,6 @@ fExP = rand() % 8;
 //		  } SzWindow(430,610);
 //	    }
 //-fVectorEngine();
-SetFontA(L"HACKED",5,20);
      cls(fGetWindow);//
 	SetColorAMD64(15); SzWindow(640,610);
   	cout<<"\n\n\n";
@@ -1687,7 +1693,6 @@ if(GetAsyncKeyState(VK_RIGHT))
 			}
 			system("cls");
 		}
-		SetFontA(L"Consolas",5,20);-
 		SzWindow(640,680);
 		// if == 1
 		if(fStrLX.size() == 1){fSLx = "   ";}if(fStrRX.size() == 1){fSRx = "   ";}
@@ -1715,6 +1720,7 @@ if(GetAsyncKeyState(VK_RIGHT))
 		SetColorAMD64(143);
 		//143
 	//-	fJEMode = " Normal ";
+		SetFontA(L"Consolas",5,20);//
 				cls(fGetWindow);
 				 SetColorAMD64(f_rndT);
 	            cout<<":::   JE Build 1.1.5                        "<<endl;

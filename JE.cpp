@@ -260,6 +260,7 @@ JElog<<" FaultingPc:"<<ps_apiL(0)<<" FaultingVa:"<<ps_apiL(1)<<endl;
     SetColorAMD64(71);
 					for(int64_t fAPIinfo = 1;fAPIinfo > 0;fAPIinfo++) 
 					{
+						SetFontA(L"Consolas",5,20);
 							SzWindow(1100,560);
 						cls(hWindow);
 			SetColorAMD64(143);
@@ -322,20 +323,21 @@ int64_t EmuCPU(int64_t fCPUType_a)
 }
 int64_t  fLdWin()
 {
-	SetColorAMD64(159);
+	SetColorAMD64(113);
 	SetFontA(L"Consolas",20,60);
 	SzWindow(480,610);
 	cls(GetStdHandle(STD_OUTPUT_HANDLE)); 
-	SetColorAMD64(159);
+	SetColorAMD64(113);
 	cout<<"\n\n\nHCPP Studio"<<endl;//
 	Sleep(1000);
 	system("cls");
 }
 int64_t  fErrText(string fStrTxt,int64_t fColor_id)
 {
+	SzWindow(320,200);
+	system("cls");
 	SetColorAMD64(fColor_id);
 	SetFontA(L"Consolas",20,60);
-	SzWindow(480,610);
 	cls(GetStdHandle(STD_OUTPUT_HANDLE)); 
 	SetColorAMD64(fColor_id);
 	cout<<"\n\n\n"<<fStrTxt<<endl;//
@@ -350,7 +352,7 @@ int main(int argc, char *argv[])
 		SetFontA(L"Consolas",5,20);
 	SetColorAMD64(15);
 	SzWindow(800,610);
-cout<<"JE build 1.1.5.3(stable) github.com/HCPP20334/JoyStickTest"<<endl;
+cout<<"JE build 1.1.5.2(stable) github.com/HCPP20334/JoyStickTest"<<endl;
 cout<<"for JE min SSE 4A instruction\nWinXPx64 and more..\n Visual Studio C++ 2011 x64 runtime \n"<<endl;
 cout<<"fCpu_id:"<<fCPUType()<<" cpu_tick:"<<GetTickCount()<<" "<<fLTime(0)<<":"<<fLTime(1)<<":"<<fLTime(2)<<endl;//
 cout<<"---------------------------------------------"<<endl;
@@ -360,7 +362,7 @@ Sleep(2000);
 system("cls");
   //data_t 
   int64_t fMemory = 0;
-  int64_t fKeyWin = 0;
+  int64_t fKeyWin = 0;//-
   int64_t fKeyXbox = 0;
   int64_t fKeyCode = 0;
   int64_t fMaxByteToKey = 0;
@@ -494,6 +496,8 @@ system("cls");
 	int64_t fItm_0 = 0;
 	int64_t fClr_0a = 0;
 	int64_t fClr_0b = 0;
+	int64_t fDgCPUPoint = 0;
+	
 
 	//string
 	string fBuffer0;
@@ -529,6 +533,7 @@ system("cls");
   bool fCL_RwMem = false;
   bool BoolDb = false;
   bool fd0 = false;
+  bool fCPUDebug = false;
   //
   HDC fDC = GetDC(GetConsoleWindow());
   string fXinput_Status;
@@ -536,6 +541,7 @@ system("cls");
   JoyStickAPI* xController2;
   string fTimeStr;
   string fJEText;
+  string fStrCPUinfo;
    string fLoadingBar[] = 
    {
    	"Û                    ",
@@ -780,6 +786,14 @@ BoolDb = false;
 				        	system("cls");
 				        }
 					}
+					if(fCPUDebug)
+					{
+						fStrCPUinfo = "cpu_type:"+fCPUType()+" cpu_tick:"+ to_string(GetTickCount())+" Errors:0x"+to_string(GetLastError());
+					}
+					if(!fCPUDebug)
+					{
+						fStrCPUinfo = "Press Debug to cpu_info";
+					}
 	cls(fGetWindow); 
 	 SzWindow(480,610);
 	            SetColorAMD64(f_rndT);
@@ -841,7 +855,7 @@ BoolDb = false;
 					SetColorAMD64(240);
 				cout<<"    Address="<<&fTextLoad<<endl;
 				SetColorAMD64(15);
-				cout<<"cpu_type:"<<fCPUType()<<" cpu_tick:"<<GetTickCount()<<" "<<fLTime(0)<<":"<<fLTime(1)<<":"<<fLTime(2)<<endl;//
+			    cout<<fStrCPUinfo<<endl;
 				cout<<"---------------------------------------------"<<endl;
 				if(GetAsyncKeyState(VK_F3))
 				{
@@ -932,7 +946,7 @@ BoolDb = false;
                         if(fItm_0 == 1){fClr_0b = 143;fClr_0a = 30;}
                         if(GetAsyncKeyState('S'))
                         {
-                          Sleep(10);
+                          Sleep(80);
                         		fItm_0++;
                         		if(fItm_0 > 1)
                         		{
@@ -941,7 +955,7 @@ BoolDb = false;
 						}
                         if(GetAsyncKeyState('W'))
                         {
-                        Sleep(10);
+                        Sleep(80);
                         		fItm_0--;
                         		if(fItm_0 < 0)
                         		{
@@ -969,10 +983,21 @@ BoolDb = false;
 					}
 					if(fMnItSel == 2)
 					{
-						cout<<"Loading.."<<endl;
-						fTextLoad = 100;
-                       //
- 	                    fDebugger = true;
+						Sleep(80);
+						system("cls");
+						fDgCPUPoint++;
+						if(fDgCPUPoint > 1)
+						{
+							fDgCPUPoint = 0;
+						}
+						if(fDgCPUPoint == 0)
+						{
+							fCPUDebug = false;
+						}
+						if(fDgCPUPoint == 1)
+						{
+							fCPUDebug = true;
+						}
 					}
 				}
 				if(GetAsyncKeyState(VK_RIGHT))
@@ -1171,14 +1196,7 @@ fExP = rand() % 8;
 	for(int64_t fClocksCPU = 1;fClocksCPU > 0;fClocksCPU++)
 	{
 			SetFontA(L"Consolas",5,20);
-		 fClocksCPU = fThread_0;
-		if(fClocksCPU == 60){fClocksCPU = 1;fTimeUsed++;}
-		if(fTimeUsed == 60)
-		{
-			fHour++;
-			fTimeUsed = 1;
-		}
-		fTimeStr = to_string(fHour)+":"+to_string(fTimeUsed)+":"+to_string(fClocksCPU);
+		fTimeStr = to_string(fLTime(0))+":"+to_string(fLTime(1))+":"+to_string(fLTime(2));
 	
         if(!fDebugMode)
         {
@@ -1608,7 +1626,7 @@ if(GetAsyncKeyState(VK_RIGHT))
 				SetColorAMD64(15);
 				 if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_B || GetAsyncKeyState('B'))
 				 {
-				 	cout<<" JE Version 1.1.4(beta)"<<endl;
+				 	cout<<"JE.exe return:"<<to_string(GetLastError())<<endl;//
 				 }
 				 if(xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP || GetAsyncKeyState('W'))
 				 {
@@ -1657,6 +1675,7 @@ if(GetAsyncKeyState(VK_RIGHT))
 				}
 				if(fJE_Menu == 1)
 				{
+						fErrText("Error!!",12);
 					fCR_Error = false;
 					fRenderWindow_Error = -1;
 					SetColorAMD64(159);
@@ -1722,6 +1741,7 @@ if(GetAsyncKeyState(VK_RIGHT))
 	//-	fJEMode = " Normal ";
 		SetFontA(L"Consolas",5,20);//
 				cls(fGetWindow);
+				cout<<"JE.exe return:"<<to_string(GetLastError())<<endl;//
 				 SetColorAMD64(f_rndT);
 	            cout<<":::   JE Build 1.1.5                        "<<endl;
 	            SetColorAMD64(143);
@@ -2054,7 +2074,7 @@ if(fRBPoint < 0){fRBPoint = 0;}
 				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
 				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<"\n\n\n"<<endl;
        		cout<<" Thanks!! How to used my Program!!          \n\n"<<endl;
-       		cout<<"Time Used:"<<fHour<<fTimeUsed<<":"<<fClocksCPU<<"\n\n "<<endl;
+       		cout<<"Time Used:"<<fLTime(0)<<":"<<fLTime(0)<<":"<<fLTime(0)<<"\n\n "<<endl;
        		cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
 				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
 				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
@@ -2123,4 +2143,5 @@ if(fRBPoint < 0){fRBPoint = 0;}
 		   if(xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_DPAD_RIGHT){fR--;if(fR < 0){fR = 0;}}
 		   }
 	      }
+
 }

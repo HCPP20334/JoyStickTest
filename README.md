@@ -6,7 +6,8 @@
 Документация в hcpp20334.github.io/doc/JoyStickAPI
 ------------------------------------
 
-![image](https://github.com/HCPP20334/JoyStickTest/assets/76736848/42449d89-5e26-46e6-92e1-e039b461d601)
+![пп](https://github.com/HCPP20334/JoyStickTest/assets/76736848/133a268f-ab99-4927-9431-8a32a44e7b17)
+
  Сборка 1.1.5 
 --------------------------------------------------------
 03.11.2023

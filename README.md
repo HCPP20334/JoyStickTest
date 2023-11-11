@@ -19,7 +19,8 @@
 ![image](https://github.com/HCPP20334/JoyStickTest/assets/76736848/ed2c84b1-88ef-4402-b01f-765d9abc0675)
 
 HCPP Studio 2023
-Баги с кодировкой 
-замените символы как тут
+# Баги с кодировкой 
+-------------
+# замените символы как тут
 ![image](https://github.com/HCPP20334/JoyStickTest/assets/76736848/da97c999-7709-4d19-b30d-bb6621206e4e)
 

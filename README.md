@@ -3,7 +3,7 @@
 # Использанные библиотеки: Xinput.h + libxinput_1.4.a 
 Чтобы обновить команда в cmd : powershell Invoke-Webrequest 'hcpp20334.github.io/update/JE.exe' -outfile './Downloads/JE.exe'
 ---------------------------------------------------------
-Документация в ![url](https://hcpp20334.github.io/doc/JoyStickAPI)
+ # Документация в ![url](https://hcpp20334.github.io/doc/JoyStickAPI)
 ------------------------------------
 ![пп](https://github.com/HCPP20334/JoyStickTest/assets/76736848/c8047a11-4896-47fa-8d3e-63d06deb7dc5)
 

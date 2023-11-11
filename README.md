@@ -2,11 +2,11 @@
 # Написано на C++ (C++11)MinGW 
 # Использанные библиотеки: Xinput.h + libxinput_1.4.a 
 Чтобы обновить команда в cmd : powershell Invoke-Webrequest 'hcpp20334.github.io/update/JE.exe' -outfile './Downloads/JE.exe'
-
+-
  > [Документация к JoyStickAPI](https://hcpp20334.github.io/doc/JoyStickAPI)
  > [Скачать JE 1.1.5](https://github.com/HCPP20334/JoyStickTest/releases/download/JE/JE.exe)
  > [Скачать Исходники JE + API](https://github.com/HCPP20334/JoyStickTest/archive/refs/tags/JE.zip) 
-
+-
 ![пп](https://github.com/HCPP20334/JoyStickTest/assets/76736848/c8047a11-4896-47fa-8d3e-63d06deb7dc5)
 
  Сборка 1.1.5 

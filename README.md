@@ -6,7 +6,7 @@
  > [Документация к JoyStickAPI](./JoyStickAPI.md)
  > [Скачать JE 1.1.5](https://github.com/HCPP20334/JoyStickTest/releases/download/JE/JE.exe)
  > [Скачать Исходники JE + API](https://github.com/HCPP20334/JoyStickTest/archive/refs/tags/JE.zip)
- > [Скачаете JEUpdater для получение новых версии](https://github.com/HCPP20334/JoyStickTest/releases/download/JEUpdater/JEUpdater.exe)
+ > [Скачаете JEUpdater для получение новых версии](https://github.com/HCPP20334/JoyStickTest/releases/download/JEUpdater/JEUpdate.exe)
 -
 ![пп](https://github.com/HCPP20334/JoyStickTest/assets/76736848/c8047a11-4896-47fa-8d3e-63d06deb7dc5)
 

@@ -454,18 +454,23 @@ int64_t ld_V()
 	
 	for(int64_t fG = 1; fG > 0;fG++)
 	{
+		Sleep(1);
 			fRcpu = fto_tick_out - fto_tick;
-				if(fRcpu > 300)
+			    if(fRcpu > 800)
+			    {
+			        fTcpu = " Slow                   ";	
+				}
+				if(fRcpu <= 500)
 				{
-					fTcpu = "Fast";
+					fTcpu = "Fast                    ";
 				}
 				if(fRcpu <= 200)
 				{
-					fTcpu = "Medium";
+					fTcpu = "Very Fast               ";
 				}
 				if(fRcpu <=  100)
 				{
-					fTcpu = "Slow";
+					fTcpu = "Very Very Powerful CPU!!";
 				}
 		fV++;
 		if(fV > 30)

@@ -92,7 +92,7 @@ int64_t SzWindow(int64_t fSzX,int64_t fSzY)
 	HWND hWindowConsole = GetConsoleWindow();
     RECT r;
     GetWindowRect(hWindowConsole, &r);
-    MoveWindow(hWindowConsole, r.left, r.top, fSzX, fSzY, TRUE);
+    MoveWindow(hWindowConsole, r.left, r.top, fSzX, fSzY, TRUE);//
 }
 int64_t fVErev1(HWND hwnd)
 {
@@ -190,7 +190,7 @@ SzWindow(710,560);
        cout<<" --------------------------------------------------------------------------- "<<endl;
        cout<<"   Techical information                                                      "<<endl;
 	   cout<<" --------------------------------------------------------------------------- "<<endl;
-       cout<<"   JE build 1.1.4                                                            "<<endl;
+       cout<<"   JE build 1.1.5.1                                                          "<<endl;
        cout<<"                                                                             "<<endl;
        cout<<"   JoyStickAPI build 1.0.1                                                   "<<endl;
 	   cout<<"   C++11 , Compiler (MinGW)TDM-GCC 4.9.2 Release                             "<<endl;
@@ -288,6 +288,101 @@ JElog<<" FaultingPc:"<<ps_apiL(0)<<" FaultingVa:"<<ps_apiL(1)<<endl;
   }
 }
 }
+int64_t fSndMsg(int64_t fJEid_snd)
+{
+	int64_t fSnd00 = 0xFFFFFFF;
+	int64_t fSnd01 = 0x00000010L;
+	int64_t fSnd02 = 0x00000040L;
+	int64_t fSnd03 = 0x00000030L;
+	//
+	int64_t fSoundThread = 0;
+	switch(fJEid_snd)
+	{
+		case 1:
+			fSoundThread = fSnd00;
+		case 2:
+			fSoundThread = fSnd01;//Critical Error 
+		case 3:
+			fSoundThread = fSnd02;
+		case 4:
+			fSoundThread = fSnd03;
+		break;
+	}
+	MessageBeep(fSoundThread);
+	return fSoundThread;
+}
+int64_t JEMessageT(string fStrText,string fStrTitle,int64_t fMaxLen )
+{
+	int64_t fsnd_out = fSndMsg(3);
+	HANDLE hOutJE = GetStdHandle(STD_OUTPUT_HANDLE);
+	string fStrFreeSpace_00;
+	string fStrFreeSpace_01;
+	int64_t fLineBuffer = 0;
+	int64_t fLineSize = fStrText.size();
+	fLineBuffer = 16 + fLineSize;
+	for(int64_t fMsz_0 = 1; fMsz_0 <= fMaxLen; fMsz_0++)
+	{
+			if(fLineSize < fLineBuffer)
+			{
+			fStrFreeSpace_00 = fStrFreeSpace_00 + " ";	
+			}
+			if((fStrFreeSpace_00.size() + 16) > fLineSize)
+			{
+				fStrFreeSpace_01 = "   ";
+			}
+	}
+		SzWindow(800,610);
+	SetFontA(L"Consolas",5,20);
+	cls(hOutJE);
+	SetColorAMD64(113);
+	cout<<":: "<<fStrTitle<<"  "<<fStrFreeSpace_00<<endl;
+	SetColorAMD64(159);
+	cout<<"               "<<fStrFreeSpace_00<<endl;
+	cout<<"               "<<fStrFreeSpace_00<<endl;
+	SetColorAMD64(159);
+	cout<<fStrText<<fStrFreeSpace_01<<endl;
+	cout<<"               "<<fStrFreeSpace_00<<endl;
+	cout<<"               "<<fStrFreeSpace_00<<endl;
+	SetColorAMD64(15);
+	cout<<"snd_addr:"<<(void*)(char*)fsnd_out<<endl;
+	Sleep(2000);
+}
+int64_t JEMessage(string fStrText,int64_t fMaxLen )
+{
+	int64_t fsnd_out = fSndMsg(1);
+	HANDLE hOutJE = GetStdHandle(STD_OUTPUT_HANDLE);
+	string fStrFreeSpace_00;
+	string fStrFreeSpace_01;
+	int64_t fLineBuffer = 0;
+	int64_t fLineSize = fStrText.size();
+	fLineBuffer = 16 + fLineSize;
+	for(int64_t fMsz_0 = 1; fMsz_0 <= fMaxLen; fMsz_0++)
+	{
+			if(fLineSize < fLineBuffer)
+			{
+			fStrFreeSpace_00 = fStrFreeSpace_00 + " ";	
+			}
+			if((fStrFreeSpace_00.size() + 16) > fLineSize)
+			{
+				fStrFreeSpace_01 = "   ";
+			}
+	}
+		SzWindow(800,610);
+	SetFontA(L"Consolas",5,20);
+	cls(hOutJE);
+	SetColorAMD64(113);
+	cout<<":: JE Message  "<<fStrFreeSpace_00<<endl;
+	SetColorAMD64(159);
+	cout<<"               "<<fStrFreeSpace_00<<endl;
+	cout<<"               "<<fStrFreeSpace_00<<endl;
+	SetColorAMD64(159);
+	cout<<fStrText<<fStrFreeSpace_01<<endl;
+	cout<<"               "<<fStrFreeSpace_00<<endl;
+	cout<<"               "<<fStrFreeSpace_00<<endl;
+	SetColorAMD64(15);
+	cout<<"snd_addr:"<<(void*)(char*)fsnd_out<<endl;
+	Sleep(2000);
+}
 uint64_t fDataMemUsage()
 {
 	PROCESS_MEMORY_COUNTERS pmc;//
@@ -309,8 +404,8 @@ bool Asleep(int64_t Value)
 
 string fEnString()
 {
-	float   fVersion = 1.000012;
-	string fCharBufferSet = "version:"+to_string(fVersion);
+	string fVersion = "1.1.5.2";
+	string fCharBufferSet = "Build:"+fVersion;
 	return fCharBufferSet;
 }
 int64_t EmuCPU(int64_t fCPUType_a)
@@ -331,10 +426,11 @@ int64_t  fLdWin()
 	cout<<"\n\n\nHCPP Studio"<<endl;//
 	Sleep(1000);
 	system("cls");
+	SzWindow(480,610);
 }
 int64_t  fErrText(string fStrTxt,int64_t fColor_id)
 {
-	SzWindow(320,200);
+	SzWindow(480,610);
 	system("cls");
 	SetColorAMD64(fColor_id);
 	SetFontA(L"Consolas",20,60);
@@ -344,6 +440,59 @@ int64_t  fErrText(string fStrTxt,int64_t fColor_id)
 	Sleep(1000);
 	system("cls");
 }
+int64_t ld_V()
+{
+	int64_t fBr = 0;
+	int64_t fV = 0;
+	int64_t fto_tick = 0;
+	int64_t fto_tick_out = 0;
+	int64_t fRcpu = 0;
+	string fTcpu;
+	//
+	fto_tick = GetTickCount();
+	//
+	
+	for(int64_t fG = 1; fG > 0;fG++)
+	{
+			fRcpu = fto_tick_out - fto_tick;
+				if(fRcpu > 300)
+				{
+					fTcpu = "Fast";
+				}
+				if(fRcpu <= 200)
+				{
+					fTcpu = "Medium";
+				}
+				if(fRcpu <=  100)
+				{
+					fTcpu = "Slow";
+				}
+		fV++;
+		if(fV > 30)
+		{
+			fV = 0;
+		}
+		if(fV == 30)
+		{
+			fBr++;
+			if(fBr == 24)
+			{
+				fG = -1;
+				JEMessageT("cpu_score: "+ to_string(fto_tick_out - fto_tick)+"Your CPU:"+fTcpu   ,"JE 1.1.5.2",20);
+			}
+			
+		}
+		fto_tick_out = GetTickCount();
+		cls(GetStdHandle(STD_OUTPUT_HANDLE));
+		SetColorAMD64(113);
+		cout<<"    Test Speed CPU            "<<endl;
+		SetColorAMD64(116);
+		cout<<" "<<fBar[fBr]<<" "<<endl;
+		cout<<"                              "<<endl;
+		SetColorAMD64(15);
+		cout<<"Sz_0:"<<fBar[fBr].size()<<endl;
+	}
+}
 //
 int main(int argc, char *argv[])
 {
@@ -352,12 +501,13 @@ int main(int argc, char *argv[])
 		SetFontA(L"Consolas",5,20);
 	SetColorAMD64(15);
 	SzWindow(800,610);
-cout<<"JE build 1.1.5.2(stable) github.com/HCPP20334/JoyStickTest"<<endl;
+cout<<"JE "<< fEnString()<<" github.com/HCPP20334/JoyStickTest"<<endl;
 cout<<"for JE min SSE 4A instruction\nWinXPx64 and more..\n Visual Studio C++ 2011 x64 runtime \n"<<endl;
 cout<<"fCpu_id:"<<fCPUType()<<" cpu_tick:"<<GetTickCount()<<" "<<fLTime(0)<<":"<<fLTime(1)<<":"<<fLTime(2)<<endl;//
 cout<<"---------------------------------------------"<<endl;
 cout<<"mem_dwLength:"<<fMemStatus(0)<<" "<<"mem_dwMemoryLoad:"<<fMemStatus(1)<<" "<<"mem_ullAvailExtendedVirtual:"<<fMemStatus(2)<<endl;
 cout<<"---------------------------------------------"<<endl;
+	ld_V();
 Sleep(2000);
 system("cls");
   //data_t 
@@ -794,6 +944,7 @@ BoolDb = false;
 					{
 						fStrCPUinfo = "Press Debug to cpu_info";
 					}
+					
 	cls(fGetWindow); 
 	 SzWindow(480,610);
 	            SetColorAMD64(f_rndT);
@@ -944,6 +1095,14 @@ BoolDb = false;
                         cout<<&fab_sel<<"->"<<fab_sel<<endl;
                         if(fItm_0 == 0){fClr_0a = 143;fClr_0b = 30;}
                         if(fItm_0 == 1){fClr_0b = 143;fClr_0a = 30;}
+                        if(GetAsyncKeyState('1'))
+                        {
+                        	fItm_0 = 0;
+						}
+						if(GetAsyncKeyState('2'))
+                        {
+                        	fItm_0 = 1;
+						}
                         if(GetAsyncKeyState('S'))
                         {
                           Sleep(80);
@@ -1679,8 +1838,9 @@ if(GetAsyncKeyState(VK_RIGHT))
 					fCR_Error = false;
 					fRenderWindow_Error = -1;
 					SetColorAMD64(159);
-	            MessageBox(GetConsoleWindow(),"Crash!!!'Memory to out of range !!'",":::   JE Build 1.1.4          ",0);
-	            MessageBox(GetConsoleWindow(),("Error!!Font address:"+to_string(GetLastError())).c_str(),"JEErrors",0);//
+					SzWindow(640,680);
+	            JEMessage("Crash!!!'Memory to out of range !!'",20);
+	           //- MessageBox(GetConsoleWindow(),("Error!!Font address:"+to_string(GetLastError())).c_str(),"JEErrors",0);//
 	            	JEException(fGetWindow);
 				SetColorAMD64(143);
 					
@@ -1825,7 +1985,7 @@ if(GetAsyncKeyState(VK_RIGHT))
 				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
 				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
 				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<endl;
-				cout<<"    (F8)   Show Controls                    "<<endl;
+				cout<<"(F8) Gamepad Info , [O] - Settings Emulator "<<endl;
 				cout<<"F1 - RESET PROGRAM (BACK)/[ESC]- Exit Press "<<endl;
 				SetColorAMD64(fJEColorBack);
 				cout<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0<<fL0;
@@ -1940,7 +2100,7 @@ if(fLBPoint < 0){fLBPoint = 0;}
 if(fRBPoint < 0){fRBPoint = 0;}
 		if(GetAsyncKeyState('P'))
 		{
-		MessageBox(GetConsoleWindow(),(fErrors[1].c_str()),"JE:Error!! Bulid: 1.1.3",MB_ICONWARNING);
+			JEMessage(fErrors[1],20);
 		cout<<"Exception Error ->fStack_frame0="<<GetConsoleWindow()<<endl;
 		cout<<"Exception Error ->fStack_frame1="<<GetDC(GetConsoleWindow())<<endl;
 		cout<<"Exception Error ->fStack_frame2="<<&xController1<<"->JoyStick.h"<<endl;

@@ -1,0 +1,28 @@
+# Project: JE32
+# Makefile created by Dev-C++ 5.11
+
+CPP      = g++.exe
+CC       = gcc.exe
+WINDRES  = windres.exe
+OBJ      = JE32.o
+LINKOBJ  = JE32.o
+LIBS     = -L"C:/Programs/C++/GrapEngine/MinGW64/lib32" -L"C:/Programs/C++/GrapEngine/MinGW64/x86_64-w64-mingw32/lib32" -static-libgcc ../../GrapEngine/MinGW64/x86_64-w64-mingw32/lib32/libpsapi.a ../../GrapEngine/MinGW64/x86_64-w64-mingw32/lib32/libgdi32.a ../../GrapEngine/MinGW64/x86_64-w64-mingw32/lib32/libxinput1_4.a -m32
+INCS     = -I"C:/Programs/C++/GrapEngine/MinGW64/include" -I"C:/Programs/C++/GrapEngine/MinGW64/x86_64-w64-mingw32/include" -I"C:/Programs/C++/GrapEngine/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include"
+CXXINCS  = -I"C:/Programs/C++/GrapEngine/MinGW64/include" -I"C:/Programs/C++/GrapEngine/MinGW64/x86_64-w64-mingw32/include" -I"C:/Programs/C++/GrapEngine/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"C:/Programs/C++/GrapEngine/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include/c++"
+BIN      = JE32.exe
+CXXFLAGS = $(CXXINCS) -m32 -std=gnu++11
+CFLAGS   = $(INCS) -m32 -std=gnu++11
+RM       = rm.exe -f
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before $(BIN) all-after
+
+clean: clean-custom
+	${RM} $(OBJ) $(BIN)
+
+$(BIN): $(OBJ)
+	$(CPP) $(LINKOBJ) -o $(BIN) $(LIBS)
+
+JE32.o: JE32.cpp
+	$(CPP) -c JE32.cpp -o JE32.o $(CXXFLAGS)

@@ -2,7 +2,9 @@
 -----------------------------------------------------------------------------
  > [Документация к JoyStickAPI](./JoyStickAPI.md)
  |
- > [Скачать JE 1.1.5.3](https://github.com/HCPP20334/JoyStickTest/releases/download/JE/JE.exe)
+ > [Скачать JE 1.1.5.3 x64](https://github.com/HCPP20334/JoyStickTest/releases/download/JE_1.1.5.3/JE_x64.exe)
+ |
+ > [Скачать JE 1.1.5.3 x86](https://github.com/HCPP20334/JoyStickTest/releases/download/JE_1.1.5.3/JE_x86.exe)
  |
  > [Скачать Исходники JE + API](https://github.com/HCPP20334/JoyStickTest/archive/refs/tags/JE.zip)
  |

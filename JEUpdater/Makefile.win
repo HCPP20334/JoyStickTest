@@ -1,0 +1,28 @@
+# Project: JEUpdate
+# Makefile created by Dev-C++ 5.10
+
+CPP      = g++.exe
+CC       = gcc.exe
+WINDRES  = windres.exe
+OBJ      = JEUpdate.o
+LINKOBJ  = JEUpdate.o
+LIBS     = -static-libgcc "../../../../../../../Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib/liburlmon.a"
+INCS     = 
+CXXINCS  = 
+BIN      = JEUpdate.exe
+CXXFLAGS = $(CXXINCS) -std=gnu++11
+CFLAGS   = $(INCS) -std=gnu++11
+RM       = rm.exe -f
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before $(BIN) all-after
+
+clean: clean-custom
+	${RM} $(OBJ) $(BIN)
+
+$(BIN): $(OBJ)
+	$(CPP) $(LINKOBJ) -o $(BIN) $(LIBS)
+
+JEUpdate.o: JEUpdate.cpp
+	$(CPP) -c JEUpdate.cpp -o JEUpdate.o $(CXXFLAGS)

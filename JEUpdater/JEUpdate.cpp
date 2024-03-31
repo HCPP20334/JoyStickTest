@@ -19,7 +19,7 @@ int main (int argc, char *argv[])
 	int64_t dBuffer = 0;
 	int64_t dTimeout = 0;
 	int64_t dSizeOnePkg = 0;
-	const TCHAR dURL[] = _T("https://github.com/HCPP20334/JoyStickTest/releases/download/JE/JE.exe");
+	const TCHAR dURL[] = _T("https://github.com/HCPP20334/JoyStickTest/releases/download/JE_1.1.5.3/JE_x64.exe");
     const TCHAR dFllePath[] = _T("./JE.exe");
     bool bDebugST = false;
 	// 

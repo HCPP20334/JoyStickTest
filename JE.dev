@@ -1,19 +1,19 @@
 [Project]
-FileName=JoyStickEmu.dev
+FileName=JE.dev
 Name=JE
 Type=1
 Ver=2
 ObjFiles=
 Includes=
 Libs=
-PrivateResource=JoyStickEmu_private.rc
+PrivateResource=JE_private.rc
 ResourceIncludes=
 MakeIncludes=
 Compiler=
 CppCompiler=
-Linker=../GrapEngine/MinGW64/x86_64-w64-mingw32/lib/libxinput1_1.a_@@_../GrapEngine/MinGW64/x86_64-w64-mingw32/lib/libxinput1_4.a_@@_../GrapEngine/MinGW64/x86_64-w64-mingw32/lib/libpsapi.a_@@_../GrapEngine/MinGW64/x86_64-w64-mingw32/lib/libxinput1_3.a_@@_../GrapEngine/MinGW64/x86_64-w64-mingw32/lib/libxinput1_2.a_@@_../GrapEngine/MinGW64/x86_64-w64-mingw32/lib/libgdi32.a_@@_../GrapEngine/MinGW64/x86_64-w64-mingw32/lib/liburlmon.a_@@_
+Linker="../../../../../../Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib/libpsapi.a"_@@_"../../../../../../Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib/libxinput1_4.a"_@@_"../../../../../../Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib/libgdi32.a"_@@_
 IsCpp=1
-Icon=JoyStickEmu.ico
+Icon=JE.ico
 ExeOutput=
 ObjectOutput=
 LogOutput=
@@ -28,8 +28,8 @@ Folders=
 IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=0
-CompilerSettings=10001010c0000000000000000
-UnitCount=3
+CompilerSettings=100010c0g0000000000000000
+UnitCount=5
 
 [VersionInfo]
 Major=1
@@ -72,6 +72,26 @@ BuildCmd=
 
 [Unit3]
 FileName=Colors.h
+CompileCpp=1
+Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit4]
+FileName=fs_std.h
+CompileCpp=1
+Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit5]
+FileName=JE.h
 CompileCpp=1
 Folder=
 Compile=1

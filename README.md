@@ -2,7 +2,7 @@
 -----------------------------------------------------------------------------
  > [Документация к JoyStickAPI](./JoyStickAPI.md)
  |
- > [Скачать JE 1.1.5.3 x64](https://github.com/HCPP20334/JoyStickTest/releases/download/JE_1.1.5.3/JE_x64.exe)
+ > [Скачать JE 1.1.5.4 x64](https://github.com/HCPP20334/JoyStickTest/releases/download/JE_1.1.5.3/JE_x64.1.1.5.4.exe)
  |
  > [Скачать JE 1.1.5.3 x86](https://github.com/HCPP20334/JoyStickTest/releases/download/JE_1.1.5.3/JE_x86.exe)
  |
@@ -11,7 +11,10 @@
  > [Скачаете JEUpdater для получение новых версии](https://github.com/HCPP20334/JoyStickTest/releases/download/JEUpdater/JEUpdate.exe)
 -----------------------------------------------------------------------------
 ![пп](https://github.com/HCPP20334/JoyStickTest/assets/76736848/c8047a11-4896-47fa-8d3e-63d06deb7dc5)
-
+ Сборка 1.1.5.4 
+ --------------------------
+ фикс багов и улучшена работа приложения 
+ -------------
  Сборка 1.1.5.3 (Обновление)
  Теперь есть две версии программы
  64 битная основная и 32 битная 

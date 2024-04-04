@@ -1,5 +1,5 @@
 ﻿  main.cpp
-C:\Users\Администратор\Desktop\my_projects\C++\JE\JEx64GUI\GUI\JEx64_win32_opengl3\main.cpp(1,1): warning C4828: Файл содержит знак, начинающийся со смещения 0x3b7d, который является недопустимым в текущей исходной кодировке (кодовая страница 65001).
+C:\Users\Администратор\Desktop\my_projects\C++\JE\JEx64GUI\GUI\JEx64_win32_opengl3\main.cpp(1,1): warning C4828: Файл содержит знак, начинающийся со смещения 0x3ce2, который является недопустимым в текущей исходной кодировке (кодовая страница 65001).
 C:\Users\Администратор\Desktop\my_projects\C++\JE\JEx64GUI\JoyStick.h(23,35): warning C4244: =: преобразование "int64_t" в "int", возможна потеря данных
   (компиляция исходного файла "main.cpp")
   

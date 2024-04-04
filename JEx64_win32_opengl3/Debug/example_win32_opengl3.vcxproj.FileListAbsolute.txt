@@ -1,0 +1,2 @@
+C:\Users\Администратор\Desktop\my_projects\C++\JE\JEx64GUI\imgui\examples\example_win32_opengl3\Debug\example_win32_opengl3.exe
+C:\Users\Администратор\Desktop\my_projects\C++\JE\JEx64GUI\GUI\JEx64_win32_opengl3\Debug\example_win32_opengl3.exe

@@ -13,5 +13,11 @@ Screenshots
 ![image](https://github.com/HCPP20334/JoyStickTest/assets/76736848/c123d22b-4037-440b-87a9-e6fe1ca10386)
 ![image](https://github.com/HCPP20334/JoyStickTest/assets/76736848/9a27be72-60a0-4321-b661-bc57429f4058)
 ![image](https://github.com/HCPP20334/JoyStickTest/assets/76736848/2261b741-c849-4d8e-8885-7d08325c7633)
+#Running for Linux
+Install Wine
+Manjaro : sudo pacman -Syuu wine
+Ubuntu: apt get install wine
+#Screen to running Manjaro Wine
+![image](https://github.com/HCPP20334/JoyStickTest/assets/76736848/f154fb0c-5f5d-42b0-8a82-69551a43b882)
 
 

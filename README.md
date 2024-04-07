@@ -1,57 +1,17 @@
-# Ссылки
------------------------------------------------------------------------------
- > [Документация к JoyStickAPI](./JoyStickAPI.md)
- |
- > [Скачать JE 1.1.5.4 x64](https://github.com/HCPP20334/JoyStickTest/releases/download/JE_1.1.5.3/JE_x64.1.1.5.4.exe)
- |
- > [Скачать JE 1.1.5.3 x86](https://github.com/HCPP20334/JoyStickTest/releases/download/JE_1.1.5.3/JE_x86.exe)
- |
- > [Скачать Исходники JE + API](https://github.com/HCPP20334/JoyStickTest/archive/refs/tags/JE.zip)
- |
- > [Скачаете JEUpdater для получение новых версии](https://github.com/HCPP20334/JoyStickTest/releases/download/JEUpdater/JEUpdate.exe)
------------------------------------------------------------------------------
+
 ![пп](https://github.com/HCPP20334/JoyStickTest/assets/76736848/c8047a11-4896-47fa-8d3e-63d06deb7dc5)
  Сборка 1.1.5.4 
  --------------------------
- фикс багов и улучшена работа приложения 
- -------------
- Сборка 1.1.5.3 (Обновление)
- Теперь есть две версии программы
- 64 битная основная и 32 битная 
- ---------------------------
- Теперь есть хедеры под 32 бита
- Color32.h
- dSys32.h
- JoyStick32.h - (JoyStickAPI32)
- * в папке JE32 лежат исходники JE_x86.exe
-20.11.2023
---------------------------------------------------------
-16.11.23
--------
+# JEx64 1.1.6 (release)
+Compiled C++20 x64 SSE4.2 
+* Test Gamepad and Emulator Keyboard(alpha)
+#JE_x64_OpenGL3_SSE4.2cpp20
+Compiled C++20 x64 SSE4.2 OpenGL3.0
+#New Interface!!
+Screenshots
+![image](https://github.com/HCPP20334/JoyStickTest/assets/76736848/19b92543-0a79-4f68-b5b8-4bf8fda66f4c)
+![image](https://github.com/HCPP20334/JoyStickTest/assets/76736848/c123d22b-4037-440b-87a9-e6fe1ca10386)
+![image](https://github.com/HCPP20334/JoyStickTest/assets/76736848/9a27be72-60a0-4321-b661-bc57429f4058)
+![image](https://github.com/HCPP20334/JoyStickTest/assets/76736848/2261b741-c849-4d8e-8885-7d08325c7633)
 
- * Добавлен тест скорости процессора
-> Позже исходя из данных о скорости буду делать оптимизация под каждый тип процессора
-------------------------------------------------------
-Работает на моем API JoyStickAPI(JoyStick.h
-Написана на С++ (С++11 MinGW TDM 4.9.2 64 bit) - JE_x64.exe 
-Написана на С++ (С++11 MinGW TDM 4.9.2 32 bit) - JE_x86.exe
-Писал в DevC++ 5.11 
-# Компиляция С++ в других IDE и компиляторах
--------------------------------------------------------
-для Компиляции из под VS нужно в начале добавить #pragma comment("lib","lib.lib") 
-У меня не получилось скомпилить из под VSCode из того не могу подключить библиотеку для работы 
-# Какие библиотеки используются в JE
-> psapi , xinput , gdi32
--------------------------------------------------------
-# Русcкий
-![image](https://github.com/HCPP20334/JoyStickTest/assets/76736848/f7870d10-da42-49bd-bddb-e618524fd0d7)
-
-# English
-![image](https://github.com/HCPP20334/JoyStickTest/assets/76736848/ed2c84b1-88ef-4402-b01f-765d9abc0675)
-
-HCPP Studio 2023
-# Баги с кодировкой 
--------------
-# замените символы как тут
-![image](https://github.com/HCPP20334/JoyStickTest/assets/76736848/da97c999-7709-4d19-b30d-bb6621206e4e)
 

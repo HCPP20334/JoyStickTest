@@ -1,14 +1,5 @@
-// Dear ImGui: standalone example application for Win32 + OpenGL 3
 
-// Learn about Dear ImGui:
-// - FAQ                  https://dearimgui.com/faq
-// - Getting Started      https://dearimgui.com/getting-started
-// - Documentation        https://dearimgui.com/docs (same as your local docs/ folder).
-// - Introduction, links and more at the top of imgui.cpp
 
-// This is provided for completeness, however it is strongly recommended you use OpenGL with SDL or GLFW.
-
-#pragma once
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_win32.h"
@@ -21,6 +12,32 @@
 #include <string>
 #include "JoyStick.h"
 #include <iostream>
+#include <conio.h>
+#include <fstream>
+#include <string>
+int64_t fSndMsg(int64_t fJEid_snd)
+{
+    int64_t fSnd00 = 0xFFFFFFF;
+    int64_t fSnd01 = 0x00000010L;
+    int64_t fSnd02 = 0x00000040L;
+    int64_t fSnd03 = 0x00000030L;
+    //
+    int64_t fSoundThread = 0;
+    switch (fJEid_snd)
+    {
+    case 1:
+        fSoundThread = fSnd00;
+    case 2:
+        fSoundThread = fSnd01;//Critical Error 
+    case 3:
+        fSoundThread = fSnd02;
+    case 4:
+        fSoundThread = fSnd03;
+        break;
+    }
+    MessageBeep(fSoundThread);
+    return fSoundThread;
+}
 // Data stored per platform window
 struct WGL_WindowData { HDC hDC; };
 
@@ -33,10 +50,49 @@ static int              g_Height;
 // Forward declarations of helper functions
 bool CreateDeviceWGL(HWND hWnd, WGL_WindowData* data);
 void CleanupDeviceWGL(HWND hWnd, WGL_WindowData* data);
+static bool bCPUTest = false;
+static bool ts_window = true;
+static bool fCAboutW;
+//
+const GLubyte* fJ_vendor = glGetString(GL_VENDOR);// Returns the vendor
+const GLubyte* fJ_rendered = glGetString(GL_RENDERER);
+//
 void ResetDeviceWGL();
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-// Main code
+std::string ld_V()
+{
+    float fBr = 0;
+    int64_t fV = 0;
+    int64_t fto_tick = 0;
+    int64_t fto_tick_out = 0;
+    int64_t fRcpu = 0;
+    std::string fTcpu;
+    //
+    fto_tick = GetTickCount64();
+    //
+    for (int64_t fG = 1; fG > 0; fG++)
+    {
+        Sleep(1);
+        fV++;
+        if (fV > 30)
+        {
+            fV = 0;
+        }
+        if (fV == 30)
+        {
+            fBr++;
+            if (fBr == 100) { ts_window = false; fG = -1; }
+            fto_tick_out = GetTickCount64();
+            fRcpu = fto_tick_out - fto_tick;
+            if (fRcpu > 0) { fTcpu = "Very Powerful CPU!!    "; }
+            if (fRcpu >= 200) { fTcpu = "Very Fast               "; }
+            if (fRcpu >= 500) { fTcpu = "Fast                    "; }
+            if (fRcpu >= 800) { fTcpu = "Very Slow CPU!!    "; }
+            return "Score\n" + std::to_string(fRcpu) + "\n\n" + "YourCPU\n\n\n" + fTcpu;
+        }
+    }
+}
 int main(int, char**)
 {
     // Create application window
@@ -68,35 +124,14 @@ int main(int, char**)
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
-    //ImGui::StyleColorsClassic();
 
-    // Setup Platform/Renderer backends
     ImGui_ImplWin32_InitForOpenGL(hwnd);
     ImGui_ImplOpenGL3_Init();
-
-    // Load Fonts
-    // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
-    // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
-    // - If the file cannot be loaded, the function will return a nullptr. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
-    // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
-    // - Use '#define IMGUI_ENABLE_FREETYPE' in your imconfig file to use Freetype for higher quality font rendering.
-    // - Read 'docs/FONTS.md' for more instructions and details.
-    // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
-    //io.Fonts->AddFontDefault();
-    //io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
-    //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
-    //IM_ASSERT(font != nullptr);
-
-    // Our state
-    ///io.Fonts->AddFontDefault();
-    //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\Fonts\ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
-    bool show_demo_window = false;
-    bool show_another_window = false;
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    static bool fCAboutW;
+    ImVec4 clear_color = ImVec4(0.01f, 0.01f, 0.02f, 0.80f);
     ImVec2 fJ_size;
+    //io.Fonts->AddFontDefault();
+    io.Fonts->AddFontFromFileTTF(".\\WhiteRabbit.ttf", 12.0f);
     // Main loop
     bool done = false;
     while (!done)
@@ -120,11 +155,11 @@ int main(int, char**)
         ImGui::NewFrame();
 
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-        if (show_demo_window)
-            ImGui::ShowDemoWindow(&show_demo_window);
+
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
         {
+
             JoyStickAPI* xController1;
             JoyStickAPI* xController2;
             xController1 = new JoyStickAPI(1);
@@ -148,7 +183,9 @@ int main(int, char**)
             static float fC_Rcol = 0.0f;
             static float fC_Gcol = 0.0f;
             static float fC_Bcol = 0.0f;
+            static bool bShowButtons = true;
             //
+            static float df = 0.0f;
             bool C_XinputControllerState = false;
             static float  fByteArray = 0;
             static float fLX = 0;
@@ -158,57 +195,50 @@ int main(int, char**)
             //
             static float fLT = 0;
             static float fRT = 0;
-            static bool fCAboutW;
-            ImGui::Begin(" JEx64 Build 1.0 ");                          // Create a window called "Hello, world!" and append into it.
-
+            //
+            ShowWindow(GetConsoleWindow(), 2);
+            static bool b_vsync = false;
+            ImGui::Begin(" JE x64 OpenGL3 ");                          // Create a window called "Hello, world!" and append into it.
+            ImGui::Checkbox("vsync", &b_vsync);
+            if (b_vsync) { Sleep(13); }
+            else { Sleep(0); }
+            ImGuiStyle& style = ImGui::GetStyle();
+            style.WindowRounding = 5.3f;
+            style.FrameRounding = 2.3f;
+            style.ScrollbarRounding = 0;
+            style.Colors[ImGuiCol_Text] = ImVec4(0.90f, 0.90f, 0.90f, 0.90f);
+            style.Colors[ImGuiCol_WindowBg] = ImVec4(0.01f, 0.01f, 0.02f, 0.80f);
+            style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
+            style.Colors[ImGuiCol_PopupBg] = ImVec4(0.05f, 0.05f, 0.10f, 0.85f);
+            style.Colors[ImGuiCol_Border] = ImVec4(0.70f, 0.70f, 0.70f, 0.65f);
+            style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+            style.Colors[ImGuiCol_FrameBg] = ImVec4(0.00f, 0.00f, 0.01f, 1.00f);
+            style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.90f, 0.80f, 0.80f, 0.40f);
+            style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.90f, 0.65f, 0.65f, 0.45f);
+            style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.08f, 0.08f, 0.08f, 0.80f);
+            style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.01f, 0.01f, 0.02f, 0.80f);
+            style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.20f, 0.25f, 0.30f, 0.60f);
+            style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.55f, 0.53f, 0.55f, 0.51f);
+            style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.56f, 0.56f, 0.56f, 1.00f);
+            style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.56f, 0.56f, 0.56f, 0.91f);
+            style.Colors[ImGuiCol_CheckMark] = ImVec4(0.90f, 0.90f, 0.90f, 0.83f);
+            style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.70f, 0.70f, 0.70f, 0.62f);
+            style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.30f, 0.30f, 0.30f, 0.84f);
+            style.Colors[ImGuiCol_Button] = ImVec4(0.03f, 0.8f, 0.5f, 0.90f);
+            style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.50f, 0.69f, 0.99f, 0.68f);
+            style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.80f, 0.50f, 0.50f, 1.00f);
+            style.Colors[ImGuiCol_Header] = ImVec4(0.30f, 0.69f, 1.00f, 0.53f);
+            style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.44f, 0.61f, 0.86f, 1.00f);
+            style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.38f, 0.62f, 0.83f, 1.00f);
+            style.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.00f, 1.00f, 1.00f, 0.85f);
+            style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(1.00f, 1.00f, 1.00f, 0.60f);
+            style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(1.00f, 1.00f, 1.00f, 0.90f);
+            style.Colors[ImGuiCol_PlotLines] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+            style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
+            style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
+            style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
+            style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.00f, 0.00f, 1.00f, 0.35f);
             ImGui::Text("Wellcome on JE!!");               // Display some text (you can use a format strings too)
-            //ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-            //ImGui::Checkbox("Another Window", &show_another_window);
-            if (GetAsyncKeyState('V'))
-            {
-                fB_a= fB_a + 0.1f;
-                fB_b= fB_b + 0.1f;
-                fB_x= fB_x + 0.1f;
-                fB_y= fB_y + 0.1f;
-                fB_rt= fB_rt + 0.1f;
-                fB_rb = fB_rb + 0.1f;
-                fB_lb = fB_lb + 0.1f;
-                fB_lt = fB_lt + 0.1f;
-                if (fB_b > 1)
-                {
-                    fB_a = 1.000f;
-                    fB_b = 1.000f;
-                    fB_x = 1.000f;
-                    fB_y = 1.000f;
-                    fB_rt = 1.000f;
-                    fB_rb = 1.000f;
-                    fB_lb = 1.000f;
-                    fB_lt = 1.000f;
-                }
-            }
-            if (!GetAsyncKeyState('V'))
-            {
-                fB_a = fB_a - 0.1f;
-                fB_b = fB_b - 0.1f;
-                fB_x = fB_x - 0.1f;
-                fB_y = fB_y - 0.1f;
-                fB_rt = fB_rt - 0.1f;
-                fB_rb = fB_rb - 0.1f;
-                fB_lb = fB_lb - 0.1f;
-                fB_lt = fB_lt - 0.1f;
-                if (fB_b < 1)
-                {
-                    fB_a = 0.000f;
-                    fB_b = 0.000f;
-                    fB_x = 0.000f;
-                    fB_y = 0.000f;
-                    fB_rt = 0.000f;
-                    fB_rb = 0.000f;
-                    fB_lb = 0.000f;
-                    fB_lt = 0.000f;
-                }
-
-            }
             fLX = (xController1->GetState().Gamepad.sThumbLX / 32768.0f);
             fLY = (xController1->GetState().Gamepad.sThumbLY / 32768.0f);
             fRX = (xController1->GetState().Gamepad.sThumbRX / 32768.0f);
@@ -216,17 +246,21 @@ int main(int, char**)
             fLT = (xController1->GetState().Gamepad.bLeftTrigger / 32768.0f);
             fRT = (xController1->GetState().Gamepad.bRightTrigger / 32768.0f);
             ImGui::Text(("FPS:" + std::to_string(io.Framerate)).c_str());
-            if (xController1->IsConnected())
+            if (xController1->IsConnected() || C_XinputControllerState)
             {
                 ImGui::Text("Controller connnected!!");
                 C_XinputControllerState = true;
             }
             else
             {
-                ImGui::Text("Contoller not Found!! Please Plug Xinput Controller!!");
+                ImGui::Text("Contoller not Found!! \nPlease Plug Xinput Controller!!");
                 C_XinputControllerState = false;
             }
             //
+            if (GetAsyncKeyState(VK_F5))
+            {
+                C_XinputControllerState = true;
+            }
             //button detector
             if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_B) { fB_b = fB_b + 0.1f; if (fB_b > 1.000f) { fB_b = 1.000f; } }
             if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A) { fB_a = fB_a + 0.1f; if (fB_a > 1.000f) { fB_a = 1.000f; } }
@@ -239,24 +273,46 @@ int main(int, char**)
             if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) { fB_dl = fB_dl + 0.1f; if (fB_dl > 1.000f) { fB_dl = 1.000f; } }
             if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) { fB_dr = fB_dr + 0.1f; if (fB_dr > 1.000f) { fB_dr = 1.000f; } }
             //
-            if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_B) { fB_b = fB_b - 0.1f; if (fB_b < 0.1f) { fB_b = 0.0f; } }
-            if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A) { fB_a = fB_a - 0.1f; if (fB_a < 0.1f) { fB_a = 0.0f; } }
-            if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_X) { fB_x = fB_x - 0.1f; if (fB_x < 0.1f) { fB_x = 0.0f; } }
-            if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_Y) { fB_y = fB_y - 0.1f; if (fB_y < 0.1f) { fB_y = 0.0f;} }
-            if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) { fB_rs = fB_rs - 0.1f; if (fB_rs < 0.1f) { fB_rs = 0.0f;
+            if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_B) { fB_b = fB_b - 0.1f; if (fB_b < 0.1f) { fB_b = 0.0f; } }
+            if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_A) { fB_a = fB_a - 0.1f; if (fB_a < 0.1f) { fB_a = 0.0f; } }
+            if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_X) { fB_x = fB_x - 0.1f; if (fB_x < 0.1f) { fB_x = 0.0f; } }
+            if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_Y) { fB_y = fB_y - 0.1f; if (fB_y < 0.1f) { fB_y = 0.0f;} }
+            if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_RIGHT_SHOULDER) { fB_rs = fB_rs - 0.1f; if (fB_rs < 0.1f) { fB_rs = 0.0f;
             } }
-            if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) { fB_ls = fB_ls - 0.1f; if (fB_ls < 0.1f) { fB_ls = 0.0f;
+            if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_LEFT_SHOULDER) { fB_ls = fB_ls - 0.1f; if (fB_ls < 0.1f) { fB_ls = 0.0f;
             } }
-            if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) { fB_du = fB_du - 0.1f; if (fB_du < 0.1f) { fB_du = 0.0f;
+            if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_DPAD_UP) { fB_du = fB_du - 0.1f; if (fB_du < 0.1f) { fB_du = 0.0f;
             } }
-            if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) { fB_dd = fB_dd - 0.1f; if (fB_dd < 0.1f) { fB_dd = 0.0f;
+            if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_DPAD_DOWN) { fB_dd = fB_dd - 0.1f; if (fB_dd < 0.1f) { fB_dd = 0.0f;
             } }
-            if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) { fB_dl = fB_dl - 0.1f; if (fB_dl < 0.1f) { fB_dl = 0.0f;
+            if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_DPAD_LEFT) { fB_dl = fB_dl - 0.1f; if (fB_dl < 0.1f) { fB_dl = 0.0f;
             } }
-            if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) { fB_dr = fB_dr - 0.1f; if (fB_dr < 0.1f) { fB_dr = 0.0f; } }
+            if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_DPAD_RIGHT) { fB_dr = fB_dr - 0.1f; if (fB_dr < 0.1f) { fB_dr = 0.0f; } }
             //
+            if (C_XinputControllerState)
+            {
+                fJEFrame = true;
+            }
+            ImGui::MemAlloc(1024);
             if (fJEFrame)
             {
+                if (GetAsyncKeyState(VK_LEFT))
+                {
+                    df = df + 0.1f;
+                    if (df > 100.0f)
+                    {
+                        df = 100.0f;
+                    }
+                }
+                else
+                {
+                    df = df - 0.1f;
+                    if (df < 0.0f)
+                    {
+                        df = 0.0f;
+                    }
+                }
+                bShowButtons = false;
                 ImGui::Text(" Buttons ");
                 ImGui::SliderFloat("A", &fB_a, 0.0f, 1.0f);
                 ImGui::SliderFloat("X", &fB_x, 0.0f, 1.0f);
@@ -277,52 +333,65 @@ int main(int, char**)
                 ImGui::SliderFloat("RY", &fRY, 0.0f, 1.0f);
                 ImGui::SliderFloat("LT", &fLT, 0.0f, 1.0f);                  // Edit 1 float using a slider from 0.0f to 1.0f
                 ImGui::SliderFloat("RT", &fRT, 0.0f, 1.0f);
+                ImGui::TextColored(ImVec4(0.0f, 200.0f, 100.0f, 10.0f), "Hello");
+         
                 if (ImGui::Button("Back to menu",ImVec2(150.0f,60.0f)))                           // Buttons return true when clicked (most widgets return true when edited/activated)
                 {
                     fJEFrame = false;
                 }
+                if(ImGui::ColorButton("Controls",ImVec4(100.0f,200.0f,100.0f,10.0f),1, ImVec2(150.0f, 60.0f)))
+                {
+                    bShowButtons = true;
+                }
             }
+           // static bool bCPUTest = false;
             //ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
             // io.Fonts->AddFontFromFileTTF("./WhiteRabbit.ttf", 15.0f);
-            if (ImGui::Button("Exit to JE", ImVec2(150.0f, 60.0f)))                              // Buttons return true when clicked (most widgets return true when edited/activated)
+            if(!fJEFrame){ bShowButtons = true; }
+            if (bShowButtons)
             {
-                exit(0);
+                if (ImGui::Button("Exit to JE", ImVec2(150.0f, 60.0f))) { exit(0); }
+                if (ImGui::Button("CPUTest", ImVec2(150.0f, 60.0f))) { bCPUTest = true; }
+                if (!fJEFrame) { if (ImGui::Button("JoyStick Test", ImVec2(150.0f, 60.0f))) { fJEFrame = true; }}
+                if (ImGui::Button("About", ImVec2(150.0f, 60.0f))) { fCAboutW = true; }
             }
-            if (!fJEFrame)
-            {
-                if (ImGui::Button("JoyStick Test", ImVec2(150.0f, 60.0f)))                              // Buttons return true when clicked (most widgets return true when edited/activated)
-                {
-                    fJEFrame = true;
-                }
-           }
-            if (ImGui::Button("About", ImVec2(150.0f, 60.0f)))
-            {
-                fCAboutW = true;
-           }
-            if (fCAboutW)
-            {
-                ImGui::Text("  JE Build 1.0 win64 OpenGL3 \n JE  -  Keyboard emulator on Gamepad!! \n and JoyStick Test\n Compiled to Visual Studio 2022 Ñ++20 ImGui");
-                if (ImGui::Button("Back", ImVec2(150.0f, 60.0f)))
-                {
-                    fCAboutW = false;
-
-      
-                }
-            }
+            ImGui::Text("Build: 1.0.1 C++20 OpenGL 3.0 Debug");
             ImGui::SameLine();
             ImGui::End();
         }
-
-        // 3. Show another simple window.
-        if (show_another_window)
+        
+        if (fCAboutW)
         {
-            ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-            ImGui::Text("Hello from another window!");
-            if (ImGui::Button("Close Me"))
-                show_another_window = false;
+            ImGui::Begin("About", &fCAboutW);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+            ImGui::TextColored(ImVec4(0.0f, 200.0f, 100.0f, 10.0f), "JE - KeyBoard Emulator on Gamepad\nPowerful Test Gamepad with beatiful design n\on OpenGL 3.0 to Uses API ImGui))n\--------------------------------\nCompiled to Visual Studio 2022 n\Build Project: 1.0.1 x64 (C++20)\nUsed My JoyStickAPI 1.0.0 (C++11)\n-------------------------------\nGITHUB:\ngithub.com/hcpp20334\nGITHUB REPO JE:\ngithub.com/hcpp20334/JoyStickTest\n--------------------------------");
+           // ImGui::TextColored(ImVec4(0.0f, 200.0f, 100.0f, 10.0f),( std::to_string(fJ_vendor).c_str()));
+            std::cout << &fJ_vendor << &fJ_rendered << "\n";
+            if (ImGui::Button("OK"))
+                fCAboutW = false;
             ImGui::End();
         }
-
+        if (bCPUTest)
+        {
+            static std::string v_Cscore;
+            static int64_t v_CFirst = 0;
+            static int64_t v_COutV = 0;
+            static int64_t fV = 0;
+            static int64_t fc_0 = 0;
+            ImGui::Begin("CPU Test", &bCPUTest);
+            ImGui::TextColored(ImVec4(11.8f, 88.1f, 43.0f, 10.f), "Test CPU");
+            ImGui::Text((v_Cscore).c_str());
+            
+                //std::cout << "Cycle:" << fT_cpuSpeed << "Score" << v_Cscore << std::endl;
+            if (ImGui::Button("TEST"))
+            {
+                v_Cscore = ld_V();
+            }
+            if (ImGui::Button("Close"))
+                bCPUTest = false;
+            ImGui::End();
+        }
+        // 3. Show another simple window.
+        
         // Rendering
         ImGui::Render();
         glViewport(0, 0, 400, 800);

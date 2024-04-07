@@ -2,10 +2,11 @@
 ![пп](https://github.com/HCPP20334/JoyStickTest/assets/76736848/c8047a11-4896-47fa-8d3e-63d06deb7dc5)
  Сборка 1.1.5.4 
  --------------------------
-# JEx64 1.1.6 (release)
+# JEx64 1.1.6 (release) Console app
 Compiled C++20 x64 SSE4.2 
-* Test Gamepad and Emulator Keyboard(alpha)
-#JE_x64_OpenGL3_SSE4.2cpp20
+Test Gamepad and Emulator Keyboard(alpha)
+----------
+#JE_x64_OpenGL3_SSE4.2cpp20 
 Compiled C++20 x64 SSE4.2 OpenGL3.0
 #New Interface!!
 Screenshots

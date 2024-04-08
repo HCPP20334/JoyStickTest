@@ -99,7 +99,7 @@ int main(int, char**)
     //ImGui_ImplWin32_EnableDpiAwareness();
     WNDCLASSEXW wc = { sizeof(wc), CS_OWNDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"ImGui Example", nullptr };
     ::RegisterClassExW(&wc);
-    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"JEx64 - OpenGL3", WS_OVERLAPPEDWINDOW, 100, 100, 500, 800, nullptr, nullptr, wc.hInstance, nullptr);
+    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"JEx64 - OpenGL3", WS_OVERLAPPEDWINDOW, 100, 80, 500, 800, nullptr, nullptr, wc.hInstance, nullptr);
 
     // Initialize OpenGL
     if (!CreateDeviceWGL(hwnd, &g_MainWindow))
@@ -198,7 +198,11 @@ int main(int, char**)
             //
             ShowWindow(GetConsoleWindow(), 2);
             static bool b_vsync = false;
-            ImGui::Begin(" JE x64 OpenGL3 ");                          // Create a window called "Hello, world!" and append into it.
+            static bool fL_motor = false;
+            static bool fR_motor = false;
+            static int  v_Rmotor = 0;
+            static int v_Lmotor = 0;
+            ImGui::Begin(" JE x64 OpenGL3_SSE4.2cpp20",&fJEFrame);                          // Create a window called "Hello, world!" and append into it.
             ImGui::Checkbox("vsync", &b_vsync);
             if (b_vsync) { Sleep(13); }
             else { Sleep(0); }
@@ -293,9 +297,9 @@ int main(int, char**)
             {
                 fJEFrame = true;
             }
-            ImGui::MemAlloc(1024);
             if (fJEFrame)
             {
+                fJEFrame = ImGui::MemAlloc(10024);
                 if (GetAsyncKeyState(VK_LEFT))
                 {
                     df = df + 0.1f;
@@ -333,8 +337,17 @@ int main(int, char**)
                 ImGui::SliderFloat("RY", &fRY, 0.0f, 1.0f);
                 ImGui::SliderFloat("LT", &fLT, 0.0f, 1.0f);                  // Edit 1 float using a slider from 0.0f to 1.0f
                 ImGui::SliderFloat("RT", &fRT, 0.0f, 1.0f);
-                ImGui::TextColored(ImVec4(0.0f, 200.0f, 100.0f, 10.0f), "Hello");
-         
+                ImGui::Checkbox("Lmotor", &fL_motor);
+                ImGui::Checkbox("Rmotor", &fR_motor);
+                xController1->Vibrate(v_Lmotor, v_Rmotor);
+                if (fR_motor)
+                {
+                    ImGui::InputInt("Rduration", &v_Rmotor, 1, 100);
+                }
+                if (fL_motor)
+                {
+                    ImGui::InputInt("Rduration", &v_Lmotor, 1, 100);
+                }
                 if (ImGui::Button("Back to menu",ImVec2(150.0f,60.0f)))                           // Buttons return true when clicked (most widgets return true when edited/activated)
                 {
                     fJEFrame = false;

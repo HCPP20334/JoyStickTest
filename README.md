@@ -28,4 +28,5 @@ Ubuntu: apt get install wine
 #Screen to running Manjaro Wine
 ![image](https://github.com/HCPP20334/JoyStickTest/assets/76736848/f154fb0c-5f5d-42b0-8a82-69551a43b882)
 
-
+[!video]
+(https://youtu.be/t9Ihq8riPtg?si=0iNRx72qYkz0AgCz)

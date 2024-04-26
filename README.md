@@ -19,8 +19,11 @@ Compiled C++20 SSE4.2 OpenGLL (Visual Studio 2022)
 
 # New Interface!!
 Screenshots
-![image](https://github.com/HCPP20334/JoyStickTest/assets/76736848/19b92543-0a79-4f68-b5b8-4bf8fda66f4c)![image](https://github.com/HCPP20334/JoyStickTest/assets/76736848/c123d22b-4037-440b-87a9-e6fe1ca10386)
-![image](https://github.com/HCPP20334/JoyStickTest/assets/76736848/9a27be72-60a0-4321-b661-bc57429f4058)![image](https://github.com/HCPP20334/JoyStickTest/assets/76736848/2261b741-c849-4d8e-8885-7d08325c7633)
+![image](https://github.com/HCPP20334/JoyStickTest/assets/76736848/18486d95-cbd7-4d4e-89b2-6bf2fb5c20f7)
+![image](https://github.com/HCPP20334/JoyStickTest/assets/76736848/8e15c017-cb30-4661-b9c8-86f169e9ee9f)
+![image](https://github.com/HCPP20334/JoyStickTest/assets/76736848/fceb5b24-a701-4dda-891a-16c77cad1584)
+
+
 # Running for Linux
 Install Wine
 Manjaro : sudo pacman -Syuu wine

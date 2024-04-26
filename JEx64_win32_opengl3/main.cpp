@@ -18,7 +18,8 @@
 #include <urlmon.h>
 #include <clocale>
 #include <thread>
-
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 #pragma comment (lib , "Urlmon.lib")
 uint64_t fDataMemUsage() // Work Function !!! Check Sym RAM to Current Program //
 {
@@ -32,6 +33,40 @@ uint64_t fDataMemUsage() // Work Function !!! Check Sym RAM to Current Program /
 
 
 
+// Simple helper function to load an image into a OpenGL texture with common settings
+bool LoadTextureFromFile(const char* filename, GLuint* out_texture, int* out_width, int* out_height)
+{
+    // Load from file
+    int fGLimage_width = 0;
+    int fGLimage_height = 0;
+    unsigned char* image_data = stbi_load(filename, &fGLimage_width, &fGLimage_height, NULL, 4);
+    if (image_data == NULL)
+        return false;
+
+    // Create a OpenGL texture identifier
+    GLuint fGLimage_texture;
+    glGenTextures(1, &fGLimage_texture);
+    glBindTexture(GL_TEXTURE_2D, fGLimage_texture);
+
+    // Setup filtering parameters for display
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP); // This is required on WebGL for non power-of-two textures
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP); // Same
+
+    // Upload pixels into texture
+#if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+#endif
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, fGLimage_width, fGLimage_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
+    stbi_image_free(image_data);
+
+    *out_texture = fGLimage_texture;
+    *out_width = fGLimage_width;
+    *out_height = fGLimage_height;
+
+    return true;
+}
 int64_t fSndMsg(int64_t fJEid_snd)
 {
     int64_t fSnd00 = 0xFFFFFFF;
@@ -124,19 +159,25 @@ static int64_t ld_V(std::string *buff)
     int64_t fto_tick_out = 0;
     int64_t fJ_stack = 0;
     std::string fTcpu;
-    std::string fBuffer_f = "1234567890abcdef";
+    std::string fBuffer_fIn = "1234567890abcdef";
+    std::string fBuffer_fOut;
     int64_t fSizeBuf_f = 0;
     int64_t fChunkSeed = 0;
     //
-    fto_tick = fBuffer_f.size();
+    //fto_tick = fBuffer_f.size();
+    fSizeBuf_f = fBuffer_fIn.size();
     //
     for (int64_t fG = 1; fG > 0; fG++)
     {
-        srand(time(0));
-        fSizeBuf_f = fBuffer_f.size();
-        fChunkSeed = rand() % fSizeBuf_f / fSizeBuf_f;
-        fBuffer_f = fBuffer_f + fBuffer_f[fSizeBuf_f - fChunkSeed];
-        *buff = fBuffer_f;
+        for (int64_t fGenKey = 1; fGenKey == 1000; fGenKey++)
+        {
+            fChunkSeed++;
+            srand(time(0));
+            if (fChunkSeed > 30) { fChunkSeed = 0; fBuffer_fOut = fBuffer_fOut + "\n"; }
+            fBuffer_fOut = fBuffer_fOut + fBuffer_fIn[rand() * fSizeBuf_f];
+            *buff = fBuffer_fOut;
+        }
+      //  *buff = fBuffer_fOut;
         Sleep(13);
         fV++;
         if (fV > 30)
@@ -148,7 +189,7 @@ static int64_t ld_V(std::string *buff)
             fBr++;
             if (fBr == 100) { ts_window = false; fG = -1;
             }
-            fto_tick_out = fBuffer_f.size();
+           // fto_tick_out = fBuffer_f.size();
             if (fJ_stack > 0) { fTcpu = "Very Powerful CPU!!    "; }
             if (fJ_stack >= 200) { fTcpu = "Very Fast               "; }
             if (fJ_stack >= 500) { fTcpu = "Fast                    "; }//
@@ -162,7 +203,21 @@ static int64_t ld_V(std::string *buff)
     }
     
 }
+bool b_Msg = false;
+uint64_t ImMessage(const char* str_text, const char* title_text)
+{
+   
+    if (b_Msg)
+    {
+        ImGui::Begin(str_text, &b_Msg);
+        ImGui::Text(title_text);
+        if (ImGui::SmallButton("OK")) { b_Msg = false; }
 
+        // *b_event = b_Msg;
+        ImGui::End();
+        return strlen(str_text);
+    }
+}
     
 int main(int, char**)
 {
@@ -211,6 +266,10 @@ int main(int, char**)
     static float fC_Gcol = 0.0f;
     static float fC_Bcol = 0.0f;
     static bool bShowButtons = false;
+    static bool b_Start = false;
+    static bool b_Back = false;
+    static bool bkb_emuFrame = false;
+    static bool fWFrame = true;
     //
     static float df = 0.0f;
     bool C_XinputControllerState = false;
@@ -241,20 +300,27 @@ int main(int, char**)
     static bool bTh_Classic;
     static bool bTh_Dark;
     static bool bTh_Light;
+    static bool Gamepad_enable;
     //
     static std::string filestr;
     static std::string fStrMsgBuf;
     static std::string fBuffer_data;
+    static  std::string bStrStatus;
     //
     static int64_t fThemeId = 0;
+    static int64_t b_data = 0;
+    static int64_t b_type = 0;
+    static int64_t fDelay = 0;
     static int th_bar = 1000;
-
+    //
+     char fInputBuffer;
+     std::string buf_0;
     int64_t Val = 0;
     // Create application window
-    //ImGui_ImplWin32_EnableDpiAwareness();
+    ImGui_ImplWin32_EnableDpiAwareness();
     WNDCLASSEXW wc = { sizeof(wc), CS_OWNDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"JE x64", nullptr };
     ::RegisterClassExW(&wc);
-    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"JE_x64_OpenGL3_SSE4.2 C++20 Build 1.0.8", WS_OVERLAPPEDWINDOW | WS_EX_NOPARENTNOTIFY, 100, 80, 500, 800, nullptr, nullptr, wc.hInstance, nullptr);
+    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"JE_x64_OpenGL3_SSE4.2 C++20 Build 1.0.8", WS_OVERLAPPEDWINDOW | WS_EX_TOOLWINDOW |  WS_EX_NOPARENTNOTIFY, 100, 80, 500, 800, nullptr, nullptr, wc.hInstance, nullptr);
 
     // Initialize OpenGL
     if (!CreateDeviceWGL(hwnd, &g_MainWindow))
@@ -267,7 +333,8 @@ int main(int, char**)
     wglMakeCurrent(g_MainWindow.hDC, g_hRC);
 
     // Show the window
-    ::ShowWindow(hwnd, SW_SHOWDEFAULT);
+   // ::ShowWindow(hwnd, SW_SHOWDEFAULT);
+    ::AnimateWindow(hwnd, 100, AW_BLEND);
     ::ShowWindow(GetConsoleWindow(), 2);
     ::UpdateWindow(hwnd);
     std::string fStrParam;
@@ -276,7 +343,7 @@ int main(int, char**)
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;   // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;    // Enable Gamepad Controls
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;    // Enable Gamepad Controls
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
@@ -298,7 +365,7 @@ int main(int, char**)
     }
     if (fFontsState)
     {
-        io.Fonts->AddFontFromFileTTF("C:\\Windows\\fonts\\unispace bd.ttf", 20.0f);
+        io.Fonts->AddFontFromFileTTF(".\\consola.ttf", 20.0f);
     }
     else
     {
@@ -311,396 +378,472 @@ int main(int, char**)
         // Poll and handle messages (inputs, window resize, etc.)
         // See the WndProc() function below for our to dispatch events to the Win32 backend.
         MSG msg;
+        fWFrame = true;
         while (::PeekMessage(&msg, nullptr, 0U, 0U, PM_REMOVE))
         {
             ::TranslateMessage(&msg);
             ::DispatchMessage(&msg);
             if (msg.message == WM_QUIT)
-                done = true;
+                exit(0);
+              //  done = true;
+            if (msg.message == WM_DESTROY)
+                exit(0);
         }
-   
+        
         if (done)
             break;
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
-
-        // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-
-
-        // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
         {
-           // static bool fJEUpdate = false;
-           // glfwWindowHint(GLFW_REFRESH_RATE, 60)
-            setlocale(0, "rus");
-            ImGui::Begin("\tJE x64_OpenGL3_SSE4.2 C++20",&fJEFrame, ImGuiWindowFlags_NoCollapse + ImGuiWindowFlags_NoTitleBar);                          // Create a window called "Hello, world!" and append into it.
-            ImGui::SetWindowPos(ImVec2(6.0f, 19.0f));
-            ImGui::SetWindowSize(ImVec2(475.0f, 703.0f));
-           // ImDrawList* Image;
-           // Image->AddImage()
-            std::ofstream WriteConfigJE("JE_CONFIG.TXT");
-               // ImGui::Begin("THEME EDITOR", &v_bThemeJE);
+           
+            ImGui::Begin("\tJE x64_OpenGL3_SSE4.2 C++20",&fJEFrame, ImGuiWindowFlags_NoCollapse + ImGuiWindowFlags_NoTitleBar);  
+            
+                // Create a window called "Hello, world!" and append into it.
+                ImGui::SetWindowPos(ImVec2(6.0f, 19.0f));
+                ImGui::SetWindowSize(ImVec2(475.0f, 703.0f));
+                JEApp.ClearFreeMemory();
+                // ImDrawList* Image;
+                // Image->AddImage()
+                std::ofstream WriteConfigJE("JE_CONFIG.TXT");
+                // ImGui::Begin("THEME EDITOR", &v_bThemeJE);
                 if (bTh_Dark)
-            {
+                {
                     bTh_Light = false;
                     bTh_Classic = false;
-                fStrMsgBuf = "Theme 0";
-                WriteConfigJE.is_open();
-                WriteConfigJE << "fJETheme=0;" << std::endl;
-               // WriteConfigJE.close();
-                ImGuiStyle& style = ImGui::GetStyle();
-                style.WindowRounding = 5.3f;
-                style.FrameRounding = 2.3f;
-                style.ScrollbarRounding = 0;
-                style.Colors[ImGuiCol_Text] = ImVec4(0.90f, 0.90f, 0.90f, 0.90f);
-                style.Colors[ImGuiCol_WindowBg] = ImVec4(0.01f, 0.01f, 0.02f, 0.80f);
-                style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
-                style.Colors[ImGuiCol_PopupBg] = ImVec4(0.05f, 0.05f, 0.10f, 0.85f);
-                style.Colors[ImGuiCol_Border] = ImVec4(0.72f, 0.772f, 0.72f, 0.60f);
-                style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-                style.Colors[ImGuiCol_FrameBg] = ImVec4(0.00f, 0.00f, 0.01f, 1.00f);
-                style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.90f, 0.80f, 0.80f, 0.40f);
-                style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.90f, 0.65f, 0.65f, 0.45f);
-                style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.08f, 0.08f, 0.08f, 0.80f);
-                style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.01f, 0.01f, 0.02f, 0.80f);
-                style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.20f, 0.25f, 0.30f, 0.60f);
-                style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.55f, 0.53f, 0.55f, 0.51f);
-                style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.56f, 0.56f, 0.56f, 1.00f);
-                style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.56f, 0.56f, 0.56f, 0.91f);
-                style.Colors[ImGuiCol_CheckMark] = ImVec4(0.90f, 0.90f, 0.90f, 0.83f);
-                style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.70f, 0.70f, 0.70f, 0.62f);
-                style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.30f, 0.30f, 0.30f, 0.84f);
-                style.Colors[ImGuiCol_Button] = ImVec4(0.32f, 0.32f, 0.83f, 0.90f);
-                style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.50f, 0.69f, 0.99f, 0.68f);
-                style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.80f, 0.50f, 0.50f, 1.00f);
-                style.Colors[ImGuiCol_Header] = ImVec4(1.08f, 1.08f, 1.08f, 1.80f);
-                style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.08f, 0.08f, 0.08f, 0.80f);
-                style.Colors[ImGuiCol_HeaderActive] = ImVec4(1.08f, 1.08f, 1.08f, 1.80f);
-                style.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.00f, 1.00f, 1.00f, 0.85f);
-                style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(1.00f, 1.00f, 1.00f, 0.60f);
-                style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(1.00f, 1.00f, 1.00f, 0.90f);
-                style.Colors[ImGuiCol_PlotLines] = ImVec4(0.08f, 0.08f, 0.08f, 0.80f);
-                style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
-                style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
-                style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
-                style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.00f, 0.00f, 1.00f, 0.35f);
-            }
+                    fStrMsgBuf = "Theme 0";
+                    WriteConfigJE.is_open();
+                    WriteConfigJE << "fJETheme=0;" << std::endl;
+                    // WriteConfigJE.close();
+                    ImGuiStyle& style = ImGui::GetStyle();
+                    style.WindowRounding = 5.3f;
+                    style.FrameRounding = 2.3f;
+                    style.ScrollbarRounding = 0;
+                    style.Colors[ImGuiCol_Text] = ImVec4(0.90f, 0.90f, 0.90f, 0.90f);
+                    style.Colors[ImGuiCol_WindowBg] = ImVec4(0.106f, 0.106f, 0.118f, 0.80f);
+                    style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
+                    style.Colors[ImGuiCol_PopupBg] = ImVec4(0.05f, 0.05f, 0.10f, 0.85f);
+                    style.Colors[ImGuiCol_Border] = ImVec4(0.72f, 0.772f, 0.72f, 0.60f);
+                    style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+                    style.Colors[ImGuiCol_FrameBg] = ImVec4(0.00f, 0.00f, 0.01f, 1.00f);
+                    style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.90f, 0.80f, 0.80f, 0.40f);
+                    style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.90f, 0.65f, 0.65f, 0.45f);
+                    style.Colors[ImGuiCol_TitleBgActive] = ImVec4(1.0f, 0.20f, 0.373f, 1.0f);
+                    style.Colors[ImGuiCol_TitleBg] = ImVec4(1.0f, 0.20f, 0.373f, 0.70f);
+                    style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.004f, 0.016f, 0.035f, 1.0f);
+                    style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.20f, 0.25f, 0.30f, 0.60f);
+                    style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(1.0f, 0.10f, 0.30f, 1.0f);
+                    style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(1.0f, 0.20f, 0.373f, 1.0f);
+                    style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.56f, 0.56f, 0.56f, 0.91f);
+                    style.Colors[ImGuiCol_CheckMark] = ImVec4(0.90f, 0.90f, 0.90f, 0.83f);
+                    style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.70f, 0.70f, 0.70f, 0.62f);
+                    style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.30f, 0.30f, 0.30f, 0.84f);
+                    style.Colors[ImGuiCol_Button] = ImVec4(1.0f, 0.20f, 0.373f, 0.90f);
+                    style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.50f, 0.69f, 0.99f, 0.68f);
+                    style.Colors[ImGuiCol_ButtonActive] = ImVec4(1.0f, 0.20f, 0.373f, 0.90f);
+                    style.Colors[ImGuiCol_Header] = ImVec4(1.08f, 1.08f, 1.08f, 1.80f);
+                    style.Colors[ImGuiCol_HeaderHovered] = ImVec4(1.0f, 0.20f, 0.373f, 0.70f);
+                    style.Colors[ImGuiCol_HeaderActive] = ImVec4(1.08f, 1.08f, 1.08f, 1.80f);
+                    style.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.00f, 1.00f, 1.00f, 0.85f);
+                    style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(1.00f, 1.00f, 1.00f, 0.60f);
+                    style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(1.00f, 1.00f, 1.00f, 0.90f);
+                    style.Colors[ImGuiCol_PlotLines] = ImVec4(1.0f, 0.20f, 0.373f, 1.0f);
+                    style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(1.0f, 0.20f, 0.373f, 0.90f);
+                    style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
+                    style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
+                    style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.00f, 0.00f, 1.00f, 0.35f);
+                    ImGuiButtonFlags btn_flags = ImGuiButtonFlags_MouseButtonMask_;
+                    //ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(100.0f, 100.0f));
+                }
                 if (bTh_Classic) {
                     bTh_Dark = false;
                     bTh_Light = false;
-                ImGui::StyleColorsClassic(); fStrMsgBuf = "Theme 1 Apply!!";  WriteConfigJE.is_open();
-                WriteConfigJE << "fJETheme=1;" << std::endl;
-                //WriteConfigJE.close();
-            }
+                    ImGui::StyleColorsClassic(); fStrMsgBuf = "Theme 1 Apply!!";  WriteConfigJE.is_open();
+                    WriteConfigJE << "fJETheme=1;" << std::endl;
+                    //WriteConfigJE.close();
+                }
                 if (bTh_Light) {
                     bTh_Dark = false;
                     bTh_Classic = false;
-                ImGui::StyleColorsLight(); fStrMsgBuf = "Theme 1 Apply!!";  WriteConfigJE.is_open();
-                WriteConfigJE << "fJETheme=2;" << std::endl;
-                //WriteConfigJE.close();
-            }
+                    ImGui::StyleColorsLight(); fStrMsgBuf = "Theme 1 Apply!!";  WriteConfigJE.is_open();
+                    WriteConfigJE << "fJETheme=2;" << std::endl;
+                    //WriteConfigJE.close();
+                }
                 //if (th_bar == 0) { bTh_Light = true; }if (th_bar <= 500) { bTh_Classic = true; }if (th_bar == 1000) { bTh_Dark = true; }
-                
+
                 //ImGui::End();
-            JEApp.ClearFreeMemory();
-            if (v_bSettings)
-            {
-                ImGui::Begin("SETTINGS", &v_bSettings, ImGuiWindowFlags_NoCollapse);
+               // GLuint out_texture = 0;
+               // int Ix = 300;
+                //int Iy = 100;
+                //bool ret = LoadTextureFromFile("logo.png", &out_texture, &Ix, &Iy);
+               // IM_ASSERT(ret);
                 JEApp.ClearFreeMemory();
-                if (v_bSettings) { v_bSettingsCh_b = true; }
-                if (b_vsync) { Sleep(13); 
-                WriteConfigJE << "fJEVsync=true;" << std::endl;
-                }
-                else { Sleep(0);
-                WriteConfigJE << "fJEVsync=false;" << std::endl;
-                }
-                //ImGui::Checkbox("AUTO CLEARNING MEMORY(DEBUG)", &v_flagClMemory);
-                ImGui::Text("::: MAIN SETTINGS :::\n");
-                ImGui::MenuItem("VSYNC", "", &b_vsync, true);
-                ImGui::MenuItem("INVERT VIBRATION VALUE FOR EMU XINPUT", "", &v_bInvertVibValue, true);
-               // ImGui::Checkbox("EMU XINPUT(DEBUG)", &C_XinputControllerState);
-                ImGui::MenuItem("SELECT FONTS","", & fFontsState,true);
-                ImGui::Text("::: THEME EDITOR :::\n");
-                ImGui::MenuItem("DARK","1",&bTh_Dark, true);
-                ImGui::MenuItem("LIGHT", "2", &bTh_Light,true);
-                ImGui::MenuItem("CLASSIC", "3", &bTh_Classic,true);
-                ImGui::Text(("Message: "+fStrMsgBuf).c_str());
-                if (ImGui::Button("SAVE"))
+                if (v_bSettings)
                 {
-                    std::ofstream buf("restart.bat");
-                    buf.is_open();
-                    buf << "taskkill /im JE_x64_OpenGL3_SSE4.2cpp20.exe>nul\n";
-                    buf << "start ./JE_x64_OpenGL3_SSE4.2cpp20.exe>nul\n";
-                    buf << " del restart.bat>nul" << std::endl;
-                    buf << "exit" << std::endl;
-                    buf.close();
-                    WinExec("restart.bat", 1);
-                }
-                if (v_bInvertVibValue)
-                {
-                    WriteConfigJE << "fJEInvertVibrationValue=true;" << std::endl;
-                }
-                else
-                {
-                    WriteConfigJE << "fJEInvertVibrationValue=false;" << std::endl;
-                }
-                if (fFontsState)
-                {
-                    //ImGui::Text("Selected WhiteRabbit!!");
-                    fStrMsgBuf = "FONT WHITERABBIT!!";
-                    WriteConfigJE << "fJE_Font_WR=true;" << std::endl;
-                   // WriteConfigJE.close();
-                }
-                else
-                {
-                    //WriteConfigJE.is_open();
-                    WriteConfigJE << "fJE_Font_WR=false;" << std::endl;
-                   // WriteConfigJE.close();
-                    //UpdateWindow(hwnd);
-                    //ImGui::Text("Selected unispace bd!!");
-                    fStrMsgBuf = "FONT UNISPACE BD!!";
-                }
-
-                ImGui::End();
-            }
-            static bool fJEUpdate = false;
-            ImGui::BeginMainMenuBar();
-            ImGui::MenuItem("SETTINGS","", &v_bSettings,true);
-            ImGui::MenuItem("ABOUT","", & fCAboutW,true);
-            ImGui::MenuItem("CPUTEST","", & bCPUTest,true);
-            ImGui::MenuItem("UPDATE","", & fJEUpdate,true);
-            ImGui::MenuItem("EXIT","", & v_bExit,true);
-            if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_B && xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A && xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_Y)
-            {
-                v_Penis = true;
-            }
-            if (GetAsyncKeyState('G') && GetAsyncKeyState('A') && GetAsyncKeyState('Y'))
-            {
-                v_Penis = true;
-            }
-          //  static bool v_bExMsg = true;
-            if (v_Penis)
-            {
-                JEApp.ClearFreeMemory();
-                ImGui::Begin("Peni1s");
-                ImGui::Text("\n\n\nYou Gay?���㯠 \n\n\n[V] - exit [N] - no");
-                if (GetAsyncKeyState('V')) { ImGui::Text("Thanks!!why used my app!!"); Sleep(1000); v_Penis = false; }
-                if (GetAsyncKeyState('N')) { v_bExit = false; }
-                ImGui::End();
-            }
-            if (v_bExit)
-            {
-                JEApp.ClearFreeMemory();
-                ImGui::Begin("EXIT");
-                ImGui::TextColored(ImVec4(1.0f,0.0f,0.0f,1.0f),"\n::WARNING!!!::\n\nSETTINGS NOT SAVED!!\nUSER DATA WILL BE  LOST!!\n");
-                if (ImGui::MenuItem("SAVE AND EXIT", "", &v_bExit, true)) { ImGui::Text("Thanks!!why used my app!!"); WriteConfigJE.close(); Sleep(1000); exit(0); }
-                if (ImGui::MenuItem("BACK", "", &v_bExit, true)) { v_bExit = false; }
-                ImGui::End();
-            }
-            ImGui::EndMainMenuBar();
-            JEApp.ClearFreeMemory();
-            ImGui::Text("\n\nWELLCOME TO JE!!\nCREATED BY HCPP\n\n\n\n");               // Display some text (you can use a format strings too)
-            fLX = (xController1->GetState().Gamepad.sThumbLX / 32768.0f);
-            fLY = (xController1->GetState().Gamepad.sThumbLY / 32768.0f);
-            fRX = (xController1->GetState().Gamepad.sThumbRX / 32768.0f);
-            fRY = (xController1->GetState().Gamepad.sThumbRY / 32768.0f);
-            fLT = (xController1->GetState().Gamepad.bLeftTrigger / 255.0f);
-            fRT = (xController1->GetState().Gamepad.bRightTrigger / 255.0f);
-            if (xController1->IsConnected() || C_XinputControllerState)
-            {
-                ImGui::Text("CONTROLLER CONNECTED!!\n\n");
-                C_XinputControllerState = true;
-            }
-            else
-            {
-                ImGui::Text("CONTROLLER NOT FOUND!! \nPLEASE PLUG YOUR CONTROLLER!!\n\n");
-                C_XinputControllerState = false;
-                //fSndMsg(1);
-            }
-            //
-           // ImGui::ColorButton("JoyStickTest", ImVec4(0.90f, 0.65f, 0.65f, 0.45f),1,ImVec2(100.0f,50.0f));
-            if (!bShowButtons)
-            {
-                if (ImGui::Button("\tJOYSTICKTEST", ImVec2(170.0f, 50.0f)))
-                {
-                    fJEFrame = true;
-                    bShowButtons = true;
-                }
-            }
-            if (fJEUpdate)
-            {
-                JEApp.ClearFreeMemory();
-               // LPBINDSTATUSCALLBACK st_b;
-                const TCHAR dURL[] = _T("https://hcpp20334.github.io/update/JE_x64_OpenGLv1.0.7SSE4.2cpp20_Release.zip");
-                const TCHAR dFllePath[] = _T("JE_x64_OpenGLv1.0.7SSE4.2cpp20_Release.zip");
-                int64_t fDwChannel_0 =  URLDownloadToFile(NULL, NULL, dFllePath, 0, NULL);
-                static bool v_bDown = false;
-                static bool v_bStatus = false;
-                std::string btn_name = "DOWNLOAD";
-                ImGui::Begin("\tUPDATE CENTER", &fJEUpdate, ImGuiWindowFlags_NoCollapse);
-                ImGui::Text("UPDATE CENTER - UPDATE JE TO GITHUB SERVER");
-               // std::cout << st_b << std::endl;
-                if (ImGui::Button((btn_name).c_str(), ImVec2(100.f, 50.0f)))
-                {
-                    btn_name = "CONNECTING..";
-                    Sleep(13);
-                    v_bDown = true;
-                }
-                if (!v_bStatus)
-                {
-                   
-                    ImGui::Text(("UPDATE FATAL ERROR!!" + std::to_string(fDwChannel_0)).c_str());
-                }
-                if (v_bStatus)
-                {
-                    btn_name = "DOWNLOAD OK";
-                    ImGui::Text("UPDATE SUCCEEDED!\t\t\nSAVED TO: ./JEx64_OpenGL3_SSE4.2cpp20");
-                    Sleep(13);
-                    btn_name = "DOWNLOAD";
-                    v_bDown = false;
-                }
-                if (v_bDown)
-                {
-                    fDwChannel_0 = URLDownloadToFile(NULL, dURL, dFllePath, 0, NULL);
-                    if (SUCCEEDED(fDwChannel_0))
-                    { 
-                        v_bStatus = true;
-                        
-                        Sleep(3000);
-                        v_bDown = false;
-                        
+                    ImGui::Begin("SETTINGS", &v_bSettings, ImGuiWindowFlags_NoCollapse);
+                    JEApp.ClearFreeMemory();
+                    // ImGui::Image((void*)(intptr_t)out_texture, ImVec2(Ix, Ix));
+                    if (v_bSettings) { v_bSettingsCh_b = true; }
+                    if (b_vsync) {
+                        Sleep(13);
+                        WriteConfigJE << "fJEVsync=true;" << std::endl;
                     }
-                    if (FAILED(fDwChannel_0))
+                    else {
+                        Sleep(0);
+                        WriteConfigJE << "fJEVsync=false;" << std::endl;
+                    }
+                    //ImGui::Checkbox("AUTO CLEARNING MEMORY(DEBUG)", &v_flagClMemory);
+                    ImGui::Text("::: MAIN SETTINGS :::\n\n");
+                    ImGui::MenuItem("VSYNC", "", &b_vsync, true);
+                    ImGui::MenuItem("INVERT VIBRATION VALUE FOR EMU XINPUT", "", &v_bInvertVibValue, true);
+                    // ImGui::Checkbox("EMU XINPUT(DEBUG)", &C_XinputControllerState);
+                    ImGui::MenuItem("SELECT FONTS", "", &fFontsState, true);
+                    ImGui::Text("::: THEME EDITOR :::\n\n");
+                    ImGui::MenuItem("DARK", "1", &bTh_Dark, true);
+                    ImGui::MenuItem("LIGHT", "2", &bTh_Light, true);
+                    ImGui::MenuItem("CLASSIC", "3", &bTh_Classic, true);
+                    ImMessage("Test_00", "Test Window");
+                    //  ImGui::SliderInt("Win Volume", &fC_vol, 0, 100, "", 0);
+                    if (GetAsyncKeyState(VK_UP) && GetAsyncKeyState(VK_LCONTROL))
                     {
-                        v_bStatus = false;
-                        Sleep(1000);
-                        v_bDown = false;
+                        keybd_event(VK_VOLUME_UP, 0x45, KEYEVENTF_EXTENDEDKEY | 0, NULL);
+                    }
+                    if (GetAsyncKeyState(VK_DOWN) && GetAsyncKeyState(VK_LCONTROL))
+                    {
+                        keybd_event(VK_VOLUME_DOWN, 0x45, KEYEVENTF_EXTENDEDKEY | 0, NULL);
+                    }
+                    //ImGuiKey_GamepadBack
+                    if (ImGui::Button("SAVE"))
+                    {
+                        std::ofstream buf("restart.bat");
+                        buf.is_open();
+                        buf << "taskkill /im JE_x64_OpenGL3_SSE4.2cpp20.exe>nul\n";
+                        buf << "start ./JE_x64_OpenGL3_SSE4.2cpp20.exe>nul\n";
+                        buf << " del restart.bat>nul" << std::endl;
+                        buf << "exit" << std::endl;
+                        buf.close();
+                        WinExec("restart.bat", 1);
+                    }
+                    if (v_bInvertVibValue)
+                    {
+                        WriteConfigJE << "fJEInvertVibrationValue=true;" << std::endl;
+                    }
+                    else
+                    {
+                        WriteConfigJE << "fJEInvertVibrationValue=false;" << std::endl;
+                    }
+                    if (fFontsState)
+                    {
+                        //ImGui::Text("Selected WhiteRabbit!!");
+                        fStrMsgBuf = "FONT WHITERABBIT!!";
+                        WriteConfigJE << "fJE_Font_WR=true;" << std::endl;
+                        // WriteConfigJE.close();
+                    }
+                    else
+                    {
+                        //WriteConfigJE.is_open();
+                        WriteConfigJE << "fJE_Font_WR=false;" << std::endl;
+                        // WriteConfigJE.close();
+                         //UpdateWindow(hwnd);
+                         //ImGui::Text("Selected unispace bd!!");
+                        fStrMsgBuf = "FONT UNISPACE BD!!";
+                    }
 
+                    ImGui::End();
+                }
+                JEApp.ClearFreeMemory();
+                static bool fJEUpdate = false;
+                //XINPUT_STATE fDJUP;
+                ImGui::BeginMainMenuBar();
+                ImGui::MenuItem("SETTINGS", "", &v_bSettings, true);
+                ImGui::MenuItem("ABOUT", "", &fCAboutW, true);
+                ImGui::MenuItem("CPUTEST", "", &bCPUTest, true);
+                ImGui::MenuItem("UPDATE", "", &fJEUpdate, true);
+                ImGui::MenuItem("EXIT", "", &v_bExit, true);
+                if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_B && xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A && xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_Y)
+                {
+                    v_Penis = true;
+                }
+                //  static bool v_bExMsg = true;
+                if (v_Penis)
+                {
+
+                    ImGui::Begin("Dpad Debugger [V - to Close]");
+                    //fWframeX = (rand() % 300);
+                    srand(ImGui::GetTime());
+                    JEApp.ClearFreeMemory();
+
+                    if (GetKeyState('R') > 0)
+                    {
+                        ImGui::SetWindowPos(ImVec2((rand() % 300), (rand() % 300)), 0);
+                    }
+                    if (GetAsyncKeyState('V')) { ImGui::Text("Thanks!!why used my app!!"); Sleep(1000); v_Penis = false; }
+                    io.AddInputCharacter(ImGuiKey_GamepadDpadUp);
+                    ImGui::End();
+                }
+                if (v_bExit)
+                {
+                    // exit:
+                    JEApp.ClearFreeMemory();
+                    ImGui::Begin("EXIT");
+                    ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "\n::WARNING!!!::\n\nSETTINGS NOT SAVED!!\nUSER DATA WILL BE  LOST!!\n");
+                    if (ImGui::MenuItem("SAVE AND EXIT", "", &v_bExit, true)) { ImGui::Text("Thanks!!why used my app!!"); WriteConfigJE.close(); Sleep(1000); exit(0); }
+                    if (ImGui::MenuItem("BACK", "", &v_bExit, true)) { v_bExit = false; }
+                    ImGui::End();
+                }
+                ImGui::EndMainMenuBar();
+                JEApp.ClearFreeMemory();
+                xController1->GetBatteryState(&b_data, &b_type, &bStrStatus);
+                ImGui::Text("\n\nWELLCOME TO JE!!\nCREATED BY HCPP\n\n\n\n");
+                ImGui::Text(("_____________________________\n\nCONTROLLER_1: " + bStrStatus + "\nTYPE : " + std::to_string(b_type) + "\n_____________________________").c_str());
+                // GLuint gl_id;
+               //  ImLoadImageForGL("Test.jpg", &gl_id, 30, 30);
+                if (xController1->IsConnected() || C_XinputControllerState)
+                {
+                    ImGui::Text("CONTROLLER CONNECTED!!\n\n");
+                    C_XinputControllerState = true;
+                }
+                else
+                {
+                    ImGui::Text("CONTROLLER NOT FOUND!! \nPLEASE PLUG YOUR CONTROLLER!!\n\n");
+                    C_XinputControllerState = false;
+                    //fSndMsg(1);
+                }
+                if (!bShowButtons)
+                {
+                    ImGui::Checkbox("Enable Supported All Gamepads", &Gamepad_enable);
+                    if (ImGui::Button("\tJOYSTICKTEST", ImVec2(170.0f, 50.0f)))
+                    {
+                        fJEFrame = true;
+                        bShowButtons = true;
+                    }
+                    if (ImGui::Button("\tKB EMU", ImVec2(170.0f, 50.0f)))
+                    {
+                        bkb_emuFrame = true;
                     }
                 }
-                ImGui::End();
-            }
-            //button
-            //  detector
-            if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_B) { fB_b = fB_b + 0.1f; if (fB_b > 1.000f) { fB_b = 1.000f; } }
-            if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A) { fB_a = fB_a + 0.1f; if (fB_a > 1.000f) { fB_a = 1.000f; } }
-            if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_X) { fB_x = fB_x + 0.1f; if (fB_x > 1.000f) { fB_x = 1.000f; } }
-            if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_Y) { fB_y = fB_y + 0.1f; if (fB_y > 1.000f) { fB_y = 1.000f; } }
-            if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) { fB_rs = fB_rs + 0.1f; if (fB_rs > 1.000f) { fB_rs = 1.000f; } }
-            if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) { fB_ls = fB_ls + 0.1f; if (fB_ls > 1.000f) { fB_ls = 1.000f; } }
-            if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) { fB_du = fB_du + 0.1f; if (fB_du > 1.000f) { fB_du = 1.000f; } }
-            if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) { fB_dd = fB_dd + 0.1f; if (fB_dd > 1.000f) { fB_dd = 1.000f; } }
-            if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) { fB_dl = fB_dl + 0.1f; if (fB_dl > 1.000f) { fB_dl = 1.000f; } }
-            if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) { fB_dr = fB_dr + 0.1f; if (fB_dr > 1.000f) { fB_dr = 1.000f; } }
-            //
-            if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_B) { fB_b = fB_b - 0.1f; if (fB_b < 0.1f) { fB_b = 0.0f; } }
-            if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_A) { fB_a = fB_a - 0.1f; if (fB_a < 0.1f) { fB_a = 0.0f; } }
-            if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_X) { fB_x = fB_x - 0.1f; if (fB_x < 0.1f) { fB_x = 0.0f; } }
-            if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_Y) { fB_y = fB_y - 0.1f; if (fB_y < 0.1f) { fB_y = 0.0f;} }
-            if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_RIGHT_SHOULDER) { fB_rs = fB_rs - 0.1f; if (fB_rs < 0.1f) { fB_rs = 0.0f;
-            } }
-            if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_LEFT_SHOULDER) { fB_ls = fB_ls - 0.1f; if (fB_ls < 0.1f) { fB_ls = 0.0f;
-            } }
-            if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_DPAD_UP) { fB_du = fB_du - 0.1f; if (fB_du < 0.1f) { fB_du = 0.0f;
-            } }
-            if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_DPAD_DOWN) { fB_dd = fB_dd - 0.1f; if (fB_dd < 0.1f) { fB_dd = 0.0f;
-            } }
-            if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_DPAD_LEFT) { fB_dl = fB_dl - 0.1f; if (fB_dl < 0.1f) { fB_dl = 0.0f;
-            } }
-            if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_DPAD_RIGHT) { fB_dr = fB_dr - 0.1f; if (fB_dr < 0.1f) { fB_dr = 0.0f; } }
-            //
-            if (C_XinputControllerState)
-            {
-                fJEFrame = true;
-            }
-            if (fJEFrame)
-            {
-
                 //
-                if (GetAsyncKeyState(VK_LEFT))
+               // ImGui::ColorButton("JoyStickTest", ImVec4(0.90f, 0.65f, 0.65f, 0.45f),1,ImVec2(100.0f,50.0f));
+                if (bkb_emuFrame)
                 {
-                    df = df + 0.1f;
-                    if (df > 100.0f)
+                    ImGui::Begin("KEYBOARD EMU", &bkb_emuFrame);
+                    ImGui::TextColored(ImVec4(1.0f, 0.10f, 0.50f, 1.0f), "Kb_EMU - Emulator Keyboard with Gamepad!!");
+                    ImGui::InputText("KEY", &fInputBuffer, 10, 0, 0);
+                    buf_0 += fInputBuffer;
+                    if (buf_0.size() > 0)
                     {
-                        df = 100.0f;
+                    
+                    }
+                    ImGui::End();
+                }
+                if (fJEUpdate)
+                {
+                    JEApp.ClearFreeMemory();
+                    // LPBINDSTATUSCALLBACK st_b;
+                    const TCHAR dURL[] = _T("https://hcpp20334.github.io/update/JE_x64_OpenGLv1.0.7SSE4.2cpp20_Release.zip");
+                    const TCHAR dFllePath[] = _T("JE_x64_OpenGLv1.0.7SSE4.2cpp20_Release.zip");
+                    int64_t fDwChannel_0 = URLDownloadToFile(NULL, NULL, dFllePath, 0, NULL);
+                    static bool v_bDown = false;
+                    static bool v_bStatus = false;
+                    std::string btn_name = "DOWNLOAD";
+                    ImGui::Begin("\tUPDATE CENTER", &fJEUpdate, ImGuiWindowFlags_NoCollapse);
+                    ImGui::Text("UPDATE CENTER - UPDATE JE TO GITHUB SERVER");
+                    // std::cout << st_b << std::endl;
+                    if (ImGui::Button((btn_name).c_str(), ImVec2(100.f, 50.0f)))
+                    {
+                        btn_name = "CONNECTING..";
+                        Sleep(13);
+                        v_bDown = true;
+                    }
+                    if (!v_bStatus)
+                    {
+
+                        ImGui::Text(("UPDATE FATAL ERROR!!" + std::to_string(fDwChannel_0)).c_str());
+                    }
+                    if (v_bStatus)
+                    {
+                        btn_name = "DOWNLOAD OK";
+                        ImGui::Text("UPDATE SUCCEEDED!\t\t\nSAVED TO: ./JEx64_OpenGL3_SSE4.2cpp20");
+                        Sleep(13);
+                        btn_name = "DOWNLOAD";
+                        v_bDown = false;
+                    }
+                    if (v_bDown)
+                    {
+                        fDwChannel_0 = URLDownloadToFile(NULL, dURL, dFllePath, 0, NULL);
+                        if (SUCCEEDED(fDwChannel_0))
+                        {
+                            v_bStatus = true;
+
+                            Sleep(3000);
+                            v_bDown = false;
+
+                        }
+                        if (FAILED(fDwChannel_0))
+                        {
+                            v_bStatus = false;
+                            Sleep(1000);
+                            v_bDown = false;
+
+                        }
+                    }
+                    ImGui::End();
+                }
+                if (Gamepad_enable)
+                {
+                    //ImGui::GetKeyIndex()
+                }
+                if (!Gamepad_enable)
+                {
+                    //button
+                    //  detector
+                    fLX = (xController1->GetState().Gamepad.sThumbLX / 100);
+                    fLY = (xController1->GetState().Gamepad.sThumbLY / 100);
+                    fRX = (xController1->GetState().Gamepad.sThumbRX / 100);
+                    fRY = (xController1->GetState().Gamepad.sThumbRY / 100);
+                    fLT = (xController1->GetState().Gamepad.bLeftTrigger);
+                    fRT = (xController1->GetState().Gamepad.bRightTrigger);
+                    if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_B) { fB_b = fB_b + 0.1f; if (fB_b > 1.000f) { fB_b = 1.000f; } }
+                    if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A) { fB_a = fB_a + 0.1f; if (fB_a > 1.000f) { fB_a = 1.000f; } }
+                    if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_X) { fB_x = fB_x + 0.1f; if (fB_x > 1.000f) { fB_x = 1.000f; } }
+                    if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_Y) { fB_y = fB_y + 0.1f; if (fB_y > 1.000f) { fB_y = 1.000f; } }
+                    if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) { fB_rs = fB_rs + 0.1f; if (fB_rs > 1.000f) { fB_rs = 1.000f; } }
+                    if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) { fB_ls = fB_ls + 0.1f; if (fB_ls > 1.000f) { fB_ls = 1.000f; } }
+                    if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) { fB_du = fB_du + 0.1f; if (fB_du > 1.000f) { fB_du = 1.000f; } }
+                    if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) { fB_dd = fB_dd + 0.1f; if (fB_dd > 1.000f) { fB_dd = 1.000f; } }
+                    if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) { fB_dl = fB_dl + 0.1f; if (fB_dl > 1.000f) { fB_dl = 1.000f; } }
+                    if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) { fB_dr = fB_dr + 0.1f; if (fB_dr > 1.000f) { fB_dr = 1.000f; } }
+                    if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_START) { b_Start = true; }
+                    if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_BACK) { b_Back = true; }
+                    //
+                    if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_B) { fB_b = fB_b - 0.1f; if (fB_b < 0.1f) { fB_b = 0.0f; } }
+                    if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_A) { fB_a = fB_a - 0.1f; if (fB_a < 0.1f) { fB_a = 0.0f; } }
+                    if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_X) { fB_x = fB_x - 0.1f; if (fB_x < 0.1f) { fB_x = 0.0f; } }
+                    if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_Y) { fB_y = fB_y - 0.1f; if (fB_y < 0.1f) { fB_y = 0.0f; } }
+                    if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_RIGHT_SHOULDER) {
+                        fB_rs = fB_rs - 0.1f; if (fB_rs < 0.1f) {
+                            fB_rs = 0.0f;
+                        }
+                    }
+                    if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_LEFT_SHOULDER) {
+                        fB_ls = fB_ls - 0.1f; if (fB_ls < 0.1f) {
+                            fB_ls = 0.0f;
+                        }
+                    }
+                    if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_DPAD_UP) {
+                        fB_du = fB_du - 0.1f; if (fB_du < 0.1f) {
+                            fB_du = 0.0f;
+                        }
+                    }
+                    if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_DPAD_DOWN) {
+                        fB_dd = fB_dd - 0.1f; if (fB_dd < 0.1f) {
+                            fB_dd = 0.0f;
+                        }
+                    }
+                    if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_DPAD_LEFT) {
+                        fB_dl = fB_dl - 0.1f; if (fB_dl < 0.1f) {
+                            fB_dl = 0.0f;
+                        }
+                    }
+                    if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_DPAD_RIGHT) { fB_dr = fB_dr - 0.1f; if (fB_dr < 0.1f) { fB_dr = 0.0f; } }
+                    if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_START) { b_Start = false; }
+                    if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_BACK) { b_Back = false; }
+                }
+                //
+                if (fJEFrame)
+                {
+
+                    //
+                    if (GetAsyncKeyState(VK_LEFT))
+                    {
+                        df = df + 0.1f;
+                        if (df > 100.0f)
+                        {
+                            df = 100.0f;
+                        }
+                    }
+                    else
+                    {
+                        df = df - 0.1f;
+                        if (df < 0.0f)
+                        {
+                            df = 0.0f;
+                        }
+                    }JEApp.ClearFreeMemory();
+                    //bShowButtons = false;
+                    ImGui::Text(" BUTTONS ");
+                    ImGui::MenuItem("START", "", &b_Start, b_Start);
+                    ImGui::MenuItem("BACK", "", &b_Back, b_Back);
+                    ImGui::SliderFloat("A", &fB_a, 0.0f, 1.0f);
+                    ImGui::SliderFloat("X", &fB_x, 0.0f, 1.0f);
+                    ImGui::SliderFloat("Y", &fB_y, 0.0f, 1.0f);
+                    ImGui::SliderFloat("B", &fB_b, 0.0f, 1.0f);
+                    ImGui::SliderFloat("RB", &fB_rs, 0.0f, 1.0f);
+                    ImGui::SliderFloat("LB", &fB_ls, 0.0f, 1.0f);                  // Edit 1 float using a slider from 0.0f to 1.0f
+                    ImGui::SliderFloat("UP", &fB_du, 0.0f, 1.0f);
+                    ImGui::SliderFloat("Dowm", &fB_dd, 0.0f, 1.0f);
+                    ImGui::SliderFloat("Left", &fB_dl, 0.0f, 1.0f);                  // Edit 1 float using a slider from 0.0f to 1.0f
+                    ImGui::SliderFloat("Right", &fB_dr, 0.0f, 1.0f);
+                    ImGui::Text(" AXIS ");
+                    ImGui::SliderFloat("LX", &fLX, -327.0f, 327.0f);
+                    ImGui::SliderFloat("LY", &fLY, -327.0f, 327.0f);
+                    ImGui::SliderFloat("RY", &fRY, -327.0f, 327.0f);
+                    ImGui::SliderFloat("RX", &fRX, -327.0f, 327.0f);
+                    ImGui::SliderFloat("LT", &fLT, 0.0f, 255.0f);                  // Edit 1 float using a slider from 0.0f to 1.0f
+                    ImGui::SliderFloat("RT", &fRT, 0.0f, 255.0f);
+                    ImGui::Checkbox("Lmotor", &fL_motor);
+                    ImGui::Checkbox("Rmotor", &fR_motor);
+                    if (v_bInvertVibValue)
+                    {
+                        //WriteConfigJE.is_open();
+
+                        xController1->Vibrate(v_Lmotor, v_Rmotor);
+                    }
+                    else
+                    {
+                        xController1->Vibrate((v_Lmotor * -1), (v_Rmotor * -1));
+
+                    }
+
+                    if (fR_motor)
+                    {
+                        // ImGui::InputInt("Rduration", &v_Rmotor, 1, 100);
+                        ImGui::SliderInt("Rduration", &v_Rmotor, 0.0f, 1000.0f);
+                    }
+                    if (fL_motor)
+                    {
+                        ImGui::SliderInt("Lduration", &v_Lmotor, 0.0f, 1000.0f);
+                        //ImGui::InputInt("Lduration", &v_Lmotor, 1, 100);
+                    }
+                    if (!fL_motor || !fR_motor)
+                    {
+                        v_Lmotor = 0;
+                        v_Rmotor = 0;
+                    }
+                    if (ImGui::Button("Back to menu", ImVec2(150.0f, 60.0f)))                           // Buttons return true when clicked (most widgets return true when edited/activated)
+                    {
+                        fJEFrame = false;
+                        bShowButtons = false;
                     }
                 }
-                else
-                {
-                    df = df - 0.1f;
-                    if (df < 0.0f)
-                    {
-                        df = 0.0f;
-                    }
-                }JEApp.ClearFreeMemory();
-               //bShowButtons = false;
-                ImGui::Text(" BUTTONS ");
-                ImGui::SliderFloat("A", &fB_a, 0.0f, 1.0f);
-                ImGui::SliderFloat("X", &fB_x, 0.0f, 1.0f);
-                ImGui::SliderFloat("Y", &fB_y, 0.0f, 1.0f);
-                ImGui::SliderFloat("B", &fB_b, 0.0f, 1.0f);
-                ImGui::SliderFloat("RB", &fB_rb, 0.0f, 1.0f);
-                ImGui::SliderFloat("LB", &fB_lb, 0.0f, 1.0f);                  // Edit 1 float using a slider from 0.0f to 1.0f
-                ImGui::SliderFloat("UP", &fB_du, 0.0f, 1.0f);
-                ImGui::SliderFloat("Dowm", &fB_dd, 0.0f, 1.0f);
-                ImGui::SliderFloat("Left", &fB_dl, 0.0f, 1.0f);                  // Edit 1 float using a slider from 0.0f to 1.0f
-                ImGui::SliderFloat("Right", &fB_dr, 0.0f, 1.0f);
-                ImGui::Text(" AXIS ");
-                ImGui::SliderFloat("LX", &fLX, 0.0f, 1.0f);
-                ImGui::SliderFloat("RX", &fLY, 0.0f, 1.0f);
-                ImGui::SliderFloat("LY", &fRX, 0.0f, 1.0f);
-                ImGui::SliderFloat("RY", &fRY, 0.0f, 1.0f);
-                ImGui::SliderFloat("LT", &fLT, 0.0f, 1.0f);                  // Edit 1 float using a slider from 0.0f to 1.0f
-                ImGui::SliderFloat("RT", &fRT, 0.0f, 1.0f);
-                ImGui::Checkbox("Lmotor", &fL_motor);
-                ImGui::Checkbox("Rmotor", &fR_motor);
-                if (v_bInvertVibValue)
-                {
-                    //WriteConfigJE.is_open();
-                 
-                    xController1->Vibrate(v_Lmotor, v_Rmotor);
-                }
-                else
-                {
-                    xController1->Vibrate((v_Lmotor * -1), (v_Rmotor * -1));
-                   
-                }
+                // static bool bCPUTest = false;
+                 //ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+                 // io.Fonts->AddFontFromFileTTF("./WhiteRabbit.ttf", 15.0f);
+                ImGui::Begin("g", &fJEFrame, ImGuiWindowFlags_NoTitleBar);
+                ImGui::SetWindowPos(ImVec2(14.0f, 480.0f));
+                ImGui::SetWindowSize(ImVec2(377.0f, 40.0f));
+                ImGui::Text(("BULID: 1.0.8 (x64) OpenGL3 SSE4.2_cpp20 \n[FPS:" + std::to_string((int64_t)io.Framerate) + " |MEM:" + std::to_string((int64_t)(fDataMemUsage() / 1024) / 1024) + "MiB]").c_str());
+                ImGui::End();
+                ImGui::SameLine();
                 
-                if (fR_motor)
-                {
-                    ImGui::InputInt("Rduration", &v_Rmotor, 1, 100);
-                }
-                if (fL_motor)
-                {
-                    ImGui::InputInt("Lduration", &v_Lmotor, 1, 100);
-                }
-                if (!fL_motor || !fR_motor)
-                {
-                    v_Lmotor = 0;
-                    v_Rmotor = 0;
-                }
-                if (ImGui::Button("Back to menu",ImVec2(150.0f,60.0f)))                           // Buttons return true when clicked (most widgets return true when edited/activated)
-                {
-                    fJEFrame = false;
-                    bShowButtons = false;
-                }
-            }
-           // static bool bCPUTest = false;
-            //ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-            // io.Fonts->AddFontFromFileTTF("./WhiteRabbit.ttf", 15.0f);
-            ImGui::Begin("g",&fJEFrame, ImGuiWindowFlags_NoTitleBar);
-            ImGui::SetWindowPos(ImVec2(14.0f, 480.0f));
-            ImGui::SetWindowSize(ImVec2(377.0f, 40.0f));
-            ImGui::Text(("BULID: 1.0.8 (x64) OpenGL3 SSE4.2_cpp20 \n[FPS:" + std::to_string((int64_t)io.Framerate) + " |MEM:" + std::to_string((int64_t)(fDataMemUsage() / 1024) / 1024) + "MiB]").c_str());
-            ImGui::End();
-            ImGui::SameLine();
-            ImGui::End();
+                ImGui::End();
+            
         }
         if (fCAboutW)
         {
             ImGui::Begin("\tAbout", &fCAboutW, ImGuiWindowFlags_NoCollapse);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-            ImGui::TextColored(ImVec4(0.0f, 200.0f, 100.0f, 10.0f), (fBuffer0).c_str());
+            ImGui::TextColored(ImVec4(0.0f, 0.50f, 10.0f, 1.0f), (fBuffer0).c_str());
            // ImGui::TextColored(ImVec4(0.0f, 200.0f, 100.0f, 10.0f),( std::to_string(fJ_vendor).c_str()));
             ImGui::Text(("Size Loaded: " + std::to_string((int64_t)fBuffer0.size())).c_str());
            // std::cout << &fJ_vendor << &fJ_rendered << "\n";
@@ -719,7 +862,7 @@ int main(int, char**)
             ImGui::Begin("\tCPU Test", &bCPUTest, ImGuiWindowFlags_NoCollapse);
             
            // ImGui::Text(("cores: " + std::to_string(dDataCPU(3)) + "\nThreads: " + std::to_string(dDataCPU(4))).c_str());
-            ImGui::TextColored(ImVec4(11.8f, 88.1f, 43.0f, 10.f), "Test CPU");
+            ImGui::TextColored(ImVec4(0.118f, 0.881f, 0.43f, 1.10f), "Test CPU");
             ImGui::Text((std::to_string(v_Cscore)+"\nBuffer: "+ fBuffer_data).c_str());
              //std::cout << "Cycle:" << fT_cpuSpeed << "Score" << v_Cscore << std::endl;
             if (ImGui::Button("TEST"))
@@ -815,7 +958,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
             return 0;
         break;
     case WM_DESTROY:
-        ::PostQuitMessage(0);
+        exit(0);
         return 0;
     }
     return ::DefWindowProcW(hWnd, msg, wParam, lParam);

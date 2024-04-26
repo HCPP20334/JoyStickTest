@@ -5,10 +5,11 @@
 Compiled C++20 x64 SSE4.2 
 Test Gamepad and Emulator Keyboard(alpha)
 ----------
-## JE x64 OpenGL3.0_SSE4.2_cpp20 Build 1.0.5 
-Compiled C++20 SSE4.2 OpenGLL (Visual Studio 2022)
+## UPDATE!! 1.0.8.1
+## JE x64 OpenGL3.0_SSE4.2_cpp20 Build 1.0.8
+Compiled C++20 SSE4.2 OpenGL3.0 (Visual Studio 2022)
 ## Install
-[JE x64 OpenGL3.0_SSE4.2_cpp20 Build 1.0.5 Release](https://github.com/HCPP20334/JoyStickTest/releases/tag/JE_x64_OpenGL " JE x64 OpenGL3.0_SSE4.2_cpp20")
+[JE x64 OpenGL3.0_SSE4.2_cpp20 Build 1.0.8 Release](https://github.com/HCPP20334/JoyStickTest/releases/tag/JE_x64_OpenGL " JE x64 OpenGL3.0_SSE4.2_cpp20")
 
 1. Unpack to Folder all files to Zip file
 2. Check Your CPU to Support SSE4.2

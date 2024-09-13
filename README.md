@@ -6,6 +6,10 @@ Compiled C++20 x64 SSE4.2
 Test Gamepad and Emulator Keyboard(alpha)
 ----------
 ## UPDATE!! 1.0.8.1
+## Intel GPU'S bugs to OpenGL3.0
+-
+![image](https://github.com/user-attachments/assets/fc3e27ca-a323-4ecf-819d-82596425a86f)
+-
 ## JE x64 OpenGL3.0_SSE4.2_cpp20 Build 1.0.8
 Compiled C++20 SSE4.2 OpenGL3.0 (Visual Studio 2022)
 ## Install

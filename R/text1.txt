@@ -1,7 +1,0 @@
- JE build 1.1.5.4 (release) 
- Writein C++ (C++11) MinGW
- ----------------
-  JE used JoyStickAPI (1.0.0)
- ----------------
- github.com/hcpp20334/JoyStickTest
- ----------------

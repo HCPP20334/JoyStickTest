@@ -1,0 +1,29 @@
+ --  JE application crashed!                                                  
+ ** JE.exe  **Address:0xffffffffffffffff                      
+ ** Error Address : 0x4c0240 xController1->GetState().Gamepad.sThumbLX
+ ** Error Address : 0x4c0220 xController1->GetState().Gamepad.sThumbRX
+ ** Error Address : 0x4c0210 xController1->GetState().Gamepad.sThumbRY
+ ** Error Address : 0x4c0230 xController1->GetState().Gamepad.sThumbLY
+fCpu_id:AMD x64 cpu_tick:459585968 22:35:9
+---------------------------------------------
+mem_dwLength:582871133 mem_dwMemoryLoad:0
+mem_ullAvailExtendedVirtual:233
+---------------------------------------------
+mem_ullAvailPageFile:0 mem_ullAvailPhys:0
+mem_ullAvailVirtual:1441792
+---------------------------------------------
+mem_ullTotalPageFile:0 mem_ullTotalPhys:0
+mem_ullTotalVirtual:140722932112289
+---------------------------------------------
+CommitLimit:4797970 CommitTotal:3484590
+CommitPeak:2241336 KernelNonpaged:66825 
+---------------------------------------------
+KernelPaged:130062 KernelTotal:196887
+ PageSize:4096 
+---------------------------------------------
+PhysicalAvailable:2386943 PhysicalTotal:4175378
+ ProcessCount:188 
+---------------------------------------------
+SystemCache:2193787 ThreadCount:2661
+---------------------------------------------
+ FaultingPc:0 FaultingVa:0

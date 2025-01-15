@@ -1,0 +1,33 @@
+# Project: JE
+# Makefile created by Dev-C++ 5.10
+
+CPP      = g++.exe
+CC       = gcc.exe
+WINDRES  = windres.exe
+RES      = JE_private.res
+OBJ      = JE.o $(RES)
+LINKOBJ  = JE.o $(RES)
+LIBS     = -static-libgcc "../../../../../../Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib/libpsapi.a" "../../../../../../Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib/libxinput1_4.a" "../../../../../../Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib/libgdi32.a"
+INCS     = 
+CXXINCS  = 
+BIN      = JE.exe
+CXXFLAGS = $(CXXINCS) -ansi -mtune=native -Ofast -std=gnu++11
+CFLAGS   = $(INCS) -ansi -mtune=native -Ofast -std=gnu++11
+RM       = rm.exe -f
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before $(BIN) all-after
+
+clean: clean-custom
+	${RM} $(OBJ) $(BIN)
+
+$(BIN): $(OBJ)
+	$(CPP) $(LINKOBJ) -o $(BIN) $(LIBS)
+
+JE.o: JE.cpp
+	$(CPP) -c JE.cpp -o JE.o $(CXXFLAGS)
+
+JE_private.res: JE_private.rc 
+	$(WINDRES) -i JE_private.rc --input-format=rc -o JE_private.res -O coff 
+

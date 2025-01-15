@@ -20,6 +20,8 @@
 #include <thread>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#include "resource.h"
+#include "Colors.h"
 #pragma comment (lib , "Urlmon.lib")
 uint64_t fDataMemUsage() // Work Function !!! Check Sym RAM to Current Program //
 {
@@ -151,57 +153,25 @@ const GLubyte* fJ_rendered = glGetString(GL_RENDERER);
 void ResetDeviceWGL();
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-static int64_t ld_V(std::string *buff)
+static int64_t ld_V(std::string *buff,std::string* debug_str)
 {
-    float fBr = 0;
-    int64_t fV = 0;
-    int64_t fto_tick = 0;
-    int64_t fto_tick_out = 0;
-    int64_t fJ_stack = 0;
-    std::string fTcpu;
-    std::string fBuffer_fIn = "1234567890abcdef";
-    std::string fBuffer_fOut;
-    int64_t fSizeBuf_f = 0;
-    int64_t fChunkSeed = 0;
-    //
-    //fto_tick = fBuffer_f.size();
-    fSizeBuf_f = fBuffer_fIn.size();
-    //
-    for (int64_t fG = 1; fG > 0; fG++)
+    std::string fBuffer_fIn = "01234567890/,./<>'[{||*&^%$#@@}]";
+    int64_t fBufferSizeOffset = fBuffer_fIn.size();
+    uint64_t InTimeData = GetTickCount64();
+    uint64_t OutTimeData = 0;
+    uint64_t stackPointOut = 0;
+    uint64_t randPointOffset = 0;
+    for (int64_t stackPoint = 0; stackPoint < 1000000; stackPoint++)
     {
-        for (int64_t fGenKey = 1; fGenKey == 1000; fGenKey++)
-        {
-            fChunkSeed++;
-            srand(time(0));
-            if (fChunkSeed > 30) { fChunkSeed = 0; fBuffer_fOut = fBuffer_fOut + "\n"; }
-            fBuffer_fOut = fBuffer_fOut + fBuffer_fIn[rand() * fSizeBuf_f];
-            *buff = fBuffer_fOut;
-        }
-      //  *buff = fBuffer_fOut;
-        Sleep(13);
-        fV++;
-        if (fV > 30)
-        {
-            fV = 0;
-        }
-        if (fV == 30)
-        {
-            fBr++;
-            if (fBr == 100) { ts_window = false; fG = -1;
-            }
-           // fto_tick_out = fBuffer_f.size();
-            if (fJ_stack > 0) { fTcpu = "Very Powerful CPU!!    "; }
-            if (fJ_stack >= 200) { fTcpu = "Very Fast               "; }
-            if (fJ_stack >= 500) { fTcpu = "Fast                    "; }//
-            if (fJ_stack >= 800) { fTcpu = "Very Slow CPU!!    "; }
-            fJ_stack = fto_tick_out - fto_tick;
-          //  std::to_integer()
-            return fJ_stack;
-            
-        }
-        
+        srand(time(0));
+        stackPointOut = stackPoint;
+        randPointOffset = rand() % fBufferSizeOffset;
+        fBuffer_fIn = fBuffer_fIn + fBuffer_fIn[randPointOffset];
+        fBufferSizeOffset = fBuffer_fIn.size();
     }
-    
+    OutTimeData = GetTickCount64();
+    *buff = std::to_string((float)(OutTimeData - InTimeData) / 3.14f);
+    *debug_str = std::to_string(stackPointOut) + " count\nbufferSizeOffset:" + std::to_string((fBufferSizeOffset / 1024)) + " :KiB Loaded";
 }
 bool b_Msg = false;
 uint64_t ImMessage(const char* str_text, const char* title_text)
@@ -218,26 +188,24 @@ uint64_t ImMessage(const char* str_text, const char* title_text)
         return strlen(str_text);
     }
 }
-    
+std::string fStrXorData;
+int64_t fXorData64 = 0;
+int64_t X_xor(bool d0, bool d1) {
+    if (d0) {if (d1) {return 0;}
+    if (!d1) {return 1;}}
+    if (!d0) {if (d1) {return 1;}
+    if (!d1) {return 0;}}
+    if (d1) {if (d0) { return 0;}
+    if (!d0) {return 1;}}
+    if (!d1) {if (d0) {return 1;}
+    if (!d0) {return 0;}}
+}
 int main(int, char**)
 {
-    static std::string fBuffer0 = "## JE - Poweful Gamepad Tester!! Build 1.0.8\n"
-        "## Compile to C++20 (x64)OpenGL3.0 SSE4.2\n\n"
-        "Navigation\n-------------------------------------------\n"
-        " -------------------------------------------\n"
-        "Settings - on / off flags\n"
-        "* Vsync - Limit framerate to 60\n"
-        "* Invert Vibration Value - Fix Bug to Rea\n"
-        "  data to Xinput Emulators\n"
-        "------------------------------------------ -\n"
-        " CPUTest - Test Speed you CPUTest\n"
-        "* Button Test - start CPUTest\n"
-        "------------------------------------------ -\n"
-        "Update - Update Center to Update New Version!!\n"
-        "(NEED THE INTERNET)\n"
-        "------------------------------------------ -\n"
-        "Exit - to Close App\n"
-        "------------------------------------------ -\n";
+    static std::string fBuffer0 = 
+        "Compiled to C++20 GCC (x64)  SSE4.2\n Backend: OpenGL3.3\n\n"
+        "\t\t\t\t\t\tGNU License";
+       
     ImDrawListSplitter JEApp;
     static bool fCAboutW;
     ImVec4 clear_color = ImVec4(0.01f, 0.01f, 0.02f, 0.80f);
@@ -319,8 +287,9 @@ int main(int, char**)
     // Create application window
     ImGui_ImplWin32_EnableDpiAwareness();
     WNDCLASSEXW wc = { sizeof(wc), CS_OWNDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"JE x64", nullptr };
+    wc.hIcon = LoadIcon(wc.hInstance, MAKEINTRESOURCE(103));
     ::RegisterClassExW(&wc);
-    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"JE_x64_OpenGL3_SSE4.2 C++20 Build 1.0.8", WS_OVERLAPPEDWINDOW | WS_EX_TOOLWINDOW |  WS_EX_NOPARENTNOTIFY, 100, 80, 500, 800, nullptr, nullptr, wc.hInstance, nullptr);
+    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"JoyStickTest 1.1 OpenGL3_SSE4.2 (C++20)", WS_OVERLAPPEDWINDOW | WS_EX_TOOLWINDOW |  WS_EX_NOPARENTNOTIFY, 100, 80, 800, 480, nullptr, nullptr, wc.hInstance, nullptr);
 
     // Initialize OpenGL
     if (!CreateDeviceWGL(hwnd, &g_MainWindow))
@@ -369,16 +338,56 @@ int main(int, char**)
     }
     else
     {
-        io.Fonts->AddFontFromFileTTF(".\\WhiteRabbit.ttf", 15.0f);
+        io.Fonts->AddFontFromFileTTF(".\\WhiteRabbit.ttf", 20.0f);//
+    }
+    ImFont* font2 = io.Fonts->AddFontFromFileTTF(".\\WhiteRabbit.ttf", 40.0f);
+    ImFont* font3 = io.Fonts->AddFontFromFileTTF(".\\WhiteRabbit.ttf", 15.0f);
+    std::cout << "[JE_ENGINE] Loaded Font WhiteRabbit.ttf" << std::endl;
+    struct GPU_DATA {
+        std::string E_Brand = (const char*)glGetString(GL_VENDOR);
+        std::string E_Model = (const char*)glGetString(GL_RENDERER);
+        std::string E_GLVer = (const char*)glGetString(GL_VERSION);
+    };
+    GPU_DATA GPU;
+    std::string fD_gpuBrand = GPU.E_Brand;
+    std::string fD_gpuModel = GPU.E_Model;
+    std::string fD_gpuGLVer = GPU.E_GLVer;
+    std::cout << "[JE_ENGINE] OpenGL Driver Loaded" << std::endl;
+    SetColorAMD64(240);
+    std::cout << "" << std::endl;
+    std::cout << "" << "OpenGL Vendor: " << glGetString(GL_VENDOR) << std::endl;
+    std::cout << "" << "OpenGL Renderer: " << glGetString(GL_RENDERER) << std::endl;
+    std::cout << "" << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
+   // std::cout << "" << "OpenGL Shading Language Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+    std::cout << "" << std::endl;
+    int CPUInfo[4] = { -1 };
+    unsigned   nExIds, i = 0;
+    char CPUBrandString[0x40];
+    // Get the information associated with each extended ID.
+    __cpuid(CPUInfo, 0x80000000);
+    nExIds = CPUInfo[0];
+    for (i = 0x80000000; i <= nExIds; ++i)
+    {
+        __cpuid(CPUInfo, i);
+        // Interpret CPU brand string
+        if (i == 0x80000002)
+            memcpy(CPUBrandString, CPUInfo, sizeof(CPUInfo));
+        else if (i == 0x80000003)
+            memcpy(CPUBrandString + 16, CPUInfo, sizeof(CPUInfo));
+        else if (i == 0x80000004)
+            memcpy(CPUBrandString + 32, CPUInfo, sizeof(CPUInfo));
     }
     // Main loop
     bool done = false;
+    std::cout << "[JE_ENGINE] Main Frame Loaded!!" << std::endl;
+    ShowWindow(GetConsoleWindow(),0);
     while (!done)
     {
         // Poll and handle messages (inputs, window resize, etc.)
         // See the WndProc() function below for our to dispatch events to the Win32 backend.
         MSG msg;
         fWFrame = true;
+        bool fB_loadFrame = false;
         while (::PeekMessage(&msg, nullptr, 0U, 0U, PM_REMOVE))
         {
             ::TranslateMessage(&msg);
@@ -397,12 +406,14 @@ int main(int, char**)
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
         {
-           
+           // std::cout << "[JE_ENGINE] Frame Cra" << std::endl;
+            std::exception *d;
+            int64_t a, b;
+          //  std::cout << "ADDR:" << &d << "->" << d << std::endl;
             ImGui::Begin("\tJE x64_OpenGL3_SSE4.2 C++20",&fJEFrame, ImGuiWindowFlags_NoCollapse + ImGuiWindowFlags_NoTitleBar);  
-            
                 // Create a window called "Hello, world!" and append into it.
-                ImGui::SetWindowPos(ImVec2(6.0f, 19.0f));
-                ImGui::SetWindowSize(ImVec2(475.0f, 703.0f));
+                ImGui::SetWindowPos(ImVec2(-1.0f, 25.0f));
+                ImGui::SetWindowSize(ImVec2(800.0f, 480.0f));
                 JEApp.ClearFreeMemory();
                 // ImDrawList* Image;
                 // Image->AddImage()
@@ -417,39 +428,39 @@ int main(int, char**)
                     WriteConfigJE << "fJETheme=0;" << std::endl;
                     // WriteConfigJE.close();
                     ImGuiStyle& style = ImGui::GetStyle();
+                    style.ButtonTextAlign = ImVec2(0.2f, 0.5f);
                     style.WindowRounding = 5.3f;
                     style.FrameRounding = 2.3f;
                     style.ScrollbarRounding = 0;
-                    style.Colors[ImGuiCol_Text] = ImVec4(0.90f, 0.90f, 0.90f, 0.90f);
-                    style.Colors[ImGuiCol_WindowBg] = ImVec4(0.106f, 0.106f, 0.118f, 0.80f);
+                    style.Colors[ImGuiCol_Text] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+                    style.Colors[ImGuiCol_WindowBg] = ImVec4(0.01f, 0.01f, 0.02f, 0.80f);
                     style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
                     style.Colors[ImGuiCol_PopupBg] = ImVec4(0.05f, 0.05f, 0.10f, 0.85f);
-                    style.Colors[ImGuiCol_Border] = ImVec4(0.72f, 0.772f, 0.72f, 0.60f);
+                    style.Colors[ImGuiCol_Border] = ImVec4(0.70f, 0.70f, 0.70f, 0.65f);
                     style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
                     style.Colors[ImGuiCol_FrameBg] = ImVec4(0.00f, 0.00f, 0.01f, 1.00f);
                     style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.90f, 0.80f, 0.80f, 0.40f);
                     style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.90f, 0.65f, 0.65f, 0.45f);
-                    style.Colors[ImGuiCol_TitleBgActive] = ImVec4(1.0f, 0.20f, 0.373f, 1.0f);
-                    style.Colors[ImGuiCol_TitleBg] = ImVec4(1.0f, 0.20f, 0.373f, 0.70f);
-                    style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.004f, 0.016f, 0.035f, 1.0f);
+                    style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.08f, 0.08f, 0.08f, 0.80f);
+                    style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.01f, 0.01f, 0.02f, 0.80f);
                     style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.20f, 0.25f, 0.30f, 0.60f);
-                    style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(1.0f, 0.10f, 0.30f, 1.0f);
-                    style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(1.0f, 0.20f, 0.373f, 1.0f);
+                    style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.55f, 0.53f, 0.55f, 0.51f);
+                    style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.56f, 0.56f, 0.56f, 1.00f);
                     style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.56f, 0.56f, 0.56f, 0.91f);
                     style.Colors[ImGuiCol_CheckMark] = ImVec4(0.90f, 0.90f, 0.90f, 0.83f);
-                    style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.70f, 0.70f, 0.70f, 0.62f);
-                    style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.30f, 0.30f, 0.30f, 0.84f);
-                    style.Colors[ImGuiCol_Button] = ImVec4(1.0f, 0.20f, 0.373f, 0.90f);
+                    style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.70f, 0.70f, 0.70f, 1.0f);
+                    style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.30f, 0.30f, 0.30f, 1.0f);
+                    style.Colors[ImGuiCol_Button] = ImVec4(0.30f, 0.30f, 0.30f, 0.80f);
                     style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.50f, 0.69f, 0.99f, 0.68f);
-                    style.Colors[ImGuiCol_ButtonActive] = ImVec4(1.0f, 0.20f, 0.373f, 0.90f);
-                    style.Colors[ImGuiCol_Header] = ImVec4(1.08f, 1.08f, 1.08f, 1.80f);
-                    style.Colors[ImGuiCol_HeaderHovered] = ImVec4(1.0f, 0.20f, 0.373f, 0.70f);
-                    style.Colors[ImGuiCol_HeaderActive] = ImVec4(1.08f, 1.08f, 1.08f, 1.80f);
+                    style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.80f, 0.50f, 0.50f, 1.00f);
+                    style.Colors[ImGuiCol_Header] = ImVec4(0.30f, 0.69f, 1.00f, 0.53f);
+                    style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.44f, 0.61f, 0.86f, 1.00f);
+                    style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.38f, 0.62f, 0.83f, 1.00f);
                     style.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.00f, 1.00f, 1.00f, 0.85f);
                     style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(1.00f, 1.00f, 1.00f, 0.60f);
                     style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(1.00f, 1.00f, 1.00f, 0.90f);
-                    style.Colors[ImGuiCol_PlotLines] = ImVec4(1.0f, 0.20f, 0.373f, 1.0f);
-                    style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(1.0f, 0.20f, 0.373f, 0.90f);
+                    style.Colors[ImGuiCol_PlotLines] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+                    style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
                     style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
                     style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
                     style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.00f, 0.00f, 1.00f, 0.35f);
@@ -479,20 +490,21 @@ int main(int, char**)
                 //bool ret = LoadTextureFromFile("logo.png", &out_texture, &Ix, &Iy);
                // IM_ASSERT(ret);
                 JEApp.ClearFreeMemory();
+                if (b_vsync) {
+                    Sleep(13);
+                    WriteConfigJE << "fJEVsync=true;" << std::endl;
+                }
+                else {
+                    Sleep(0);
+                    WriteConfigJE << "fJEVsync=false;" << std::endl;
+                }
                 if (v_bSettings)
                 {
                     ImGui::Begin("SETTINGS", &v_bSettings, ImGuiWindowFlags_NoCollapse);
                     JEApp.ClearFreeMemory();
                     // ImGui::Image((void*)(intptr_t)out_texture, ImVec2(Ix, Ix));
                     if (v_bSettings) { v_bSettingsCh_b = true; }
-                    if (b_vsync) {
-                        Sleep(13);
-                        WriteConfigJE << "fJEVsync=true;" << std::endl;
-                    }
-                    else {
-                        Sleep(0);
-                        WriteConfigJE << "fJEVsync=false;" << std::endl;
-                    }
+                    std::string dCPUBrandString = CPUBrandString;
                     //ImGui::Checkbox("AUTO CLEARNING MEMORY(DEBUG)", &v_flagClMemory);
                     ImGui::Text("::: MAIN SETTINGS :::\n\n");
                     ImGui::MenuItem("VSYNC", "", &b_vsync, true);
@@ -503,6 +515,13 @@ int main(int, char**)
                     ImGui::MenuItem("DARK", "1", &bTh_Dark, true);
                     ImGui::MenuItem("LIGHT", "2", &bTh_Light, true);
                     ImGui::MenuItem("CLASSIC", "3", &bTh_Classic, true);
+                    ImGui::Text("_______________________________");
+                    ImGui::PushFont(font3);
+                    ImGui::Text(("CPU:" + dCPUBrandString).c_str());
+                    ImGui::Text(("GPU:" + (fD_gpuModel)).c_str());
+                    ImGui::Text(("GPU GL:" + (fD_gpuGLVer)).c_str());
+                    ImGui::PopFont();
+                    ImGui::Text("_______________________________");
                     ImMessage("Test_00", "Test Window");
                     //  ImGui::SliderInt("Win Volume", &fC_vol, 0, 100, "", 0);
                     if (GetAsyncKeyState(VK_UP) && GetAsyncKeyState(VK_LCONTROL))
@@ -518,8 +537,8 @@ int main(int, char**)
                     {
                         std::ofstream buf("restart.bat");
                         buf.is_open();
-                        buf << "taskkill /im JE_x64_OpenGL3_SSE4.2cpp20.exe>nul\n";
-                        buf << "start ./JE_x64_OpenGL3_SSE4.2cpp20.exe>nul\n";
+                        buf << "taskkill /im JEx64OpenGL.exe>nul\n";
+                        buf << "start ./JEx64OpenGL.exe>nul\n";
                         buf << " del restart.bat>nul" << std::endl;
                         buf << "exit" << std::endl;
                         buf.close();
@@ -594,9 +613,15 @@ int main(int, char**)
                 }
                 ImGui::EndMainMenuBar();
                 JEApp.ClearFreeMemory();
-                xController1->GetBatteryState(&b_data, &b_type, &bStrStatus);
-                ImGui::Text("\n\nWELLCOME TO JE!!\nCREATED BY HCPP\n\n\n\n");
-                ImGui::Text(("_____________________________\n\nCONTROLLER_1: " + bStrStatus + "\nTYPE : " + std::to_string(b_type) + "\n_____________________________").c_str());
+               // xController1->GetBatteryState(&b_data, &b_type, &bStrStatus);
+                if (!fJEFrame)
+                {
+                    ImGui::PushFont(font2);
+                    ImGui::Text("\nWELLCOME TO JOYSTICKTEST!!");
+                    ImGui::PopFont();
+                    ImGui::Text("\nCREATED BY HCPP\n");
+                }
+              // ImGui::Text(("_____________________________\n\nCONTROLLER_1: " + bStrStatus + "\nTYPE : " + std::to_string(b_type) + "\n_____________________________").c_str());
                 // GLuint gl_id;
                //  ImLoadImageForGL("Test.jpg", &gl_id, 30, 30);
                 if (xController1->IsConnected() || C_XinputControllerState)
@@ -606,7 +631,7 @@ int main(int, char**)
                 }
                 else
                 {
-                    ImGui::Text("CONTROLLER NOT FOUND!! \nPLEASE PLUG YOUR CONTROLLER!!\n\n");
+                    ImGui::Text("PLEASE PLUG YOUR CONTROLLER!!\n");
                     C_XinputControllerState = false;
                     //fSndMsg(1);
                 }
@@ -618,31 +643,21 @@ int main(int, char**)
                         fJEFrame = true;
                         bShowButtons = true;
                     }
-                    if (ImGui::Button("\tKB EMU", ImVec2(170.0f, 50.0f)))
+                    ImGui::SameLine();
+                    if (ImGui::Button("\tVisit Github", ImVec2(170.0f, 50.0f)))
                     {
-                        bkb_emuFrame = true;
+                        std::system("start https://github.com/hcpp20334");
                     }
                 }
                 //
                // ImGui::ColorButton("JoyStickTest", ImVec4(0.90f, 0.65f, 0.65f, 0.45f),1,ImVec2(100.0f,50.0f));
-                if (bkb_emuFrame)
-                {
-                    ImGui::Begin("KEYBOARD EMU", &bkb_emuFrame);
-                    ImGui::TextColored(ImVec4(1.0f, 0.10f, 0.50f, 1.0f), "Kb_EMU - Emulator Keyboard with Gamepad!!");
-                    ImGui::InputText("KEY", &fInputBuffer, 10, 0, 0);
-                    buf_0 += fInputBuffer;
-                    if (buf_0.size() > 0)
-                    {
-                    
-                    }
-                    ImGui::End();
-                }
+         
                 if (fJEUpdate)
                 {
                     JEApp.ClearFreeMemory();
                     // LPBINDSTATUSCALLBACK st_b;
-                    const TCHAR dURL[] = _T("https://hcpp20334.github.io/update/JE_x64_OpenGLv1.0.7SSE4.2cpp20_Release.zip");
-                    const TCHAR dFllePath[] = _T("JE_x64_OpenGLv1.0.7SSE4.2cpp20_Release.zip");
+                    const TCHAR dURL[] = _T("https://github.com/HCPP20334/JoyStickTest/releases/download/JE_x64_OpenGL/JEx64OpenGL.SSE4.2.CPP20.zip");
+                    const TCHAR dFllePath[] = _T("JoyStickTest_x64_OpenGL3SSE4.2.zip");
                     int64_t fDwChannel_0 = URLDownloadToFile(NULL, NULL, dFllePath, 0, NULL);
                     static bool v_bDown = false;
                     static bool v_bStatus = false;
@@ -774,25 +789,20 @@ int main(int, char**)
                     //bShowButtons = false;
                     ImGui::Text(" BUTTONS ");
                     ImGui::MenuItem("START", "", &b_Start, b_Start);
+                    ImGui::SameLine();
                     ImGui::MenuItem("BACK", "", &b_Back, b_Back);
-                    ImGui::SliderFloat("A", &fB_a, 0.0f, 1.0f);
-                    ImGui::SliderFloat("X", &fB_x, 0.0f, 1.0f);
-                    ImGui::SliderFloat("Y", &fB_y, 0.0f, 1.0f);
-                    ImGui::SliderFloat("B", &fB_b, 0.0f, 1.0f);
-                    ImGui::SliderFloat("RB", &fB_rs, 0.0f, 1.0f);
-                    ImGui::SliderFloat("LB", &fB_ls, 0.0f, 1.0f);                  // Edit 1 float using a slider from 0.0f to 1.0f
-                    ImGui::SliderFloat("UP", &fB_du, 0.0f, 1.0f);
-                    ImGui::SliderFloat("Dowm", &fB_dd, 0.0f, 1.0f);
-                    ImGui::SliderFloat("Left", &fB_dl, 0.0f, 1.0f);                  // Edit 1 float using a slider from 0.0f to 1.0f
-                    ImGui::SliderFloat("Right", &fB_dr, 0.0f, 1.0f);
-                    ImGui::Text(" AXIS ");
-                    ImGui::SliderFloat("LX", &fLX, -327.0f, 327.0f);
-                    ImGui::SliderFloat("LY", &fLY, -327.0f, 327.0f);
-                    ImGui::SliderFloat("RY", &fRY, -327.0f, 327.0f);
-                    ImGui::SliderFloat("RX", &fRX, -327.0f, 327.0f);
-                    ImGui::SliderFloat("LT", &fLT, 0.0f, 255.0f);                  // Edit 1 float using a slider from 0.0f to 1.0f
-                    ImGui::SliderFloat("RT", &fRT, 0.0f, 255.0f);
+                    ImGui::PushItemWidth(200.0f);
+                    ImGui::SliderFloat("A \t", &fB_a, 0.0f, 1.0f);  ImGui::SameLine(); ImGui::SliderFloat("\tLY", &fLY, -327.0f, 327.0f);
+                    ImGui::SliderFloat("X \t", &fB_x, 0.0f, 1.0f);  ImGui::SameLine(); ImGui::SliderFloat("\tRY", &fRY, -327.0f, 327.0f);
+                    ImGui::SliderFloat("Y \t", &fB_y, 0.0f, 1.0f);  ImGui::SameLine(); ImGui::SliderFloat("\tRX", &fRX, -327.0f, 327.0f);
+                    ImGui::SliderFloat("B \t", &fB_b, 0.0f, 1.0f);  ImGui::SameLine(); ImGui::SliderFloat("\tLX", &fLX, -327.0f, 327.0f);
+                    ImGui::SliderFloat("RB\t", &fB_rs, 0.0f, 1.0f); ImGui::SameLine(); ImGui::SliderFloat("\tRT", &fRT, 0.0f, 255.0f);
+                    ImGui::SliderFloat("LB\t", &fB_ls, 0.0f, 1.0f); ImGui::SameLine(); ImGui::SliderFloat("\tLT", &fLT, 0.0f, 255.0f);
+                    ImGui::SliderFloat("UP\t", &fB_du, 0.0f, 1.0f); ImGui::SameLine(); ImGui::SliderFloat("\t L", &fB_dl, 0.0f, 1.0f);
+                    ImGui::SliderFloat("D \t", &fB_dd, 0.0f, 1.0f); ImGui::SameLine();ImGui::SliderFloat("\t R", &fB_dr, 0.0f, 1.0f);
+                    ImGui::PopItemWidth();
                     ImGui::Checkbox("Lmotor", &fL_motor);
+                    ImGui::SameLine();
                     ImGui::Checkbox("Rmotor", &fR_motor);
                     if (v_bInvertVibValue)
                     {
@@ -809,11 +819,16 @@ int main(int, char**)
                     if (fR_motor)
                     {
                         // ImGui::InputInt("Rduration", &v_Rmotor, 1, 100);
+                        ImGui::PushItemWidth(200.0f);
                         ImGui::SliderInt("Rduration", &v_Rmotor, 0.0f, 1000.0f);
+                        ImGui::SameLine();
+                        ImGui::PopItemWidth();
                     }
                     if (fL_motor)
                     {
+                        ImGui::PushItemWidth(200.0f);
                         ImGui::SliderInt("Lduration", &v_Lmotor, 0.0f, 1000.0f);
+                        ImGui::PopItemWidth();
                         //ImGui::InputInt("Lduration", &v_Lmotor, 1, 100);
                     }
                     if (!fL_motor || !fR_motor)
@@ -830,22 +845,21 @@ int main(int, char**)
                 // static bool bCPUTest = false;
                  //ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
                  // io.Fonts->AddFontFromFileTTF("./WhiteRabbit.ttf", 15.0f);
-                ImGui::Begin("g", &fJEFrame, ImGuiWindowFlags_NoTitleBar);
-                ImGui::SetWindowPos(ImVec2(14.0f, 480.0f));
-                ImGui::SetWindowSize(ImVec2(377.0f, 40.0f));
-                ImGui::Text(("BULID: 1.0.8 (x64) OpenGL3 SSE4.2_cpp20 \n[FPS:" + std::to_string((int64_t)io.Framerate) + " |MEM:" + std::to_string((int64_t)(fDataMemUsage() / 1024) / 1024) + "MiB]").c_str());
-                ImGui::End();
-                ImGui::SameLine();
-                
+                ImGui::Text(("BULID: 1.1 (x64) (OpenGL3.3SSE4.2(C++20 GCC)) \nGPU:" + (fD_gpuModel)+" FPS:" + std::to_string((int64_t)io.Framerate) + " \n MEM : " + std::to_string((int64_t)(fDataMemUsage() / 1024) / 1024) + "MiB]").c_str());
+           
                 ImGui::End();
             
         }
         if (fCAboutW)
         {
-            ImGui::Begin("\tAbout", &fCAboutW, ImGuiWindowFlags_NoCollapse);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-            ImGui::TextColored(ImVec4(0.0f, 0.50f, 10.0f, 1.0f), (fBuffer0).c_str());
-           // ImGui::TextColored(ImVec4(0.0f, 200.0f, 100.0f, 10.0f),( std::to_string(fJ_vendor).c_str()));
-            ImGui::Text(("Size Loaded: " + std::to_string((int64_t)fBuffer0.size())).c_str());
+            ImGui::Begin("\tAbout", &fCAboutW, ImGuiWindowFlags_NoCollapse);  
+            ImGui::PushFont(font2);
+            ImGui::TextColored(ImVec4(0.20f, 1.0f, 0.40f,1.0f), "JOYSTICKTEST");//Build 1.1\n
+            ImGui::PopFont();
+            ImGui::PushFont(font3);
+            ImGui::TextColored(ImVec4(0.20f, 1.0f, 0.40f, 1.0f), "Build 1.1\n");//Build 1.1\n
+            ImGui::PopFont();
+            ImGui::TextColored(ImVec4(0.20f, 1.0f, 0.40f, 1.0f),"COMPILED C++20 (GCC) Visual Studio 2022 x64\nBackendAPI: OpenGL3.3\nInstruction Set:SSE4.2,x64,IA-64");
            // std::cout << &fJ_vendor << &fJ_rendered << "\n";
             if (ImGui::Button("OK"))
                 fCAboutW = false;
@@ -859,26 +873,28 @@ int main(int, char**)
             static int64_t fV = 0;
             static int64_t fc_0 = 0;
             static bool cp_state = false;
+            std::string fDebugData;
             ImGui::Begin("\tCPU Test", &bCPUTest, ImGuiWindowFlags_NoCollapse);
-            
-           // ImGui::Text(("cores: " + std::to_string(dDataCPU(3)) + "\nThreads: " + std::to_string(dDataCPU(4))).c_str());
-            ImGui::TextColored(ImVec4(0.118f, 0.881f, 0.43f, 1.10f), "Test CPU");
-            ImGui::Text((std::to_string(v_Cscore)+"\nBuffer: "+ fBuffer_data).c_str());
-             //std::cout << "Cycle:" << fT_cpuSpeed << "Score" << v_Cscore << std::endl;
-            if (ImGui::Button("TEST"))
-            {
-                v_Cscore = ld_V(&fBuffer_data);
-   
-            }
-            if (ImGui::Button("Close"))
 
-                bCPUTest = false;
+            // ImGui::Text(("cores: " + std::to_string(dDataCPU(3)) + "\nThreads: " + std::to_string(dDataCPU(4))).c_str());
+            ImGui::TextColored(ImVec4(0.118f, 0.881f, 0.43f, 1.10f), "Test CPU");
+            ImGui::PushFont(font2);
+            ImGui::Text(("\t\t" + fBuffer_data).c_str());
+            ImGui::PopFont();
+            ImGui::Text(("\ninfo:\n" + fDebugData).c_str());
+            //std::cout << "Cycle:" << fT_cpuSpeed << "Score" << v_Cscore << std::endl;
+            ImGui::SetCursorPosX((ImGui::GetWindowWidth() - 130) / 2);
+            if (ImGui::Button("BENCH", ImVec2(130.0f, 40.0f)))
+            {
+                v_Cscore = ld_V(&fBuffer_data, &fDebugData);
+
+            }
             ImGui::End();
         }
         // 3. Show another simple window.
         
         // Rendering
-        ImGui::Render();
+      ImGui::Render();
         glViewport(0, 0, 400, 800);
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);

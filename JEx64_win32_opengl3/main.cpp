@@ -15,7 +15,7 @@
 #include "dSys.h"
 #include <fstream>
 #include <Psapi.h>
-#include <urlmon.h>
+#include <urlmon.h>//
 #include <clocale>
 #include <thread>
 #define STB_IMAGE_IMPLEMENTATION
@@ -736,7 +736,7 @@ int main(int, char**)
                     ImGui::PushFont(font2);
                     ImGui::SetCursorPosX(30.0f);
                     ImGui::Text("GPU TEST OpenGL");
-                    ImGui::PopFont();
+                    ImGui::PopFont();//
                     if (stopBench)
                     {
                         ImGui::PushFont(font2);

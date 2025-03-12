@@ -198,12 +198,12 @@ uint64_t ImMessage(const char* str_text, const char* title_text)
 }
 static bool kButton(bool state, bool bSameLine,std::string value) {
     if (state) {
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 0.0f, 0.33f, 1.0f));
     }
     if (!state) {
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.30f, 0.30f, 0.30f, 0.80f));
     }
-    ImGui::Button((value).c_str());
+    ImGui::Button((value).c_str(),ImVec2(50,50));
     ImGui::PopStyleColor();
     if (bSameLine) {
         ImGui::SameLine();

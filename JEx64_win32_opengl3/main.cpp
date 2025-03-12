@@ -23,6 +23,7 @@
 #include "resource.h"
 #include <sysinfoapi.h>
 #include "Colors.h"
+#include <unordered_map>
 #pragma comment (lib , "Urlmon.lib")
 uint64_t fDataMemUsage() // Work Function !!! Check Sym RAM to Current Program //
 {
@@ -33,7 +34,6 @@ uint64_t fDataMemUsage() // Work Function !!! Check Sym RAM to Current Program /
 }
 
 #pragma once
-
 
 
 // Simple helper function to load an image into a OpenGL texture with common settings
@@ -146,10 +146,14 @@ void CleanupDeviceWGL(HWND hWnd, WGL_WindowData* data);
 static bool bCPUTest = false;
 static bool ts_window = true;
 static bool bGPUTest = false;
+static bool bKbTest = false;
 bool renderFrame = false;
 static bool fCAboutW;
 //
 uint64_t id = 0;
+int64_t  idx = 0;
+
+
 //
 const GLubyte* fJ_vendor = glGetString(GL_VENDOR);// Returns the vendor
 const GLubyte* fJ_rendered = glGetString(GL_RENDERER);
@@ -159,7 +163,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 static int64_t ld_V(std::string *buff,std::string* debug_str)
 {
-    std::string fBuffer_fIn = "01234567890/,./<>'[{||*&^%$#@@}]";
+    std::string fBuffer_fIn = "01234567890/,./<>[{||*&^%$#@@}]";
     int64_t fBufferSizeOffset = fBuffer_fIn.size();
     uint64_t InTimeData = GetTickCount64();
     uint64_t OutTimeData = 0;
@@ -192,25 +196,76 @@ uint64_t ImMessage(const char* str_text, const char* title_text)
         return strlen(str_text);
     }
 }
-
-std::string fStrXorData;
-int64_t fXorData64 = 0;
-int64_t X_xor(bool d0, bool d1) {
-    if (d0) {if (d1) {return 0;}
-    if (!d1) {return 1;}}
-    if (!d0) {if (d1) {return 1;}
-    if (!d1) {return 0;}}
-    if (d1) {if (d0) { return 0;}
-    if (!d0) {return 1;}}
-    if (!d1) {if (d0) {return 1;}
-    if (!d0) {return 0;}}
+static bool kButton(bool state, bool bSameLine,std::string value) {
+    if (state) {
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+    }
+    if (!state) {
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.30f, 0.30f, 0.30f, 0.80f));
+    }
+    ImGui::Button((value).c_str());
+    ImGui::PopStyleColor();
+    if (bSameLine) {
+        ImGui::SameLine();
+    }
+    return state;
 }
 class ClockSystem {
 public:
         uint64_t fC_second = fLTime(2);
         
 };
+static std::string SwapTextStr(int64_t code) {
+    return std::to_string((char)code);
+}
+void StyleColorsDracula(ImGuiStyle* dst) {
+    ImGuiStyle* style = dst ? dst : &ImGui::GetStyle();
+    ImVec4* colors = style->Colors;
 
+    colors[ImGuiCol_WindowBg] = ImVec4{ 0.1f, 0.1f, 0.13f, 1.0f };
+    colors[ImGuiCol_MenuBarBg] = ImVec4{ 0.16f, 0.16f, 0.21f, 1.0f };
+    colors[ImGuiCol_Border] = ImVec4{ 0.44f, 0.37f, 0.61f, 0.29f };
+    colors[ImGuiCol_BorderShadow] = ImVec4{ 0.0f, 0.0f, 0.0f, 0.24f };
+    colors[ImGuiCol_Text] = ImVec4{ 1.0f, 1.0f, 1.0f, 1.0f };
+    colors[ImGuiCol_TextDisabled] = ImVec4{ 0.5f, 0.5f, 0.5f, 1.0f };
+    colors[ImGuiCol_Header] = ImVec4{ 0.13f, 0.13f, 0.17, 1.0f };
+    colors[ImGuiCol_HeaderHovered] = ImVec4{ 0.19f, 0.2f, 0.25f, 1.0f };
+    colors[ImGuiCol_HeaderActive] = ImVec4{ 0.16f, 0.16f, 0.21f, 1.0f };
+    colors[ImGuiCol_Button] = ImVec4{ 0.13f, 0.13f, 0.17, 1.0f };
+    colors[ImGuiCol_ButtonHovered] = ImVec4{ 0.19f, 0.2f, 0.25f, 1.0f };
+    colors[ImGuiCol_ButtonActive] = ImVec4{ 0.16f, 0.16f, 0.21f, 1.0f };
+    colors[ImGuiCol_CheckMark] = ImVec4{ 0.74f, 0.58f, 0.98f, 1.0f };
+    colors[ImGuiCol_PopupBg] = ImVec4{ 0.1f, 0.1f, 0.13f, 0.92f };
+    colors[ImGuiCol_SliderGrab] = ImVec4{ 0.44f, 0.37f, 0.61f, 0.54f };
+    colors[ImGuiCol_SliderGrabActive] = ImVec4{ 0.74f, 0.58f, 0.98f, 0.54f };
+    colors[ImGuiCol_FrameBg] = ImVec4{ 0.13f, 0.13, 0.17, 1.0f };
+    colors[ImGuiCol_FrameBgHovered] = ImVec4{ 0.19f, 0.2f, 0.25f, 1.0f };
+    colors[ImGuiCol_FrameBgActive] = ImVec4{ 0.16f, 0.16f, 0.21f, 1.0f };
+    colors[ImGuiCol_Tab] = ImVec4{ 0.16f, 0.16f, 0.21f, 1.0f };
+    colors[ImGuiCol_TabHovered] = ImVec4{ 0.24, 0.24f, 0.32f, 1.0f };
+    colors[ImGuiCol_TabActive] = ImVec4{ 0.2f, 0.22f, 0.27f, 1.0f };
+    colors[ImGuiCol_TabUnfocused] = ImVec4{ 0.16f, 0.16f, 0.21f, 1.0f };
+    colors[ImGuiCol_TabUnfocusedActive] = ImVec4{ 0.16f, 0.16f, 0.21f, 1.0f };
+    colors[ImGuiCol_TitleBg] = ImVec4{ 0.16f, 0.16f, 0.21f, 1.0f };
+    colors[ImGuiCol_TitleBgActive] = ImVec4{ 0.16f, 0.16f, 0.21f, 1.0f };
+    colors[ImGuiCol_TitleBgCollapsed] = ImVec4{ 0.16f, 0.16f, 0.21f, 1.0f };
+    colors[ImGuiCol_ScrollbarBg] = ImVec4{ 0.1f, 0.1f, 0.13f, 1.0f };
+    colors[ImGuiCol_ScrollbarGrab] = ImVec4{ 0.16f, 0.16f, 0.21f, 1.0f };
+    colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4{ 0.19f, 0.2f, 0.25f, 1.0f };
+    colors[ImGuiCol_ScrollbarGrabActive] = ImVec4{ 0.24f, 0.24f, 0.32f, 1.0f };
+    colors[ImGuiCol_Separator] = ImVec4{ 0.44f, 0.37f, 0.61f, 1.0f };
+    colors[ImGuiCol_SeparatorHovered] = ImVec4{ 0.74f, 0.58f, 0.98f, 1.0f };
+    colors[ImGuiCol_SeparatorActive] = ImVec4{ 0.84f, 0.58f, 1.0f, 1.0f };
+    colors[ImGuiCol_ResizeGrip] = ImVec4{ 0.44f, 0.37f, 0.61f, 0.29f };
+    colors[ImGuiCol_ResizeGripHovered] = ImVec4{ 0.74f, 0.58f, 0.98f, 0.29f };
+    colors[ImGuiCol_ResizeGripActive] = ImVec4{ 0.84f, 0.58f, 1.0f, 0.29f };
+#ifdef IMGUI_HAS_DOCK
+    colors[ImGuiCol_DockingPreview] = ImVec4{ 0.44f, 0.37f, 0.61f, 1.0f };
+#endif
+}
+static bool bTh_Classic = true;
+static bool bTh_Dark = false;
+static bool bTh_Light = false;
 int main(int, char**)
 {
 
@@ -291,10 +346,8 @@ int main(int, char**)
     static bool v_Penis = false;
     static bool fFontsState;
     static bool v_bThemeJE;
-    static bool bTh_Classic;
-    static bool bTh_Dark;
-    static bool bTh_Light;
     static bool Gamepad_enable;
+    static bool fExitWindow = false;
     //
     static std::string filestr;
     static std::string fStrMsgBuf;
@@ -374,6 +427,7 @@ int main(int, char**)
     {
         io.Fonts->AddFontFromFileTTF(".\\WhiteRabbit.ttf", 20.0f);//
     }
+    ImFont* font1 = io.Fonts->AddFontFromFileTTF(".\\WhiteRabbit.ttf", 20.0f);
     ImFont* font2 = io.Fonts->AddFontFromFileTTF(".\\WhiteRabbit.ttf", 40.0f);
     ImFont* font3 = io.Fonts->AddFontFromFileTTF(".\\WhiteRabbit.ttf", 15.0f);
     struct GPU_DATA {
@@ -421,6 +475,7 @@ int main(int, char**)
     IM_ASSERT(load);
     IM_ASSERT(amdLogo);
     static bool dgwnd = false;
+    static std::string dCPUBrandString = CPUBrandString;
     while (!done)
     {
 
@@ -459,15 +514,35 @@ int main(int, char**)
                 JEApp.ClearFreeMemory();
                 std::ofstream WriteConfigJE("JE_CONFIG.TXT");
                 // ImGui::Begin("THEME EDITOR", &v_bThemeJE);
+                ImGuiStyle& style = ImGui::GetStyle();
+                if (bTh_Classic) {
+                    bTh_Dark = false;
+                    bTh_Light = false;
+                    bTh_Classic = true;
+                    // ImGui::StyleColorsClassic(); fStrMsgBuf = "Theme 1 Apply!!";  WriteConfigJE.is_open();
+                    StyleColorsDracula(&style);
+                    WriteConfigJE << "fJETheme=1;" << std::endl;
+                    //WriteConfigJE.close();
+                }
+                if (bTh_Light) {
+                    bTh_Dark = false;
+                    bTh_Classic = false;
+                    bTh_Light = true;
+                    ImGui::StyleColorsLight();
+                    WriteConfigJE.is_open();
+                    WriteConfigJE << "fJETheme=2;" << std::endl;
+                    //WriteConfigJE.close();
+                }
                 if (bTh_Dark)
                 {
                     bTh_Light = false;
                     bTh_Classic = false;
+                    bTh_Dark = true;
                     fStrMsgBuf = "Theme 0";
                     WriteConfigJE.is_open();
                     WriteConfigJE << "fJETheme=0;" << std::endl;
                     //WriteConfigJE.close();
-                    ImGuiStyle& style = ImGui::GetStyle();
+                    
                     style.ButtonTextAlign = ImVec2(0.2f, 0.5f);
                     style.WindowRounding = 5.3f;
                     style.FrameRounding = 2.3f;
@@ -504,31 +579,11 @@ int main(int, char**)
                     style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
                     style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
                     style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.00f, 0.00f, 1.00f, 0.35f);
+                  //  style.Colors[ImGuiCol_WindowShadow] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
                     ImGuiButtonFlags btn_flags = ImGuiButtonFlags_MouseButtonMask_;
                     //ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(100.0f, 100.0f));
                 }
-                if (bTh_Classic) {
-                    bTh_Dark = false;
-                    bTh_Light = false;
-                    ImGui::StyleColorsClassic(); fStrMsgBuf = "Theme 1 Apply!!";  WriteConfigJE.is_open();
-                    WriteConfigJE << "fJETheme=1;" << std::endl;
-                    //WriteConfigJE.close();
-                }
-                if (bTh_Light) {
-                    bTh_Dark = false;
-                    bTh_Classic = false;
-                    ImGui::StyleColorsLight(); fStrMsgBuf = "Theme 1 Apply!!";  WriteConfigJE.is_open();
-                    WriteConfigJE << "fJETheme=2;" << std::endl;
-                    //WriteConfigJE.close();
-                }
-                //if (th_bar == 0) { bTh_Light = true; }if (th_bar <= 500) { bTh_Classic = true; }if (th_bar == 1000) { bTh_Dark = true; }
-
-                //ImGui::End();
-               // GLuint out_texture = 0;
-               // int Ix = 300;
-                //int Iy = 100;
-                //bool ret = LoadTextureFromFile("logo.png", &out_texture, &Ix, &Iy);
-               // IM_ASSERT(ret);
+                //ImGui::Text(("b0:" + std::to_string(bTh_Classic) + "b1:" + std::to_string(bTh_Dark) + "b1:" + std::to_string(bTh_Light)).c_str());
                 JEApp.ClearFreeMemory();
                 if (b_vsync) {
                     Sleep(13);
@@ -538,8 +593,13 @@ int main(int, char**)
                     Sleep(0);
                     WriteConfigJE << "fJEVsync=false;" << std::endl;
                 }
+                if (GetAsyncKeyState(VK_ESCAPE)) {
+                    v_bExit = true;
+                }
                 if (dgwnd) {
                     std::exception mainStack;
+                    ImGui::Text("f=%p", &v_bExit);
+                    std::cout << "f=" << &v_bExit << std::endl;
                     ImGui::Begin("1d", &dgwnd, ImGuiWindowFlags_NoCollapse + ImGuiWindowFlags_NoTitleBar);
                     ImGui::SetWindowSize(ImVec2(600.0f, 600.0f));
                     ImGui::Text(("b_vsync:" + std::to_string(b_vsync)+"\tstack:=%p").c_str(), &b_vsync);
@@ -571,7 +631,6 @@ int main(int, char**)
                     JEApp.ClearFreeMemory();
                     // ImGui::Image((void*)(intptr_t)out_texture, ImVec2(Ix, Ix));
                     if (v_bSettings) { v_bSettingsCh_b = true; }
-                    std::string dCPUBrandString = CPUBrandString;
                     //ImGui::Checkbox("AUTO CLEARNING MEMORY(DEBUG)", &v_flagClMemory);
                     ImGui::Text("::: MAIN SETTINGS :::\n\n");
                     ImGui::MenuItem("VSYNC", "", &b_vsync, true);
@@ -580,23 +639,26 @@ int main(int, char**)
                     ImGui::MenuItem("SELECT FONTS", "", &fFontsState, true);
                     ImGui::MenuItem("Debug Info", "", &dgwnd,true);
                     ImGui::Text("::: THEME EDITOR :::\n\n");
-                    ImGui::MenuItem("DARK", "1", &bTh_Dark, true);
-                    ImGui::MenuItem("LIGHT", "2", &bTh_Light, true);
-                    ImGui::MenuItem("CLASSIC", "3", &bTh_Classic, true);
+                    ImGui::Checkbox("DARK", &bTh_Dark);
+                    ImGui::SameLine();
+                    ImGui::Checkbox("LIGHT", &bTh_Light);
+                    ImGui::SameLine();
+                    ImGui::Checkbox("CLASSIC", &bTh_Classic);
                     ImGui::Text("_______________________________");
                     ImGui::PushFont(font3);
-                    ImGui::Text(("CPU:" + dCPUBrandString).c_str());
+                    ImGui::Text(("CPU:" + dCPUBrandString).c_str());//
                     ImGui::Text(("GPU:" + (fD_gpuModel)).c_str());
                     ImGui::Text(("GPU GL:" + (fD_gpuGLVer)).c_str());
+                    ImGui::TextColored(ImVec4(0.20f, 1.0f, 0.40f, 1.0f), ("[--RAM Memory--]\nMemory Load:" + std::to_string(fMemStatus(1))+":Procents | "+(std::to_string(fMemStatus(7) - fMemStatus(4))) + ":GB\nFree Memory:" + std::to_string(fMemStatus(4)) + " :GB\nTotal Memory" + std::to_string(fMemStatus(7)) + " :GB").c_str());
                     ImGui::PopFont();
                     ImGui::Text("_______________________________");
                     //ImMessage("Test_00", "Test Window");
                     //  ImGui::SliderInt("Win Volume", &fC_vol, 0, 100, "", 0);
-                    if (GetAsyncKeyState(VK_UP) && GetAsyncKeyState(VK_LCONTROL))
+                    if (GetAsyncKeyState((char)VK_UP) && GetAsyncKeyState((char)VK_LCONTROL))
                     {
                         keybd_event(VK_VOLUME_UP, 0x45, KEYEVENTF_EXTENDEDKEY | 0, NULL);
                     }
-                    if (GetAsyncKeyState(VK_DOWN) && GetAsyncKeyState(VK_LCONTROL))
+                    if (GetAsyncKeyState((char)VK_DOWN) && GetAsyncKeyState((char)VK_LCONTROL))
                     {
                         keybd_event(VK_VOLUME_DOWN, 0x45, KEYEVENTF_EXTENDEDKEY | 0, NULL);
                     }
@@ -640,6 +702,9 @@ int main(int, char**)
                     ImGui::End();
                 }
                 JEApp.ClearFreeMemory();
+                if (GetAsyncKeyState('C')) {
+                    MessageBoxA(hwnd, ("CPU:" + dCPUBrandString + "\ngpu_model: " + fD_gpuModel + "\ngpu_brand: " + fD_gpuBrand + "\ngpu_OpenGL_version: " + fD_gpuGLVer[0]+ fD_gpuGLVer[1]+ fD_gpuGLVer[2]+"\n[--Memory--]-RAM\nMemory Load:"+std::to_string(fMemStatus(1))+"%\nFree Memory:"+std::to_string(fMemStatus(4))+" :GB\nTotal Memory"+std::to_string(fMemStatus(7))+" :GB").c_str(), "JoyStickTest PC Hardware", 1);
+                }
                 static bool fJEUpdate = false;
                 //XINPUT_STATE fDJUP;
                 ImGui::BeginMainMenuBar();
@@ -647,6 +712,7 @@ int main(int, char**)
                 ImGui::MenuItem("ABOUT", "", &fCAboutW, true);
                 ImGui::MenuItem("CPUTEST", "", &bCPUTest, true);
                 ImGui::MenuItem("GPUTEST", "", &bGPUTest, true);
+                ImGui::MenuItem("KeyBoard Test", "", &bKbTest, true);
                 ImGui::MenuItem("UPDATE", "", &fJEUpdate, true);
                 ImGui::MenuItem("EXIT", "", &v_bExit, true);
                 if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_B && xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A && xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_Y)
@@ -660,11 +726,12 @@ int main(int, char**)
                 if (v_Penis)
                 {
 
-                    ImGui::Begin("Dpad Debugger [V - to Close]");
+                    ImGui::Begin("Memory Stack Runtime [V - to Close]");
                     //fWframeX = (rand() % 300);
                     srand(ImGui::GetTime());
                     JEApp.ClearFreeMemory();
-                    ImGui::Text((fBuffer0).c_str());
+                    ImGui::Text(":::::::::::::::::: MEMORY STACK :::::::::::::::::::");
+                    ImGui::Text("---------------------------------------------------");
                     if (GetKeyState('R') > 0)
                     {
                         ImGui::SetWindowPos(ImVec2((rand() % 300), (rand() % 300)), 0);
@@ -678,20 +745,154 @@ int main(int, char**)
                     // exit:
                     JEApp.ClearFreeMemory();
                     ImGui::Begin("EXIT");
-                    ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "\n::WARNING!!!::\n\nSETTINGS NOT SAVED!!\nUSER DATA WILL BE  LOST!!\n");
-                    if (ImGui::MenuItem("SAVE AND EXIT", "", &v_bExit, true)) { ImGui::Text("Thanks!!why used my app!!"); WriteConfigJE.close(); Sleep(1000); exit(0); }
-                    if (ImGui::MenuItem("BACK", "", &v_bExit, true)) { v_bExit = false; }
+                    ImGui::PushFont(font2);
+                    ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), ":: WARNING!!! ::");
+                    ImGui::PopFont();
+                    ImGui::PushFont(font1);
+                    ImGui::Text("\n:: SETTINGS NOT SAVED!! ::\n:: USER DATA WILL BE  LOST!! ::");
+                    ImGui::PopFont();
+                    if (ImGui::Button("SAVE AND EXIT",ImVec2(150.0f, 40.0f))) { ImGui::Text("Thanks!!why used my app!!"); WriteConfigJE.close(); Sleep(1000); exit(0); }
+                    ImGui::SameLine();
+                    if (ImGui::Button("BACK",ImVec2(150.0f,40.0f))) { v_bExit = false; }
                     ImGui::End();
                 }
                 ImGui::EndMainMenuBar();
                 JEApp.ClearFreeMemory();
+                static std::string key_pull;
                // xController1->GetBatteryState(&b_data, &b_type, &bStrStatus);
+                if (bKbTest) {
+                    ImGui::Begin("kb_test", &bKbTest);
+                    ImGui::Text(("key_pullup: " + key_pull).c_str());
+
+                    // Ассоциативный массив: ключ — код клавиши, значение — строковое представление
+                    static const std::unordered_map<int, std::string> keyMap = {
+                        {'1', "k1"}, {'Q', "kQ"},
+                        {'2', "k2"}, {'W', "kW"},
+                        {'3', "k3"}, {'E', "kE"},
+                        {'4', "k4"}, {'R', "kR"},
+                        {'5', "k5"}, {'T', "kT"},
+                        {'6', "k6"}, {'Y', "kY"},
+                        {'7', "k7"}, {'U', "kU"},
+                        {'8', "k8"}, {'I', "kI"},
+                        {'9', "k9"}, {'O', "kO"},
+                        {'0', "k0"}, {'P', "kP"},
+                        {'A', "kA"}, {'V', "kV"},
+                        {'S', "kS"}, {'B', "kB"},
+                        {'D', "kD"}, {'N', "kN"},
+                        {'F', "kF"}, {'M', "kM"},
+                        {'G', "kG"}, {VK_DIVIDE, "k/"},
+                        {'H', "kH"}, {'.', "k."},
+                        {'J', "kJ"}, {VK_ESCAPE, "kESC"},
+                        {'K', "kK"}, {VK_F1, "kf1"},
+                        {'L', "kL"}, {VK_F2, "kf2"},
+                        {';', "k;"}, {VK_F3, "kf3"},
+                        {'"', "k'"}, {VK_F4, "kf4"},
+                        {'Z', "kZ"}, {VK_F5, "kf5"},
+                        {'X', "kX"}, {VK_F6, "kf6"},
+                        {'C', "kC"}, {VK_F7, "kf7"},
+                        {VK_F8, "kf8"}, {VK_F9, "kf9"},
+                        {VK_F10, "kf10"}, {VK_F11, "kf11"},
+                        {VK_F12, "kf12"}
+                    };
+                    static bool bp0 = false; static bool bp12 = false; static bool bp24 = false;
+                    static bool bp1 = false; static bool bp13 = false; static bool bp25 = false;
+                    static bool bp2 = false; static bool bp14 = false; static bool bp26 = false;
+                    static bool bp3 = false; static bool bp15 = false; static bool bp27 = false;
+                    static bool bp4 = false; static bool bp16 = false; static bool bp28 = false;
+                    static bool bp5 = false; static bool bp17 = false; static bool bp29 = false;
+                    static bool bp6 = false; static bool bp18 = false; static bool bp30 = false;
+                    static bool bp7 = false; static bool bp19 = false; static bool bp31 = false;
+                    static bool bp8 = false; static bool bp20 = false; static bool bp32 = false;
+                    static bool bp9 = false; static bool bp21 = false; static bool bp33 = false;
+                    static bool bp10 = false; static bool bp22 = false; static bool bp34 = false;
+                    static bool bp11 = false; static bool bp23 = false; static bool bp35 = false;
+                    std::string key2;
+                    kButton(bp0, true, "1");
+                    kButton(bp1, true, "2");
+                    kButton(bp2, true, "3");
+                    kButton(bp3, true, "4");
+                    kButton(bp4, true, "5");
+                    kButton(bp5, true, "6");
+                    kButton(bp6, true, "7");
+                    kButton(bp7, true, "8");
+                    kButton(bp8, true, "9");
+                    kButton(bp9, false, "0");
+                    kButton(bp10, true, "q");
+                    kButton(bp11, true, "w");
+                    kButton(bp12, true, "e");
+                    kButton(bp13, true, "r");
+                    kButton(bp14, true, "t");
+                    kButton(bp15, true, "y");
+                    kButton(bp16, true, "u");
+                    kButton(bp17, true, "i");
+                    kButton(bp18, true, "o");
+                    kButton(bp19, false, "p");
+                    kButton(bp20, true, "a");
+                    kButton(bp21, true, "s");
+                    kButton(bp22, true, "d");
+                    kButton(bp23, true, "f");
+                    kButton(bp24, true, "g");
+                    kButton(bp25, true, "h");
+                    kButton(bp26, true, "j");
+                    kButton(bp27, true, "k");
+                    kButton(bp28, false, "l");
+                    kButton(bp29, true, "z");
+                    kButton(bp30, true, "x");
+                    kButton(bp31, true, "c");
+                    kButton(bp32, true, "v");
+                    kButton(bp33, true, "b");
+                    kButton(bp34, true, "n");
+                    kButton(bp35, true, "m");
+                    static int64_t key_id = 0;
+                    
+                    
+                    // Проверяем каждую клавишу в ассоциативном массиве
+                    for (const auto& [key, keyName] : keyMap) {
+                        if (GetAsyncKeyState(key)) {
+                            
+                            key_id++;
+                            key_pull = "\n" + std::to_string(key_id) + "->kid->" + keyName;
+                            key2 = keyName;
+                            if (keyName == "k1") { bp0 = true; }if (keyName == "k4") { bp3 = true; }if (keyName == "k7") { bp6 = true; }
+                            if (keyName == "k2") { bp1 = true; }if (keyName == "k5") { bp4 = true; }if (keyName == "k8") { bp7 = true; }
+                            if (keyName == "k3") { bp2 = true; }if (keyName == "k6") { bp5 = true; }if (keyName == "k9") { bp8 = true; }
+                            if (keyName == "k0") { bp9 = true; }if (keyName == "kQ") { bp10 = true; }if (keyName == "kW") { bp11 = true; }
+                            if (keyName == "kE") { bp12 = true; }if (keyName == "kR") { bp13 = true; }if (keyName == "kT") { bp14 = true; }
+                            if (keyName == "kY") { bp15 = true; }if (keyName == "kU") { bp16 = true; }if (keyName == "kI") { bp17 = true; }
+                            if (keyName == "kO") { bp18 = true; }if (keyName == "kP") { bp19 = true; }if (keyName == "kA") { bp20 = true; }
+                            if (keyName == "kS") { bp21 = true; }if (keyName == "kD") { bp22 = true; }if (keyName == "kF") { bp23 = true; }
+                            if (keyName == "kG") { bp24 = true; }if (keyName == "kH") { bp25 = true; }if (keyName == "kJ") { bp26 = true; }
+                            if (keyName == "kK") { bp27 = true; }if (keyName == "kL") { bp28 = true; }if (keyName == "kZ") { bp29 = true; }
+                            if (keyName == "kX") { bp30 = true; }if (keyName == "kC") { bp31 = true; }if (keyName == "kV") { bp32 = true; }
+                            if (keyName == "kB") { bp33 = true; }if (keyName == "kN") { bp34 = true; }if (keyName == "kM") { bp35 = true; }
+                            //
+                            if (keyName != "k1") { bp0 = false; }if (keyName != "k4") { bp3 = false; }if (keyName != "k7") { bp6 = false; }
+                            if (keyName != "k2") { bp1 = false; }if (keyName != "k5") { bp4 = false; }if (keyName != "k8") { bp7 = false; }
+                            if (keyName != "k3") { bp2 = false; }if (keyName != "k6") { bp5 = false; }if (keyName != "k9") { bp8 = false; }
+                            if (keyName != "k0") { bp9 = false; }if (keyName != "kQ") { bp10 = false; }if (keyName != "kW") { bp11 = false; }
+                            if (keyName != "kE") { bp12 = false; }if (keyName != "kR") { bp13 = false; }if (keyName != "kT") { bp14 = false; }
+                            if (keyName != "kY") { bp15 = false; }if (keyName != "kU") { bp16 = false; }if (keyName != "kI") { bp17 = false; }
+                            if (keyName != "kO") { bp18 = false; }if (keyName != "kP") { bp19 = false; }if (keyName != "kA") { bp20 = false; }
+                            if (keyName != "kS") { bp21 = false; }if (keyName != "kD") { bp22 = false; }if (keyName != "kF") { bp23 = false; }
+                            if (keyName != "kG") { bp24 = false; }if (keyName != "kH") { bp25 = false; }if (keyName != "kJ") { bp26 = false; }
+                            if (keyName != "kK") { bp27 = false; }if (keyName != "kL") { bp28 = false; }if (keyName != "kZ") { bp29 = false; }
+                            if (keyName != "kX") { bp30 = false; }if (keyName != "kC") { bp31 = false; }if (keyName != "kV") { bp32 = false; }
+                            if (keyName != "kB") { bp33 = false; }if (keyName != "kN") { bp34 = false; }if (keyName != "kM") { bp35 = false; }
+                            break; // Прерываем цикл, если клавиша найдена
+       
+                        }
+                    }
+
+                    ImGui::End();
+
+                }
                 if (!fJEFrame)
                 {
                     ImGui::PushFont(font2);
                     ImGui::Text("\nWELLCOME TO JOYSTICKTEST!!");
                     ImGui::PopFont();
                     ImGui::Text("\nCREATED BY HCPP\n");
+
                 }
               // ImGui::Text(("_____________________________\n\nCONTROLLER_1: " + bStrStatus + "\nTYPE : " + std::to_string(b_type) + "\n_____________________________").c_str());
                 // GLuint gl_id;
@@ -827,7 +1028,7 @@ int main(int, char**)
                 {
                     JEApp.ClearFreeMemory();
                     // LPBINDSTATUSCALLBACK st_b;
-                    const TCHAR dURL[] = _T("https://github.com/HCPP20334/JoyStickTest/releases/download/JE_x64_OpenGL/JEx64OpenGL.SSE4.2.CPP20.zip");
+                    const TCHAR dURL[] = _T("https://github.com/HCPP20334/JoyStickTest/releases/download/JoyStickTest_x64_OpenGL_1.1/JoyStickTest_x64_OpenGL3SSE4.2.zip");
                     const TCHAR dFllePath[] = _T("JoyStickTest_x64_OpenGL3SSE4.2.zip");
                     int64_t fDwChannel_0 = URLDownloadToFile(NULL, NULL, dFllePath, 0, NULL);
                     static bool v_bDown = false;
@@ -941,7 +1142,7 @@ int main(int, char**)
                 {
 
                     //
-                    if (GetAsyncKeyState(VK_LEFT))
+                    if (GetAsyncKeyState((char)VK_LEFT))
                     {
                         df = df + 0.1f;
                         if (df > 100.0f)
@@ -1031,6 +1232,7 @@ int main(int, char**)
             ImGui::TextColored(ImVec4(0.20f, 1.0f, 0.40f, 1.0f), "Build 1.1\n");//Build 1.1\n
             ImGui::PopFont();
             ImGui::TextColored(ImVec4(0.20f, 1.0f, 0.40f, 1.0f),"COMPILED C++20 (GCC) Visual Studio 2022 x64\nBackendAPI: OpenGL3.3\nInstruction Set:SSE4.2,x64,IA-64");
+          
             
            // std::cout << &fJ_vendor << &fJ_rendered << "\n";
             if (ImGui::Button("OK")){ fCAboutW = false; }
@@ -1143,7 +1345,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
         }
         return 0;
     case WM_SYSCOMMAND:
-        if ((wParam & 0xfff0) == SC_KEYMENU) // Disable ALT application menu
+        if ((wParam & 0xfff0) == SC_KEYMENU) // Disable ALT application menuS
             return 0;
         break;
     case WM_DESTROY:

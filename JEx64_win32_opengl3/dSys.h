@@ -6,7 +6,7 @@
 #include <string>
 int64_t ps_apiL(int64_t fps_count);
 int64_t fPerfomanceInfo(int64_t fPdataId);
-int64_t fMemStatus(int64_t fMData_0);
+float fMemStatus(int64_t fMData_0);
 int64_t fLTime(int64_t fLtData);
 int64_t CPUArch();
 std::string fCPUType();
@@ -59,7 +59,7 @@ int64_t fPerfomanceInfo(int64_t fPdataId)
 		return fPdata0A.PageSize;
 	}
 	if(fPdataId == 8){
-		return fPdata0A.PhysicalAvailable;
+		return (fPdata0A.PhysicalAvailable) / 1024;
 	}
 	if(fPdataId == 9){
 		return fPdata0A.PhysicalTotal;
@@ -74,36 +74,42 @@ int64_t fPerfomanceInfo(int64_t fPdataId)
 		return fPdata0A.ThreadCount;
 	}
 }
-int64_t fMemStatus(int64_t fMData_0)
+float fMemStatus(int64_t fMData_0)
 {
-	MEMORYSTATUSEX fMemState_0A;
-	GlobalMemoryStatusEx(&fMemState_0A);
+	//MEMORYSTATUSEX fMemState_0A;
+	MEMORYSTATUS fMemState_0A;
+
+	// Zero structure
+	memset(&fMemState_0A, 0, sizeof(fMemState_0A));
+
+	// Get RAM snapshot
+	::GlobalMemoryStatus(&fMemState_0A);
 	if(fMData_0 == 0){
 	return fMemState_0A.dwLength;
 	}
 	if(fMData_0 == 1){
-	return fMemState_0A.dwMemoryLoad;
+	return (float)(fMemState_0A.dwMemoryLoad);
 	}
 	if(fMData_0 == 2){
-	return fMemState_0A.ullAvailExtendedVirtual;
+	return fMemState_0A.dwAvailVirtual;
 	}
 	if(fMData_0 == 3){
-	return fMemState_0A.ullAvailPageFile;
+	return fMemState_0A.dwAvailPageFile;
 	}
 	if(fMData_0 == 4){
-	return fMemState_0A.ullAvailPhys;
+		return (float)(fMemState_0A.dwAvailPhys / 1024 / 1024 / 1024);
 	}
 	if(fMData_0 == 5){
-	return fMemState_0A.ullAvailVirtual;
+	return fMemState_0A.dwAvailVirtual;
 	}
 	if(fMData_0 == 6){
-	return fMemState_0A.ullTotalPageFile;
+	return fMemState_0A.dwTotalPageFile;
 	}
 	if(fMData_0 == 7){
-	return fMemState_0A.ullTotalPhys;
+	return (float)(fMemState_0A.dwTotalPhys / 1024 / 1024 / 1024);
 	}
 	if(fMData_0 == 8){
-	return fMemState_0A.ullTotalVirtual;
+	return fMemState_0A.dwTotalVirtual;
 	}
 }
 int64_t fLTime(int64_t fLtData)

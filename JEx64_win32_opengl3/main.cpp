@@ -1,30 +1,112 @@
-﻿
-#include "imgui.h"
-#include "imgui_impl_opengl3.h"
-#include "imgui_impl_win32.h"
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#include <GL/GL.h>
-#include <tchar.h>
-#include <string>
-#include "JoyStick.h"
-#include <iostream>
-#include <conio.h>
-#include "dSys.h"
-#include <fstream>
-#include <Psapi.h>
-#include <urlmon.h>//
-#include <clocale>
-#include <thread>
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-#include "resource.h"
-#include <sysinfoapi.h>
-#include "Colors.h"
-#include <unordered_map>
+﻿#include "JoyStickTest_module.h"
 #pragma comment (lib , "Urlmon.lib")
+namespace ImGui {
+
+    bool CustomToggle(const char* label, bool* v) {
+        ImGuiWindow* window = ImGui::GetCurrentWindow();
+        ImGui::PushID(label);
+        ImGui::TextColored((*v ? ImVec4(1.0f, 1.0f, 1.0f, 1.00f): ImVec4(0.65f, 0.65f, 0.65f, 1.00f)), label);
+        ImGui::SameLine();
+        float height = ImGui::GetFrameHeight();
+        float width = height * 1.55f;
+        ImGuiStyle& style = ImGui::GetStyle();
+
+        ImVec2 p = ImGui::GetCursorScreenPos();
+
+        // Colors
+        ImU32 color_bg_on = ImGui::GetColorU32(ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+        ImU32 color_bg_off = ImGui::GetColorU32(ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+        ImU32 color_knob = *v ? ImGui::GetColorU32(ImVec4(0.34f, 0.06f, 0.98f, 1.00f)) :
+            ImGui::GetColorU32(ImVec4(0.36f, 0.36f, 0.36f, 1.0f));
+        ImU32 glow_color = ImGui::GetColorU32(ImVec4(0.34f, 0.06f, 0.98f, 0.3f)); // Цвет свечения
+        ImU32 border_color = ImGui::GetColorU32(ImGuiCol_Border);
+
+        ImGui::InvisibleButton(label, ImVec2(width, height));
+        bool clicked = ImGui::IsItemClicked();
+        if (clicked) *v = !(*v);
+
+        // Background + Border
+        ImDrawList* draw_list = ImGui::GetWindowDrawList();
+        draw_list->AddRectFilled(p, ImVec2(p.x + width, p.y + height), *v ? color_bg_on : color_bg_off, height);
+
+        if (style.FrameBorderSize > 0.0f) {
+            draw_list->AddRect(
+                p,
+                ImVec2(p.x + width, p.y + height),
+                border_color,
+                height * 0.5f,
+                0,
+                style.FrameBorderSize
+            );
+        }
+
+        // Knob parameters
+        float base_radius = *v ? 10 : 8;
+        ImVec2 knob_pos = *v ?
+            ImVec2(p.x + width - height * 0.5f, p.y + height * 0.5f) :
+            ImVec2(p.x + height * 0.5f, p.y + height * 0.5f);
+
+        // Glow effect (only when active)
+        if (*v) {
+            // Рисуем несколько слоев для эффекта свечения
+            const int glow_layers = 3;
+            for (int i = 0; i < glow_layers; i++) {
+                float alpha = 0.3f * (1.0f - (float)i / glow_layers);
+                float radius = base_radius + 2.0f * (i + 1);
+                draw_list->AddCircle(
+                    knob_pos,
+                    radius,
+                    ImGui::GetColorU32(ImVec4(0.34f, 0.06f, 0.98f, alpha)),
+                    0, // сегменты (0 = автоматически)
+                    2.0f // толщина линии
+                );
+            }
+        }
+
+        // Main knob
+        draw_list->AddCircleFilled(knob_pos, base_radius, color_knob);
+
+        ImGui::PopID();
+        return clicked;
+    }
+    
+    bool Spinner(const char* label, float radius, int thickness, const ImU32& color) {
+        ImGuiWindow* window = GetCurrentWindow();
+        if (window->SkipItems)
+            return false;
+
+        ImGuiContext& g = *GImGui;
+        const ImGuiStyle& style = g.Style;
+        const ImGuiID id = window->GetID(label);
+
+        ImVec2 pos = window->DC.CursorPos;
+        ImVec2 size((radius) * 2, (radius + style.FramePadding.y) * 2);
+
+        const ImRect bb(pos, ImVec2(pos.x + size.x, pos.y + size.y));
+        ItemSize(bb, style.FramePadding.y);
+        if (!ItemAdd(bb, id))
+            return false;
+
+        // Render
+        window->DrawList->PathClear();
+
+        int num_segments = 30;
+        int start = abs(ImSin(g.Time * 1.8f) * (num_segments - 5));
+
+        const float a_min = IM_PI * 2.0f * ((float)start) / (float)num_segments;
+        const float a_max = IM_PI * 2.0f * ((float)num_segments - 3) / (float)num_segments;
+
+        const ImVec2 centre = ImVec2(pos.x + radius, pos.y + radius + style.FramePadding.y);
+
+        for (int i = 0; i < num_segments; i++) {
+            const float a = a_min + ((float)i / (float)num_segments) * (a_max - a_min);
+            window->DrawList->PathLineTo(ImVec2(centre.x + ImCos(a + g.Time * 8) * radius,
+                centre.y + ImSin(a + g.Time * 8) * radius));
+        }
+
+        window->DrawList->PathStroke(color, false, thickness);
+    }
+}
 uint64_t fDataMemUsage() // Work Function !!! Check Sym RAM to Current Program //
 {
     PROCESS_MEMORY_COUNTERS pmc;
@@ -154,7 +236,7 @@ uint64_t id = 0;
 int64_t  idx = 0;
 
 
-//
+
 const GLubyte* fJ_vendor = glGetString(GL_VENDOR);// Returns the vendor
 const GLubyte* fJ_rendered = glGetString(GL_RENDERER);
 //
@@ -198,7 +280,7 @@ uint64_t ImMessage(const char* str_text, const char* title_text)
 }
 static bool kButton(bool state, bool bSameLine,std::string value) {
     if (state) {
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 0.0f, 0.33f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.34f, 0.06f, 0.98f, 1.00f));
     }
     if (!state) {
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.30f, 0.30f, 0.30f, 0.80f));
@@ -344,7 +426,7 @@ int main(int, char**)
     static bool v_bInvertVibValue = false;
     static bool rd_text;
     static bool v_Penis = false;
-    static bool fFontsState;
+    static bool fFontsState = true;
     static bool v_bThemeJE;
     static bool Gamepad_enable;
     static bool fExitWindow = false;
@@ -376,7 +458,7 @@ int main(int, char**)
     WNDCLASSEXW wc = { sizeof(wc), CS_OWNDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"JE x64", nullptr };
     wc.hIcon = LoadIcon(wc.hInstance, MAKEINTRESOURCE(103));
     ::RegisterClassExW(&wc);
-    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"JoyStickTest 1.1 OpenGL3_SSE4.2 (C++20)", WS_OVERLAPPEDWINDOW | WS_EX_TOOLWINDOW |  WS_EX_NOPARENTNOTIFY, 100, 80, 800, 480, nullptr, nullptr, wc.hInstance, nullptr);
+    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"JoyStickTest 1.2.1 OpenGL3_SSE4.2 (C++20)", WS_OVERLAPPEDWINDOW | WS_EX_TOOLWINDOW |  WS_EX_NOPARENTNOTIFY, 100, 80, 800, 480, nullptr, nullptr, wc.hInstance, nullptr);
 
     // Initialize OpenGL
     if (!CreateDeviceWGL(hwnd, &g_MainWindow))
@@ -412,24 +494,32 @@ int main(int, char**)
     Set_prm.is_open();
     while (std::getline(Set_prm, fStrParam))
     {
-        if (fStrParam == "fJE_Font_WR=false;") { fFontsState = false; }if (fStrParam == "fJE_Font_WR=true;") { fFontsState = true; }
+        if (fStrParam == "fJE_Font=false;") { fFontsState = false; }if (fStrParam == "fJE_Font=true;") { fFontsState = true; }
         if (fStrParam == "fJETheme=0;") { bTh_Dark = true; bTh_Light = false; bTh_Classic = false; }
         if (fStrParam == "fJETheme=1;") { bTh_Dark = false; bTh_Light = false; bTh_Classic = true; }
         if (fStrParam == "fJETheme=2;") { bTh_Dark = false; bTh_Light = false; bTh_Classic = false; }
         if (fStrParam == "fJEVsync=true;") { b_vsync = true; }if (fStrParam == "fJEVsync=false;") { b_vsync = false; }
         if (fStrParam == "fJEInvertVibrationValue=true;") { v_bInvertVibValue = true; }if (fStrParam == "fJEInvertVibrationValue=false;") { v_bInvertVibValue = false; }
     }
+
+    ImFont* font1 = 0;
+    ImFont* font2 = 0;
+    ImFont* font3 = 0;
     if (fFontsState)
     {
-        io.Fonts->AddFontFromFileTTF(".\\consola.ttf", 20.0f);
+        io.Fonts->AddFontFromFileTTF(".\\PixelizerBold.ttf", 20.0f);
+        font1 = io.Fonts->AddFontFromFileTTF("PixelizerBold.ttf", 20.0f);
+        font2 = io.Fonts->AddFontFromFileTTF("PixelizerBold.ttf", 40.0f);
+        font3 = io.Fonts->AddFontFromFileTTF("PixelizerBold.ttf", 15.0f);
     }
     else
     {
-        io.Fonts->AddFontFromFileTTF(".\\WhiteRabbit.ttf", 20.0f);//
+        io.Fonts->AddFontFromFileTTF(".\\roboto.ttf", 20.0f);//
+        font1 = io.Fonts->AddFontFromFileTTF("roboto.ttf", 20.0f);
+        font2 = io.Fonts->AddFontFromFileTTF("roboto.ttf", 40.0f);
+        font3 = io.Fonts->AddFontFromFileTTF("roboto.ttf", 15.0f);
+
     }
-    ImFont* font1 = io.Fonts->AddFontFromFileTTF(".\\WhiteRabbit.ttf", 20.0f);
-    ImFont* font2 = io.Fonts->AddFontFromFileTTF(".\\WhiteRabbit.ttf", 40.0f);
-    ImFont* font3 = io.Fonts->AddFontFromFileTTF(".\\WhiteRabbit.ttf", 15.0f);
     struct GPU_DATA {
         std::string E_Brand = (const char*)glGetString(GL_VENDOR);
         std::string E_Model = (const char*)glGetString(GL_RENDERER);
@@ -509,6 +599,7 @@ int main(int, char**)
           //  std::cout << "ADDR:" << &d << "->" << d << std::endl;
             ImGui::Begin("\tJE x64_OpenGL3_SSE4.2 C++20",&fJEFrame, ImGuiWindowFlags_NoCollapse + ImGuiWindowFlags_NoTitleBar);  
                 // Create a window called "Hello, world!" and append into it.
+
                 ImGui::SetWindowPos(ImVec2(-1.0f, 25.0f));
                 ImGui::SetWindowSize(ImVec2(800.0f, 480.0f));
                 JEApp.ClearFreeMemory();
@@ -543,45 +634,70 @@ int main(int, char**)
                     WriteConfigJE << "fJETheme=0;" << std::endl;
                     //WriteConfigJE.close();
                     
-                    style.ButtonTextAlign = ImVec2(0.2f, 0.5f);
-                    style.WindowRounding = 5.3f;
-                    style.FrameRounding = 2.3f;
-                    style.ScrollbarRounding = 0;
-                    style.Colors[ImGuiCol_Text] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-                    style.Colors[ImGuiCol_WindowBg] = ImVec4(0.01f, 0.01f, 0.02f, 0.80f);
-                    style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
-                    style.Colors[ImGuiCol_PopupBg] = ImVec4(0.05f, 0.05f, 0.10f, 0.85f);
-                    style.Colors[ImGuiCol_Border] = ImVec4(0.70f, 0.70f, 0.70f, 0.65f);
-                    style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-                    style.Colors[ImGuiCol_FrameBg] = ImVec4(0.00f, 0.00f, 0.01f, 1.00f);
-                    style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.90f, 0.80f, 0.80f, 0.40f);
-                    style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.90f, 0.65f, 0.65f, 0.45f);
-                    style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.08f, 0.08f, 0.08f, 0.80f);
-                    style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.01f, 0.01f, 0.02f, 0.80f);
-                    style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.20f, 0.25f, 0.30f, 0.60f);
-                    style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.55f, 0.53f, 0.55f, 0.51f);
-                    style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.56f, 0.56f, 0.56f, 1.00f);
-                    style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.56f, 0.56f, 0.56f, 0.91f);
-                    style.Colors[ImGuiCol_CheckMark] = ImVec4(0.90f, 0.90f, 0.90f, 0.83f);
-                    style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.70f, 0.70f, 0.70f, 1.0f);
-                    style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.30f, 0.30f, 0.30f, 1.0f);
-                    style.Colors[ImGuiCol_Button] = ImVec4(0.30f, 0.30f, 0.30f, 0.80f);
-                    style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.50f, 0.69f, 0.99f, 0.68f);
-                    style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.80f, 0.50f, 0.50f, 1.00f);
-                    style.Colors[ImGuiCol_Header] = ImVec4(0.30f, 0.69f, 1.00f, 0.53f);
-                    style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.44f, 0.61f, 0.86f, 1.00f);
-                    style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.38f, 0.62f, 0.83f, 1.00f);
-                    style.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.00f, 1.00f, 1.00f, 0.85f);
-                    style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(1.00f, 1.00f, 1.00f, 0.60f);
-                    style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(1.00f, 1.00f, 1.00f, 0.90f);
-                    style.Colors[ImGuiCol_PlotLines] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-                    style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
-                    style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
-                    style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
-                    style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.00f, 0.00f, 1.00f, 0.35f);
-                  //  style.Colors[ImGuiCol_WindowShadow] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
-                    ImGuiButtonFlags btn_flags = ImGuiButtonFlags_MouseButtonMask_;
-                    //ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(100.0f, 100.0f));
+                    ImGuiStyle& style = ImGui::GetStyle();
+                    ImVec4* colors = ImGui::GetStyle().Colors;
+                    colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+                    colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
+                    colors[ImGuiCol_WindowBg] = ImVec4(0.04f, 0.04f, 0.04f, 0.94f);
+                    colors[ImGuiCol_ChildBg] = ImVec4(0.10f, 0.10f, 0.10f, 1.0f);
+                    colors[ImGuiCol_PopupBg] = ImVec4(0.08f, 0.08f, 0.08f, 1.00f);
+                    colors[ImGuiCol_Border] = ImVec4(0.43f, 0.43f, 0.50f, 0.50f);
+                    colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+                    colors[ImGuiCol_FrameBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
+                    colors[ImGuiCol_FrameBgHovered] = ImVec4(0.48f, 0.26f, 0.98f, 0.40f);
+                    colors[ImGuiCol_FrameBgActive] = ImVec4(0.37f, 0.00f, 1.00f, 1.00f);
+                    colors[ImGuiCol_TitleBg] = ImVec4(0.04f, 0.04f, 0.04f, 1.00f);
+                    colors[ImGuiCol_TitleBgActive] = ImVec4(0.21f, 0.16f, 0.48f, 1.00f);
+                    colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, 0.51f);
+                    colors[ImGuiCol_MenuBarBg] = ImVec4(0.11f, 0.11f, 0.11f, 1.00f);
+                    colors[ImGuiCol_ScrollbarBg] = ImVec4(0.02f, 0.02f, 0.02f, 0.53f);
+                    colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.31f, 0.31f, 0.31f, 1.00f);
+                    colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.41f, 0.41f, 0.41f, 1.00f);
+                    colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.51f, 0.51f, 0.51f, 1.00f);
+                    colors[ImGuiCol_CheckMark] = ImVec4(0.45f, 0.26f, 0.98f, 1.00f);
+                    colors[ImGuiCol_SliderGrab] = ImVec4(0.48f, 0.26f, 0.98f, 0.52f);
+                    colors[ImGuiCol_SliderGrabActive] = ImVec4(0.48f, 0.26f, 0.98f, 0.52f);
+                    colors[ImGuiCol_Button] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
+                    colors[ImGuiCol_ButtonHovered] = ImVec4(0.34f, 0.06f, 0.98f, 1.00f);
+                    colors[ImGuiCol_ButtonActive] = ImVec4(0.34f, 0.06f, 0.98f, 1.00f);
+                    colors[ImGuiCol_Header] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
+                    colors[ImGuiCol_HeaderHovered] = ImVec4(0.15f, 0.15f, 0.15f, 0.80f);
+                    colors[ImGuiCol_HeaderActive] = ImVec4(1.00f, 1.00f, 1.00f, 0.04f);
+                    colors[ImGuiCol_Separator] = ImVec4(0.34f, 0.06f, 0.98f, 1.00f);
+                    colors[ImGuiCol_SeparatorHovered] = ImVec4(0.10f, 0.40f, 0.75f, 0.78f);
+                    colors[ImGuiCol_SeparatorActive] = ImVec4(0.10f, 0.40f, 0.75f, 1.00f);
+                    colors[ImGuiCol_ResizeGrip] = ImVec4(1.00f, 1.00f, 1.00f, 0.04f);
+                    colors[ImGuiCol_ResizeGripHovered] = ImVec4(1.00f, 1.00f, 1.00f, 0.13f);
+                    colors[ImGuiCol_ResizeGripActive] = ImVec4(0.38f, 0.38f, 0.38f, 1.00f);
+                    colors[ImGuiCol_TabHovered] = ImVec4(0.40f, 0.26f, 0.98f, 0.50f);
+                    colors[ImGuiCol_Tab] = ImVec4(0.18f, 0.20f, 0.58f, 0.73f);
+                    //colors[ImGuiCol_TabSelected] = ImVec4(0.29f, 0.20f, 0.68f, 1.00f);
+                  ///  colors[ImGuiCol_TabSelectedOverline] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+                    //colors[ImGuiCol_TabDimmed] = ImVec4(0.07f, 0.10f, 0.15f, 0.97f);
+                  //  colors[ImGuiCol_TabDimmedSelected] = ImVec4(0.14f, 0.26f, 0.42f, 1.00f);
+                    //colors[ImGuiCol_TabDimmedSelectedOverline] = ImVec4(0.50f, 0.50f, 0.50f, 0.00f);
+                    colors[ImGuiCol_PlotLines] = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
+                    colors[ImGuiCol_PlotLinesHovered] = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
+                    colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
+                    colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
+                    colors[ImGuiCol_TableHeaderBg] = ImVec4(0.19f, 0.19f, 0.20f, 1.00f);
+                    colors[ImGuiCol_TableBorderStrong] = ImVec4(0.31f, 0.31f, 0.35f, 1.00f);
+                    colors[ImGuiCol_TableBorderLight] = ImVec4(0.23f, 0.23f, 0.25f, 1.00f);
+                    colors[ImGuiCol_TableRowBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+                    colors[ImGuiCol_TableRowBgAlt] = ImVec4(1.00f, 1.00f, 1.00f, 0.06f);
+                    //colors[ImGuiCol_TextLink] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+                    colors[ImGuiCol_TextSelectedBg] = ImVec4(1.00f, 1.00f, 1.00f, 0.04f);
+                    colors[ImGuiCol_DragDropTarget] = ImVec4(1.00f, 1.00f, 0.00f, 0.90f);
+                    // colors[ImGuiCol_NavCursor] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+                    colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
+                    colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
+                    colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
+                    style.WindowRounding = 10;
+                    style.FrameRounding = 10;
+                    style.FrameBorderSize = 1;
+                    style.GrabRounding = 10;
+                    style.GrabMinSize = 20;
+                   
                 }
                 //ImGui::Text(("b0:" + std::to_string(bTh_Classic) + "b1:" + std::to_string(bTh_Dark) + "b1:" + std::to_string(bTh_Light)).c_str());
                 JEApp.ClearFreeMemory();
@@ -632,33 +748,33 @@ int main(int, char**)
                     // ImGui::Image((void*)(intptr_t)out_texture, ImVec2(Ix, Ix));
                     if (v_bSettings) { v_bSettingsCh_b = true; }
                     //ImGui::Checkbox("AUTO CLEARNING MEMORY(DEBUG)", &v_flagClMemory);
-                    ImGui::Text("::: MAIN SETTINGS :::\n\n");
-                    ImGui::MenuItem("VSYNC", "", &b_vsync, true);
-                    ImGui::MenuItem("INVERT VIBRATION VALUE FOR EMU XINPUT", "", &v_bInvertVibValue, true);
-                    // ImGui::Checkbox("EMU XINPUT(DEBUG)", &C_XinputControllerState);
-                    ImGui::MenuItem("SELECT FONTS", "", &fFontsState, true);
-                    ImGui::MenuItem("Debug Info", "", &dgwnd,true);
-                    ImGui::Text("::: THEME EDITOR :::\n\n");
-                    ImGui::Checkbox("DARK", &bTh_Dark);
+                    ImGui::SeparatorText("MAIN SETTINGS");
+                    ImGui::CustomToggle("VSYNC", &b_vsync); ImGui::SameLine(); ImGui::TextColored((b_vsync ? ImVec4(0.65f, 0, 1.0f, 1.0f) : ImVec4(1, 0, 0.33f, 1.0f)), (b_vsync ? "Enabled" : "Disabled"));
+                    ImGui::CustomToggle("INVERT VIBRATION VALUE FOR EMU XINPUT", &v_bInvertVibValue); ImGui::SameLine(); ImGui::TextColored((v_bInvertVibValue ? ImVec4(0.65f, 0, 1.0f, 1.0f) : ImVec4(1, 0, 0.33f, 1.0f)), (v_bInvertVibValue ? "Enabled" : "Disabled"));
+                    ImGui::TextColored((fFontsState ? ImVec4(0.65f, 0, 1.0f, 1.0f) : ImVec4(1, 0, 0.33f, 1.0f)), "Need Restart App");
+                    ImGui::CustomToggle("SELECT FONTS", &fFontsState); ImGui::SameLine(); ImGui::TextColored((fFontsState ? ImVec4(0.65f, 0, 1.0f, 1.0f) : ImVec4(1, 0, 0.33f, 1.0f)), (fFontsState ? "PixelizerBold" : "roboto"));
+                    ImGui::CustomToggle("Debug Info",&dgwnd);
+                    ImGui::SeparatorText("THEME EDITOR");
+                    ImGui::CustomToggle("DARK", &bTh_Dark);
                     ImGui::SameLine();
-                    ImGui::Checkbox("LIGHT", &bTh_Light);
+                    ImGui::CustomToggle("LIGHT", &bTh_Light);
                     ImGui::SameLine();
-                    ImGui::Checkbox("CLASSIC", &bTh_Classic);
-                    ImGui::Text("_______________________________");
+                    ImGui::CustomToggle("CLASSIC", &bTh_Classic);
+                    ImGui::BeginChild("f", ImVec2(0, 100), ImGuiChildFlags_Border | ImGuiChildFlags_FrameStyle);
                     ImGui::PushFont(font3);
                     ImGui::Text(("CPU:" + dCPUBrandString).c_str());//
                     ImGui::Text(("GPU:" + (fD_gpuModel)).c_str());
                     ImGui::Text(("GPU GL:" + (fD_gpuGLVer)).c_str());
                     ImGui::TextColored(ImVec4(0.20f, 1.0f, 0.40f, 1.0f), ("[--RAM Memory--]\nMemory Load:" + std::to_string(fMemStatus(1))+":Procents | "+(std::to_string(fMemStatus(7) - fMemStatus(4))) + ":GB\nFree Memory:" + std::to_string(fMemStatus(4)) + " :GB\nTotal Memory" + std::to_string(fMemStatus(7)) + " :GB").c_str());
                     ImGui::PopFont();
-                    ImGui::Text("_______________________________");
+                    ImGui::EndChild();
                     //ImMessage("Test_00", "Test Window");
                     //  ImGui::SliderInt("Win Volume", &fC_vol, 0, 100, "", 0);
-                    if (GetAsyncKeyState((char)VK_UP) && GetAsyncKeyState((char)VK_LCONTROL))
+                    if (GetAsyncKeyState((char)'W') && GetAsyncKeyState((char)VK_LCONTROL))
                     {
                         keybd_event(VK_VOLUME_UP, 0x45, KEYEVENTF_EXTENDEDKEY | 0, NULL);
                     }
-                    if (GetAsyncKeyState((char)VK_DOWN) && GetAsyncKeyState((char)VK_LCONTROL))
+                    if (GetAsyncKeyState((char)'S') && GetAsyncKeyState((char)VK_LCONTROL))
                     {
                         keybd_event(VK_VOLUME_DOWN, 0x45, KEYEVENTF_EXTENDEDKEY | 0, NULL);
                     }
@@ -686,13 +802,13 @@ int main(int, char**)
                     {
                         //ImGui::Text("Selected WhiteRabbit!!");
                         fStrMsgBuf = "FONT WHITERABBIT!!";
-                        WriteConfigJE << "fJE_Font_WR=true;" << std::endl;
+                        WriteConfigJE << "fJE_Font=true;" << std::endl;
                         // WriteConfigJE.close();
                     }
                     else
                     {
                         //WriteConfigJE.is_open();
-                        WriteConfigJE << "fJE_Font_WR=false;" << std::endl;
+                        WriteConfigJE << "fJE_Font=false;" << std::endl;
                         // WriteConfigJE.close();
                          //UpdateWindow(hwnd);
                          //ImGui::Text("Selected unispace bd!!");
@@ -894,6 +1010,7 @@ int main(int, char**)
                     ImGui::Text("\nCREATED BY HCPP\n");
 
                 }
+                ImU32 col = ImGui::GetColorU32(ImVec4(0.0f, 1, 0.50f, 1.0f));
               // ImGui::Text(("_____________________________\n\nCONTROLLER_1: " + bStrStatus + "\nTYPE : " + std::to_string(b_type) + "\n_____________________________").c_str());
                 // GLuint gl_id;
                //  ImLoadImageForGL("Test.jpg", &gl_id, 30, 30);
@@ -905,6 +1022,8 @@ int main(int, char**)
                 else
                 {
                     ImGui::Text("PLEASE PLUG YOUR CONTROLLER!!\n");
+                    ImGui::Text("Scaning Gamepads");
+                    ImGui::Spinner("scan", 20, 3, col);
                     C_XinputControllerState = false;
                     //fSndMsg(1);
                 }
@@ -921,7 +1040,7 @@ int main(int, char**)
                     {
                         std::system("start https://github.com/hcpp20334");
                     }
-                    ImGui::Text(("BULID: 1.1 (x64) (OpenGL3.3SSE4.2(C++20 GCC)) \nGPU:" + (fD_gpuModel)+" FPS:" + std::to_string((int64_t)io.Framerate) + " \n MEM : " + std::to_string((int64_t)(fDataMemUsage() / 1024) / 1024) + "MiB]").c_str());
+                    ImGui::Text(("BULID: 1.2.1 (x64) (OpenGL3.3SSE4.2(C++20 GCC)) \nGPU:" + (fD_gpuModel)+" FPS:" + std::to_string((int64_t)io.Framerate) + " \n MEM : " + std::to_string((int64_t)(fDataMemUsage() / 1024) / 1024) + "MiB]").c_str());
                 }
                 //
                // ImGui::ColorButton("JoyStickTest", ImVec4(0.90f, 0.65f, 0.65f, 0.45f),1,ImVec2(100.0f,50.0f));
@@ -1140,31 +1259,37 @@ int main(int, char**)
                 //
                 if (fJEFrame)
                 {
-
-                    //
-                    if (GetAsyncKeyState((char)VK_LEFT))
-                    {
-                        df = df + 0.1f;
-                        if (df > 100.0f)
-                        {
-                            df = 100.0f;
-                        }
+                    static bool dbg_b = false;
+                    if (GetAsyncKeyState('N')) {
+                        fB_a    = 1;
+                        fB_x    = 1;
+                        fB_y    = 1;
+                        fB_b    = 1;
+                        fB_rs   = 1;
+                        fB_ls   = 1;
+                        fB_du   = 1;
+                        fB_dd   = 1;
+                        fLY     = 327.0f;
+                        fRY     = 327.0f;
+                        fLX     = 327.0f;
+                        fRX     = 327.0f;
+                        fLT     = 255.0f;
+                        fRT     = 255.0f;
+                        fB_dl   = 1;
+                        fB_dr   = 1;
+                        dbg_b = true;
+                        b_Start = dbg_b ? true : false;
+                        b_Back = dbg_b ? true : false;
                     }
-                    else
-                    {
-                        df = df - 0.1f;
-                        if (df < 0.0f)
-                        {
-                            df = 0.0f;
-                        }
-                    }JEApp.ClearFreeMemory();
+                    //
+                    JEApp.ClearFreeMemory();
                     //bShowButtons = false;
                     ImGui::Text(" BUTTONS ");
                     ImGui::MenuItem("START", "", &b_Start, b_Start);
                     ImGui::SameLine();
                     ImGui::MenuItem("BACK", "", &b_Back, b_Back);
                     ImGui::PushItemWidth(200.0f);
-                    ImGui::SliderFloat("A \t", &fB_a, 0.0f, 1.0f);  ImGui::SameLine(); ImGui::SliderFloat("\tLY", &fLY, -327.0f, 327.0f);
+                    ImGui::SliderFloat("A \t", &fB_a, 0.0f, 1.0f); ImGui::SameLine(); ImGui::SliderFloat("\tLY", &fLY, -327.0f, 327.0f);
                     ImGui::SliderFloat("X \t", &fB_x, 0.0f, 1.0f);  ImGui::SameLine(); ImGui::SliderFloat("\tRY", &fRY, -327.0f, 327.0f);
                     ImGui::SliderFloat("Y \t", &fB_y, 0.0f, 1.0f);  ImGui::SameLine(); ImGui::SliderFloat("\tRX", &fRX, -327.0f, 327.0f);
                     ImGui::SliderFloat("B \t", &fB_b, 0.0f, 1.0f);  ImGui::SameLine(); ImGui::SliderFloat("\tLX", &fLX, -327.0f, 327.0f);
@@ -1229,7 +1354,7 @@ int main(int, char**)
             ImGui::TextColored(ImVec4(0.20f, 1.0f, 0.40f,1.0f), "JOYSTICKTEST");//Build 1.1\n
             ImGui::PopFont();
             ImGui::PushFont(font3);
-            ImGui::TextColored(ImVec4(0.20f, 1.0f, 0.40f, 1.0f), "Build 1.1\n");//Build 1.1\n
+            ImGui::TextColored(ImVec4(0.20f, 1.0f, 0.40f, 1.0f), "Build 1.2.1\n");//Build 1.1\n
             ImGui::PopFont();
             ImGui::TextColored(ImVec4(0.20f, 1.0f, 0.40f, 1.0f),"COMPILED C++20 (GCC) Visual Studio 2022 x64\nBackendAPI: OpenGL3.3\nInstruction Set:SSE4.2,x64,IA-64");
           
@@ -1264,8 +1389,11 @@ int main(int, char**)
                 v_Cscore = ld_V(&fBuffer_data, &fDebugData);
 
             }
+            
             ImGui::End();
+            
         }
+       
         // 3. Show another simple window.
          
         // Rendering

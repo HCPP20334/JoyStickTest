@@ -1,4 +1,4 @@
-## JoyStickTest 1.1
+## JoyStickTest 1.2.1 (latest)
 ```bash
 Gamepad tester (Xinput Only) **
 Compiled to C++20 GCC 

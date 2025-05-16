@@ -1,5 +1,15 @@
 ## JoyStickTest 1.2.1 (latest)
 ```bash
+FiXed
+* Fix Sliders to Test Gamepsad
+* Optimize code
+* fix frame update center
+ADDED
+* Circles to LS , RS Axis
+* Add New Gamepad API
+* add new fectches Update Center
+```
+```bash
 Gamepad tester (Xinput Only) **
 Compiled to C++20 GCC 
 IDE: Visual Studio 2022 x64

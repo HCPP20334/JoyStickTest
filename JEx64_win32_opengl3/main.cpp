@@ -1,7 +1,171 @@
 ﻿#include "JoyStickTest_module.h"
 #pragma comment (lib , "Urlmon.lib")
 namespace ImGui {
+    void TextToBool(const char* label, bool v) {
+        ImVec4 col = v? ImVec4(1.0f, 1.0f, 1.0f, 1.0f) : ImVec4(0.50f, 0.50f, 0.50f, 1.0f);
+        ImGui::TextColored(col, label);
+    }
+    void TextRGBABool(const char* label,ImVec4 colRGBA_in,ImVec4 colRGBA_out ,bool v) {
+        ImVec4 col = v ? GUI->RGBA2IV4(colRGBA_in.x, colRGBA_in.y, colRGBA_in.z, colRGBA_in.w) : GUI->RGBA2IV4(colRGBA_out.x, colRGBA_out.y, colRGBA_out.z, colRGBA_out.w);
+        ImGui::TextColored(col, label);
+    }
+    float CircleAxis(const char* label, float v) {
+        ImGui::BeginGroup(); // Группируем элементы
+        ImVec2 canvasSize = ImVec2(128, 128);
 
+        // Добавляем текст и получаем позицию canvas
+        ImGui::Text("%s : %.1f", label,v);
+        ImVec2 canvasPos = ImGui::GetCursorScreenPos();
+
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
+        ImU32 border_color = ImGui::GetColorU32(ImGuiCol_Border);
+        ImGuiStyle& style = ImGui::GetStyle();
+
+        // Отрисовка фона и границы
+        float radius = canvasSize.x * 0.5f;
+        ImVec2 center = ImVec2(canvasPos.x + radius, canvasPos.y + radius);
+
+        // Фоновый круг
+        drawList->AddCircleFilled(
+            center,
+            radius - style.FrameBorderSize,
+            IM_COL32(0, 0, 0, 0)
+        );
+
+        // Граница (рисуем круг вместо прямоугольника)
+        if (style.FrameBorderSize > 0.0f) {
+            drawList->AddCircle(
+                center,
+                radius - style.FrameBorderSize * 0.5f,
+                border_color,
+                0, // Автоматическое количество сегментов
+                style.FrameBorderSize
+            );
+        }
+
+        // Положение стика (предполагаем, что v - нормализованное значение [-1, 1])
+        ImVec2 stickPos = ImVec2(
+            center.x + v * (radius - 10.0f), // Учитываем размер маркера
+            center.y + v * (radius - 10.0f)
+        );
+
+        // Маркер стика
+        drawList->AddCircleFilled(
+            stickPos,
+            10.0f,
+            ImGui::GetColorU32(ImVec4(0.34f, 0.06f, 0.98f, 1.00f))
+        );
+
+        // Перемещаем курсор для следующих элементов ImGui
+        ImGui::Dummy(canvasSize);
+        ImGui::EndGroup();
+
+        return 0;
+    }
+    float CircleAxisXY(const char* label, float v, float v1) {
+        ImGui::BeginGroup(); // Группируем элементы
+        ImVec2 canvasSize = ImVec2(128, 128);
+
+        // Добавляем текст и получаем позицию canvas
+        ImGui::Text("%s : %.1f : %.1f", label, v,v1);
+        ImVec2 canvasPos = ImGui::GetCursorScreenPos();
+
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
+        ImU32 border_color = ImGui::GetColorU32(ImGuiCol_Border);
+        ImGuiStyle& style = ImGui::GetStyle();
+
+        // Отрисовка фона и границы
+        float radius = canvasSize.x * 0.5f;
+        ImVec2 center = ImVec2(canvasPos.x + radius, canvasPos.y + radius);
+
+        // Фоновый круг
+        drawList->AddCircleFilled(
+            center,
+            radius - style.FrameBorderSize,
+            IM_COL32(0, 0, 0, 0)
+        );
+
+        // Граница (рисуем круг вместо прямоугольника)
+        if (style.FrameBorderSize > 0.0f) {
+            drawList->AddCircle(
+                center,
+                radius - style.FrameBorderSize * 0.5f,
+                border_color,
+                0, // Автоматическое количество сегментов
+                style.FrameBorderSize
+            );
+        }
+
+        // Положение стика (предполагаем, что v - нормализованное значение [-1, 1])
+        ImVec2 stickPos = ImVec2(
+            center.x + v * (radius - 10.0f), // Учитываем размер маркера
+            center.y + v1 * (radius - 10.0f)
+        );
+
+        // Маркер стика
+        drawList->AddCircleFilled(
+            stickPos,
+            10.0f,
+            ImGui::GetColorU32(ImVec4(0.34f, 0.06f, 0.98f, 1.00f))
+        );
+
+        // Перемещаем курсор для следующих элементов ImGui
+        ImGui::Dummy(canvasSize);
+        ImGui::EndGroup();
+
+        return 0;
+    }
+    float ButtonGamepad(const char* label, bool v) {
+        ImGui::BeginGroup();
+        ImVec2 canvasSize = ImVec2(32, 32);
+
+        ImVec2 canvasPos = ImGui::GetCursorScreenPos();
+        ImGuiWindow* window = ImGui::GetCurrentWindow();
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
+        ImU32 border_color = ImGui::GetColorU32(ImGuiCol_Border);
+        ImGuiStyle& style = ImGui::GetStyle();
+        float radius = canvasSize.x * 0.5f;
+
+        // Рассчитываем размер текста
+        ImVec2 text_size = ImGui::CalcTextSize(label);
+
+        // Вычисляем центр кнопки
+        ImVec2 center = ImVec2(canvasPos.x + radius, canvasPos.y + radius);
+
+        // Позиция текста (центрированная)
+        ImVec2 text_pos = ImVec2(
+            center.x - text_size.x * 0.5f,
+            center.y - text_size.y * 0.5f
+        );
+
+        // Отрисовка текста через drawList
+        if (style.FrameBorderSize > 0.0f) {
+            drawList->AddCircle(
+                center,
+                radius - style.FrameBorderSize * 0.5f,
+                border_color,
+                0, // Автоматическое количество сегментов
+                style.FrameBorderSize
+            );
+        }
+
+        // Фоновый круг
+        drawList->AddCircleFilled(
+            center,
+            radius - style.FrameBorderSize,
+            v ? ImGui::GetColorU32(ImVec4(0.34f, 0.06f, 0.98f, 1.00f)) :
+            ImGui::GetColorU32(ImVec4(0.36f, 0.36f, 0.36f, 1.0f))
+        );
+        drawList->AddText(text_pos, ImGui::GetColorU32(ImGuiCol_Text), label);
+
+        // Положение стика (предполагаем, что v - нормализованное значение [-1, 1])
+      
+        // Перемещаем курсор для следующих элементов ImGui
+        ImGui::Dummy(canvasSize);
+        ImGui::EndGroup();
+
+        return 0;
+    }
     bool CustomToggle(const char* label, bool* v) {
         ImGuiWindow* window = ImGui::GetCurrentWindow();
         ImGui::PushID(label);
@@ -105,6 +269,79 @@ namespace ImGui {
         }
 
         window->DrawList->PathStroke(color, false, thickness);
+    }
+    bool CustomSliderFloat(const char* label, float* value, float min, float max, ImVec2 size = ImVec2(100, 16)) {
+        ImGuiWindow* window = ImGui::GetCurrentWindow();
+        if (window->SkipItems)
+            return false;
+
+        ImGuiContext& g = *GImGui;
+        const ImGuiStyle& style = g.Style;
+        const ImGuiID id = window->GetID(label);
+
+        const ImVec2 text_size = ImGui::CalcTextSize(label);
+        const float text_offset_x = (text_size.x > 0.0f)
+            ? style.ItemInnerSpacing.x + text_size.x
+            : 0.0f;
+
+        // Правильное создание векторов
+        const ImRect frame_bb(
+            window->DC.CursorPos,
+            ImVec2(
+                window->DC.CursorPos.x + size.x,
+                window->DC.CursorPos.y + size.y
+            )
+        );
+
+        const ImRect total_bb(
+            frame_bb.Min,
+            ImVec2(
+                frame_bb.Max.x + text_offset_x,
+                frame_bb.Max.y + ImMax(0.0f, text_size.y - size.y)
+            )
+        );
+        ImGui::ItemSize(total_bb, style.FramePadding.y);
+        if (!ImGui::ItemAdd(total_bb, id, &frame_bb))
+            return false;
+
+        // Обработка ввода
+        bool hovered, held;
+        bool clicked = ImGui::ButtonBehavior(frame_bb, id, &hovered, &held);
+        if (clicked || held) {
+            const float mouse_pos = (g.IO.MousePos.x - frame_bb.Min.x) / size.x;
+            *value = ImClamp(mouse_pos * (max - min) + min, min, max);
+        }
+
+        // Цвета
+        const ImU32 bg_color = ImGui::GetColorU32(ImGuiCol_FrameBg);
+        const ImU32 fill_color = ImGui::GetColorU32(ImGuiCol_SliderGrabActive);
+        const ImU32 knob_color = ImGui::GetColorU32((held && hovered) ? ImGuiCol_SliderGrabActive :
+            hovered ? ImGuiCol_SliderGrab :
+            ImGuiCol_SliderGrab);
+
+        // Отрисовка
+        ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+        // Фон
+        draw_list->AddRectFilled(frame_bb.Min, frame_bb.Max, bg_color, style.FrameRounding);
+
+        // Заполненная область
+        const float t = (*value - min) / (max - min);
+        const ImRect fill_bb(frame_bb.Min, ImVec2(frame_bb.Min.x + size.x * t, frame_bb.Max.y));
+        draw_list->AddRectFilled(fill_bb.Min, fill_bb.Max, fill_color, style.FrameRounding);
+
+        // Бегунок
+        const float knob_radius = size.y * 0.8f;
+        const ImVec2 knob_center = ImVec2(
+            frame_bb.Min.x + size.x * t,
+            frame_bb.Min.y + size.y * 0.5f
+        );
+        draw_list->AddCircleFilled(knob_center, knob_radius, knob_color, 16);
+
+        // Текст
+        ImGui::RenderText(ImVec2(frame_bb.Max.x + style.ItemInnerSpacing.x, frame_bb.Min.y), label);
+
+        return clicked || held;
     }
 }
 uint64_t fDataMemUsage() // Work Function !!! Check Sym RAM to Current Program //
@@ -225,12 +462,7 @@ static int              g_Height;
 // Forward declarations of helper functions
 bool CreateDeviceWGL(HWND hWnd, WGL_WindowData* data);
 void CleanupDeviceWGL(HWND hWnd, WGL_WindowData* data);
-static bool bCPUTest = false;
-static bool ts_window = true;
-static bool bGPUTest = false;
-static bool bKbTest = false;
-bool renderFrame = false;
-static bool fCAboutW;
+
 //
 uint64_t id = 0;
 int64_t  idx = 0;
@@ -368,97 +600,14 @@ int main(int, char**)
         "⣿⣿⣿⣿⣿⣿⡏⠄⠄⠈⠄⠄⣀⣤⣾⣶⣤⡀⠄⠄⠄⠄⠄⢻⣿⣿⣿⣿⣿⣿"
         "⣿⣿⣿⣿⣿⣿⠃⠄⢀⣤⣶⣿⣿⣿⣿⣿⣿⣿⣿⣶⣤⡀⠄⠸⣿⣿⣿⣿⣿⣿"
         "⣿⣿⣿⣿⣿⣿⣶⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣶⣿⣿⣿⣿⣿⣿";
-    ClockSystem clock;
-    ImDrawListSplitter JEApp;
-    static bool fCAboutW;
-    ImVec4 clear_color = ImVec4(0.01f, 0.01f, 0.02f, 0.80f);
-    ImVec2 fJ_size;
-    JoyStickAPI* xController1;
-    JoyStickAPI* xController2;
-    xController1 = new JoyStickAPI(1);
-    static float fB_a = 0.0f;
-    static float fB_b = 0.0f;
-    static float fB_x = 0.0f;
-    static float fB_y = 0.0f;
-    static float fB_rt = 0.0f;
-    static float fB_rb = 0.0f;
-    static float fB_lb = 0.0f;
-    static float fB_lt = 0.0f;
-    static float fB_du = 0.0f;
-    static float fB_dd = 0.0f;
-    static float fB_dl = 0.0f;
-    static float fB_dr = 0.0f;
-    static float fB_ls = 0.0f;
-    static float fB_rs = 0.0f;
-    static int counter = 0;
-    static bool fJEFrame = false;
-    bool fLoadingFrame = true;
-    static float fC_Rcol = 0.0f;
-    static float fC_Gcol = 0.0f;
-    static float fC_Bcol = 0.0f;
-    static bool bShowButtons = false;
-    static bool b_Start = false;
-    static bool b_Back = false;
-    static bool bkb_emuFrame = false;
-    static bool fWFrame = true;
-    //
-    static float df = 0.0f;
-    bool C_XinputControllerState = false;
-    static float  fByteArray = 0;
-    static float fLX = 0;
-    static float fLY = 0;
-    static float fRX = 0;
-    static float fRY = 0;
-    //
-    static float fLT = 0;
-    static float fRT = 0;
-    //
-   // ShowWindow(GetConsoleWindow(), 2);
-    static bool b_vsync = false;
-    static bool fL_motor = false;
-    static bool fR_motor = false;
-    static bool v_flagClMemory = false;
-    static bool v_bExit = false;
-    static int  v_Rmotor = 0;
-    static int v_Lmotor = 0;
-    static bool v_bSettings = false;
-    static bool v_bSettingsCh_b = false;
-    static bool v_bInvertVibValue = false;
-    static bool rd_text;
-    static bool v_Penis = false;
-    static bool fFontsState = true;
-    static bool v_bThemeJE;
-    static bool Gamepad_enable;
-    static bool fExitWindow = false;
-    //
-    static std::string filestr;
-    static std::string fStrMsgBuf;
-    static std::string fBuffer_data;
-    static  std::string bStrStatus;
-    //
-    static int64_t fThemeId = 0;
-    static int64_t b_data = 0;
-    static int64_t b_type = 0;
-    static int64_t fDelay = 0;
-    static int64_t fGPUScore = 0;
-    //
- 
-    uint64_t OutLatency = 0;
-    int imgCountToRender = 0;
-    static int th_bar = 1000;
-    //
-
-    //
-     char fInputBuffer;
-     bool stopBench = false;
-     std::string buf_0;
-    int64_t Val = 0;
+  
+  
     // Create application window
     ImGui_ImplWin32_EnableDpiAwareness();
     WNDCLASSEXW wc = { sizeof(wc), CS_OWNDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"JE x64", nullptr };
     wc.hIcon = LoadIcon(wc.hInstance, MAKEINTRESOURCE(103));
     ::RegisterClassExW(&wc);
-    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"JoyStickTest 1.2.1 OpenGL3_SSE4.2 (C++20)", WS_OVERLAPPEDWINDOW | WS_EX_TOOLWINDOW |  WS_EX_NOPARENTNOTIFY, 100, 80, 800, 480, nullptr, nullptr, wc.hInstance, nullptr);
+    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"JoyStickTest 1.2.2 OpenGL3_SSE4.2 (C++20)", WS_OVERLAPPEDWINDOW | WS_EX_TOOLWINDOW |  WS_EX_NOPARENTNOTIFY, 100, 80, 800, 540, nullptr, nullptr, wc.hInstance, nullptr);
 
     // Initialize OpenGL
     if (!CreateDeviceWGL(hwnd, &g_MainWindow))
@@ -494,18 +643,18 @@ int main(int, char**)
     Set_prm.is_open();
     while (std::getline(Set_prm, fStrParam))
     {
-        if (fStrParam == "fJE_Font=false;") { fFontsState = false; }if (fStrParam == "fJE_Font=true;") { fFontsState = true; }
+        if (fStrParam == "fJE_Font=false;") { JTModule->fFontsState = false; }if (fStrParam == "fJE_Font=true;") { JTModule->fFontsState = true; }
         if (fStrParam == "fJETheme=0;") { bTh_Dark = true; bTh_Light = false; bTh_Classic = false; }
         if (fStrParam == "fJETheme=1;") { bTh_Dark = false; bTh_Light = false; bTh_Classic = true; }
         if (fStrParam == "fJETheme=2;") { bTh_Dark = false; bTh_Light = false; bTh_Classic = false; }
-        if (fStrParam == "fJEVsync=true;") { b_vsync = true; }if (fStrParam == "fJEVsync=false;") { b_vsync = false; }
-        if (fStrParam == "fJEInvertVibrationValue=true;") { v_bInvertVibValue = true; }if (fStrParam == "fJEInvertVibrationValue=false;") { v_bInvertVibValue = false; }
+        if (fStrParam == "fJEVsync=true;") { JTModule->b_vsync = true; }if (fStrParam == "fJEVsync=false;") { JTModule->b_vsync = false; }
+        if (fStrParam == "fJEInvertVibrationValue=true;") { JTModule->v_bInvertVibValue = true; }if (fStrParam == "fJEInvertVibrationValue=false;") { JTModule->v_bInvertVibValue = false; }
     }
 
     ImFont* font1 = 0;
     ImFont* font2 = 0;
     ImFont* font3 = 0;
-    if (fFontsState)
+    if (JTModule->fFontsState)
     {
         io.Fonts->AddFontFromFileTTF(".\\PixelizerBold.ttf", 20.0f);
         font1 = io.Fonts->AddFontFromFileTTF("PixelizerBold.ttf", 20.0f);
@@ -572,7 +721,7 @@ int main(int, char**)
         // Poll and handle messages (inputs, window resize, etc.)
         // See the WndProc() function below for our to dispatch events to the Win32 backend.
         MSG msg;
-        fWFrame = true;
+        JTModule->fWFrame = true;
         bool fB_loadFrame = false;
         while (::PeekMessage(&msg, nullptr, 0U, 0U, PM_REMOVE))
         {
@@ -597,12 +746,12 @@ int main(int, char**)
            // fJEFrame = false;
            // std::cout << "[JE_ENGINE] Frame Cra" << std::endl;
           //  std::cout << "ADDR:" << &d << "->" << d << std::endl;
-            ImGui::Begin("\tJE x64_OpenGL3_SSE4.2 C++20",&fJEFrame, ImGuiWindowFlags_NoCollapse + ImGuiWindowFlags_NoTitleBar);  
+            ImGui::Begin("\tJE x64_OpenGL3_SSE4.2 C++20",&JTModule->fJEFrame, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove );
                 // Create a window called "Hello, world!" and append into it.
 
                 ImGui::SetWindowPos(ImVec2(-1.0f, 25.0f));
                 ImGui::SetWindowSize(ImVec2(800.0f, 480.0f));
-                JEApp.ClearFreeMemory();
+                JTModule->JEApp.ClearFreeMemory();
                 std::ofstream WriteConfigJE("JE_CONFIG.TXT");
                 // ImGui::Begin("THEME EDITOR", &v_bThemeJE);
                 ImGuiStyle& style = ImGui::GetStyle();
@@ -629,7 +778,7 @@ int main(int, char**)
                     bTh_Light = false;
                     bTh_Classic = false;
                     bTh_Dark = true;
-                    fStrMsgBuf = "Theme 0";
+                    JTModule->fStrMsgBuf = "Theme 0";
                     WriteConfigJE.is_open();
                     WriteConfigJE << "fJETheme=0;" << std::endl;
                     //WriteConfigJE.close();
@@ -655,7 +804,7 @@ int main(int, char**)
                     colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.41f, 0.41f, 0.41f, 1.00f);
                     colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.51f, 0.51f, 0.51f, 1.00f);
                     colors[ImGuiCol_CheckMark] = ImVec4(0.45f, 0.26f, 0.98f, 1.00f);
-                    colors[ImGuiCol_SliderGrab] = ImVec4(0.48f, 0.26f, 0.98f, 0.52f);
+                    colors[ImGuiCol_SliderGrab] = ImVec4(0.48f, 0.26f, 0.98f, 1.0f);
                     colors[ImGuiCol_SliderGrabActive] = ImVec4(0.48f, 0.26f, 0.98f, 0.52f);
                     colors[ImGuiCol_Button] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
                     colors[ImGuiCol_ButtonHovered] = ImVec4(0.34f, 0.06f, 0.98f, 1.00f);
@@ -700,8 +849,8 @@ int main(int, char**)
                    
                 }
                 //ImGui::Text(("b0:" + std::to_string(bTh_Classic) + "b1:" + std::to_string(bTh_Dark) + "b1:" + std::to_string(bTh_Light)).c_str());
-                JEApp.ClearFreeMemory();
-                if (b_vsync) {
+                JTModule->JEApp.ClearFreeMemory();
+                if (JTModule->b_vsync) {
                     Sleep(13);
                     WriteConfigJE << "fJEVsync=true;" << std::endl;
                 }
@@ -710,49 +859,51 @@ int main(int, char**)
                     WriteConfigJE << "fJEVsync=false;" << std::endl;
                 }
                 if (GetAsyncKeyState(VK_ESCAPE)) {
-                    v_bExit = true;
+                    JTModule->v_bExit = true;
                 }
                 if (dgwnd) {
                     std::exception mainStack;
-                    ImGui::Text("f=%p", &v_bExit);
-                    std::cout << "f=" << &v_bExit << std::endl;
+                    ImGui::Text("f=%p", &JTModule->v_bExit);
+                    std::cout << "f=" << &JTModule->v_bExit << std::endl;
                     ImGui::Begin("1d", &dgwnd, ImGuiWindowFlags_NoCollapse + ImGuiWindowFlags_NoTitleBar);
                     ImGui::SetWindowSize(ImVec2(600.0f, 600.0f));
-                    ImGui::Text(("b_vsync:" + std::to_string(b_vsync)+"\tstack:=%p").c_str(), &b_vsync);
-                    ImGui::Text(("fL_motor:"+std::to_string(fL_motor)+"\tstack:=%p").c_str(), &fL_motor);
-                    ImGui::Text(("fL_motor:"+std::to_string(fL_motor)+"\tstack:=%p").c_str(), &fR_motor);
-                    ImGui::Text(("v_flagClMemory:" + std::to_string(v_flagClMemory)+"\tstack:=%p").c_str(), &v_flagClMemory);
+                    ImGui::Text(("b_vsync:" + std::to_string(JTModule->b_vsync)+"\tstack:=%p").c_str(), &JTModule->b_vsync);
+                    ImGui::Text(("fL_motor:"+std::to_string(JTModule->fL_motor)+"\tstack:=%p").c_str(), &JTModule->fL_motor);
+                    ImGui::Text(("fL_motor:"+std::to_string(JTModule->fL_motor)+"\tstack:=%p").c_str(), &JTModule->fR_motor);
+                    ImGui::Text(("v_flagClMemory:" + std::to_string(JTModule->v_flagClMemory)+"\tstack:=%p").c_str(), &JTModule->v_flagClMemory);
                     ImGui::Text(("imgBufferAMD:" + std::to_string(imgBufferAMD)+"\tstack:=%p").c_str(), &imgBufferAMD);
-                    ImGui::Text(("v_bExit:" + std::to_string(v_bExit)+"\tstack:=%p").c_str(), &v_bExit);
-                    ImGui::Text(("v_Rmotor:"+std::to_string(v_Rmotor)+"\tstack:=%p").c_str(), &v_Rmotor);
-                    ImGui::Text(("v_Lmotor:" + std::to_string(v_Lmotor)+"\tstack:=%p").c_str(), &v_Lmotor);
-                    ImGui::Text(("v_bSettings:" + std::to_string(v_bSettings) + "\tstack:=%p").c_str(), &v_bSettings);
-                    ImGui::Text(("v_bSettingsCh_b:"+std::to_string(v_bSettingsCh_b)+"\tstack:=%p").c_str(), &v_bSettingsCh_b);
-                    ImGui::Text(("v_bInvertVibValue:" + std::to_string(v_bInvertVibValue)+"\tstack:=%p").c_str(), &v_bInvertVibValue);
-                    ImGui::Text(("rd_text:"+std::to_string(rd_text)+"\tstack:=%p").c_str(), &rd_text);
-                    ImGui::Text(("v_Penis:"+std::to_string(v_Penis)+"\tstack:=%p").c_str(), &v_Penis);
-                    ImGui::Text(("fFontsState:"+std::to_string(fFontsState)+"\tstack:=%p").c_str(), &fFontsState);
+                    ImGui::Text(("v_bExit:" + std::to_string(JTModule->v_bExit)+"\tstack:=%p").c_str(), &JTModule->v_bExit);
+                    ImGui::Text(("v_Rmotor:"+std::to_string(JTModule->v_Rmotor)+"\tstack:=%p").c_str(), &JTModule->v_Rmotor);
+                    ImGui::Text(("v_Lmotor:" + std::to_string(JTModule->v_Lmotor)+"\tstack:=%p").c_str(), &JTModule->v_Lmotor);
+                    ImGui::Text(("v_bSettings:" + std::to_string(JTModule->v_bSettings) + "\tstack:=%p").c_str(), &JTModule->v_bSettings);
+                    ImGui::Text(("v_bSettingsCh_b:"+std::to_string(JTModule->v_bSettingsCh_b)+"\tstack:=%p").c_str(), &JTModule->v_bSettingsCh_b);
+                    ImGui::Text(("v_bInvertVibValue:" + std::to_string(JTModule->v_bInvertVibValue)+"\tstack:=%p").c_str(), &JTModule->v_bInvertVibValue);
+                    ImGui::Text(("rd_text:"+std::to_string(JTModule->rd_text)+"\tstack:=%p").c_str(), &JTModule->rd_text);
+                    ImGui::Text(("v_Penis:"+std::to_string(JTModule->v_Penis)+"\tstack:=%p").c_str(), &JTModule->v_Penis);
+                    ImGui::Text(("fFontsState:"+std::to_string(JTModule->fFontsState)+"\tstack:=%p").c_str(), &JTModule->fFontsState);
                     ImGui::Text(("imgBufferAMD:"+std::to_string(imgBufferAMD)+"\tstack:=%p").c_str(), &imgBufferAMD);
-                    ImGui::Text(("v_bThemeJE:"+std::to_string(v_bThemeJE)+"\tstack:=%p").c_str(), &v_bThemeJE);
+                    ImGui::Text(("v_bThemeJE:"+std::to_string(JTModule->v_bThemeJE)+"\tstack:=%p").c_str(), &JTModule->v_bThemeJE);
                     ImGui::Text(("bTh_Classic:"+std::to_string(bTh_Classic)+"\tstack:=%p").c_str(), &bTh_Classic);
                     ImGui::Text(("bTh_Dark:"+std::to_string(bTh_Dark)+"\tstack:=%p").c_str(), &bTh_Dark);
                     ImGui::Text(("bTh_Light:"+std::to_string(bTh_Light)+"\tstack:=%p").c_str(), &bTh_Light);
-                    ImGui::Text(("Gamepad_enable:"+std::to_string(Gamepad_enable)+"\tstack:=%p").c_str(), &Gamepad_enable);
-                    ImGui::Text(("C_XinputControllerState=" + std::to_string(C_XinputControllerState) + "\tstack=%p").c_str(), &C_XinputControllerState);
+                    ImGui::Text(("Gamepad_enable:"+std::to_string(JTModule->Gamepad_enable)+"\tstack:=%p").c_str(), &JTModule->Gamepad_enable);
+                    ImGui::Text(("C_XinputControllerState=" + std::to_string(JTModule->C_XinputControllerState) + "\tstack=%p").c_str(), &JTModule->C_XinputControllerState);
                     ImGui::End();
                 }
-                if (v_bSettings)
+                if (JTModule->v_bSettings)
                 {
-                    ImGui::Begin("SETTINGS", &v_bSettings, ImGuiWindowFlags_NoCollapse);
-                    JEApp.ClearFreeMemory();
+                    ImGui::Begin("SETTINGS", &JTModule->v_bSettings, ImGuiWindowFlags_NoCollapse);
+                    JTModule->JEApp.ClearFreeMemory();
                     // ImGui::Image((void*)(intptr_t)out_texture, ImVec2(Ix, Ix));
-                    if (v_bSettings) { v_bSettingsCh_b = true; }
-                    //ImGui::Checkbox("AUTO CLEARNING MEMORY(DEBUG)", &v_flagClMemory);
+                    if (JTModule->v_bSettings) { JTModule->v_bSettingsCh_b = true; }
+                    //ImGui::Checkbox("AUTO CLEARNING MEMORY(DEBUG)", &v_flagClMemory);fInvertYBool
                     ImGui::SeparatorText("MAIN SETTINGS");
-                    ImGui::CustomToggle("VSYNC", &b_vsync); ImGui::SameLine(); ImGui::TextColored((b_vsync ? ImVec4(0.65f, 0, 1.0f, 1.0f) : ImVec4(1, 0, 0.33f, 1.0f)), (b_vsync ? "Enabled" : "Disabled"));
-                    ImGui::CustomToggle("INVERT VIBRATION VALUE FOR EMU XINPUT", &v_bInvertVibValue); ImGui::SameLine(); ImGui::TextColored((v_bInvertVibValue ? ImVec4(0.65f, 0, 1.0f, 1.0f) : ImVec4(1, 0, 0.33f, 1.0f)), (v_bInvertVibValue ? "Enabled" : "Disabled"));
-                    ImGui::TextColored((fFontsState ? ImVec4(0.65f, 0, 1.0f, 1.0f) : ImVec4(1, 0, 0.33f, 1.0f)), "Need Restart App");
-                    ImGui::CustomToggle("SELECT FONTS", &fFontsState); ImGui::SameLine(); ImGui::TextColored((fFontsState ? ImVec4(0.65f, 0, 1.0f, 1.0f) : ImVec4(1, 0, 0.33f, 1.0f)), (fFontsState ? "PixelizerBold" : "roboto"));
+                    ImGui::CustomToggle("VSYNC", &JTModule->b_vsync); ImGui::SameLine(); ImGui::TextColored((JTModule->b_vsync ? ImVec4(0.65f, 0, 1.0f, 1.0f) : ImVec4(1, 0, 0.33f, 1.0f)), (JTModule->b_vsync ? "Enabled" : "Disabled"));
+                    ImGui::CustomToggle("INVERT VIBRATION VALUE FOR EMU XINPUT", &JTModule->v_bInvertVibValue); ImGui::SameLine(); ImGui::TextColored((JTModule->v_bInvertVibValue ? ImVec4(0.65f, 0, 1.0f, 1.0f) : ImVec4(1, 0, 0.33f, 1.0f)), (JTModule->v_bInvertVibValue ? "Enabled" : "Disabled"));
+                    ImGui::CustomToggle("Gamepad API:", &JTModule->Gamepad_enable); ImGui::SameLine(); ImGui::Text((!JTModule->Gamepad_enable ? "JoyStickAPI(Xinput)" : "ImGui Gamepad API"));
+                    ImGui::CustomToggle("Invert Y Axis:", &JTModule->fInvertYBool); ImGui::SameLine(); ImGui::Text((JTModule->fInvertYBool ? "Enable" : "Disable"));
+                    ImGui::TextColored((JTModule->fFontsState ? ImVec4(0.65f, 0, 1.0f, 1.0f) : ImVec4(1, 0, 0.33f, 1.0f)), "Need Restart App");
+                    ImGui::CustomToggle("SELECT FONTS", &JTModule->fFontsState); ImGui::SameLine(); ImGui::TextColored((JTModule->fFontsState ? ImVec4(0.65f, 0, 1.0f, 1.0f) : ImVec4(1, 0, 0.33f, 1.0f)), (JTModule->fFontsState ? "PixelizerBold" : "roboto"));
                     ImGui::CustomToggle("Debug Info",&dgwnd);
                     ImGui::SeparatorText("THEME EDITOR");
                     ImGui::CustomToggle("DARK", &bTh_Dark);
@@ -790,7 +941,7 @@ int main(int, char**)
                         buf.close();
                         WinExec("restart.bat", 1);
                     }
-                    if (v_bInvertVibValue)
+                    if (JTModule->v_bInvertVibValue)
                     {
                         WriteConfigJE << "fJEInvertVibrationValue=true;" << std::endl;
                     }
@@ -798,10 +949,10 @@ int main(int, char**)
                     {
                         WriteConfigJE << "fJEInvertVibrationValue=false;" << std::endl;
                     }
-                    if (fFontsState)
+                    if (JTModule->fFontsState)
                     {
                         //ImGui::Text("Selected WhiteRabbit!!");
-                        fStrMsgBuf = "FONT WHITERABBIT!!";
+                        JTModule->fStrMsgBuf = "FONT WHITERABBIT!!";
                         WriteConfigJE << "fJE_Font=true;" << std::endl;
                         // WriteConfigJE.close();
                     }
@@ -812,54 +963,47 @@ int main(int, char**)
                         // WriteConfigJE.close();
                          //UpdateWindow(hwnd);
                          //ImGui::Text("Selected unispace bd!!");
-                        fStrMsgBuf = "FONT UNISPACE BD!!";
+                        JTModule->fStrMsgBuf = "FONT UNISPACE BD!!";
                     }
 
                     ImGui::End();
                 }
-                JEApp.ClearFreeMemory();
+                JTModule->JEApp.ClearFreeMemory();
                 if (GetAsyncKeyState('C')) {
                     MessageBoxA(hwnd, ("CPU:" + dCPUBrandString + "\ngpu_model: " + fD_gpuModel + "\ngpu_brand: " + fD_gpuBrand + "\ngpu_OpenGL_version: " + fD_gpuGLVer[0]+ fD_gpuGLVer[1]+ fD_gpuGLVer[2]+"\n[--Memory--]-RAM\nMemory Load:"+std::to_string(fMemStatus(1))+"%\nFree Memory:"+std::to_string(fMemStatus(4))+" :GB\nTotal Memory"+std::to_string(fMemStatus(7))+" :GB").c_str(), "JoyStickTest PC Hardware", 1);
                 }
                 static bool fJEUpdate = false;
                 //XINPUT_STATE fDJUP;
                 ImGui::BeginMainMenuBar();
-                ImGui::MenuItem("SETTINGS", "", &v_bSettings, true);
-                ImGui::MenuItem("ABOUT", "", &fCAboutW, true);
-                ImGui::MenuItem("CPUTEST", "", &bCPUTest, true);
-                ImGui::MenuItem("GPUTEST", "", &bGPUTest, true);
-                ImGui::MenuItem("KeyBoard Test", "", &bKbTest, true);
+                ImGui::PushFont(font1);
+                ImGui::MenuItem("SETTINGS", "", &JTModule->v_bSettings, true);
+                ImGui::MenuItem("ABOUT", "", &JTModule->fCAboutW, true);
+                ImGui::MenuItem("CPUTEST", "", &JTModule->bCPUTest, true);
+                ImGui::MenuItem("GPUTEST", "", &JTModule->bGPUTest, true);
+                ImGui::MenuItem("KeyBoard Test", "", &JTModule->bKbTest, true);
                 ImGui::MenuItem("UPDATE", "", &fJEUpdate, true);
-                ImGui::MenuItem("EXIT", "", &v_bExit, true);
-                if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_B && xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A && xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_Y)
+                ImGui::MenuItem("EXIT", "", &JTModule->v_bExit, true);
+                ImGui::PopFont();
+                if (JTModule->xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_B && JTModule->xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A && JTModule->xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_Y)
                 {
-                    v_Penis = true;
+                    JTModule->v_Penis = true;
                 }
                 //  static bool v_bExMsg = true;
-                if (GetAsyncKeyState('G') && GetAsyncKeyState('A') & GetAsyncKeyState('Y')) {
-                    v_Penis = true;
-                }
-                if (v_Penis)
-                {
-
-                    ImGui::Begin("Memory Stack Runtime [V - to Close]");
-                    //fWframeX = (rand() % 300);
-                    srand(ImGui::GetTime());
-                    JEApp.ClearFreeMemory();
-                    ImGui::Text(":::::::::::::::::: MEMORY STACK :::::::::::::::::::");
-                    ImGui::Text("---------------------------------------------------");
-                    if (GetKeyState('R') > 0)
-                    {
-                        ImGui::SetWindowPos(ImVec2((rand() % 300), (rand() % 300)), 0);
+                if (GetAsyncKeyState('G')) {
+                    a++;
+                    if (a > 20) {
+                        a = 0;
                     }
-                    if (GetAsyncKeyState('V')) { ImGui::Text("Thanks!!why used my app!!"); Sleep(1000); v_Penis = false; }
-                    io.AddInputCharacter(ImGuiKey_GamepadDpadUp);
-                    ImGui::End();
+                    if (((a == 20) ? true : false)) {
+                        ImGui::Text("OK");
+                        JTModule->v_Penis = true;
+                   }
                 }
-                if (v_bExit)
+                
+                if (JTModule->v_bExit)
                 {
                     // exit:
-                    JEApp.ClearFreeMemory();
+                    JTModule->JEApp.ClearFreeMemory();
                     ImGui::Begin("EXIT");
                     ImGui::PushFont(font2);
                     ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), ":: WARNING!!! ::");
@@ -869,17 +1013,16 @@ int main(int, char**)
                     ImGui::PopFont();
                     if (ImGui::Button("SAVE AND EXIT",ImVec2(150.0f, 40.0f))) { ImGui::Text("Thanks!!why used my app!!"); WriteConfigJE.close(); Sleep(1000); exit(0); }
                     ImGui::SameLine();
-                    if (ImGui::Button("BACK",ImVec2(150.0f,40.0f))) { v_bExit = false; }
+                    if (ImGui::Button("BACK",ImVec2(150.0f,40.0f))) { JTModule->v_bExit = false; }
                     ImGui::End();
                 }
                 ImGui::EndMainMenuBar();
-                JEApp.ClearFreeMemory();
+                JTModule->JEApp.ClearFreeMemory();
                 static std::string key_pull;
-               // xController1->GetBatteryState(&b_data, &b_type, &bStrStatus);
-                if (bKbTest) {
-                    ImGui::Begin("kb_test", &bKbTest);
+               // JTModule->xController1->GetBatteryState(&b_data, &b_type, &bStrStatus);
+                if (JTModule->bKbTest) {
+                    ImGui::Begin("kb_test", &JTModule->bKbTest);
                     ImGui::Text(("key_pullup: " + key_pull).c_str());
-
                     // Ассоциативный массив: ключ — код клавиши, значение — строковое представление
                     static const std::unordered_map<int, std::string> keyMap = {
                         {'1', "k1"}, {'Q', "kQ"},
@@ -1002,7 +1145,7 @@ int main(int, char**)
                     ImGui::End();
 
                 }
-                if (!fJEFrame)
+                if (!JTModule->fJEFrame)
                 {
                     ImGui::PushFont(font2);
                     ImGui::Text("\nWELLCOME TO JOYSTICKTEST!!");
@@ -1010,30 +1153,37 @@ int main(int, char**)
                     ImGui::Text("\nCREATED BY HCPP\n");
 
                 }
-                ImU32 col = ImGui::GetColorU32(ImVec4(0.0f, 1, 0.50f, 1.0f));
+                ImU32 col = ImGui::GetColorU32(ImVec4(0.34f, 0.06f, 0.98f, 1.00f));
               // ImGui::Text(("_____________________________\n\nCONTROLLER_1: " + bStrStatus + "\nTYPE : " + std::to_string(b_type) + "\n_____________________________").c_str());
                 // GLuint gl_id;
                //  ImLoadImageForGL("Test.jpg", &gl_id, 30, 30);
-                if (xController1->IsConnected() || C_XinputControllerState)
+                JTModule->C_XinputControllerStateError = (JTModule->C_XinputControllerState ? true : false);
+                if (JTModule->xController1->IsConnected() || JTModule->C_XinputControllerState)
                 {
                     ImGui::Text("CONTROLLER CONNECTED!!\n\n");
-                    C_XinputControllerState = true;
+                    JTModule->C_XinputControllerState = true;
                 }
-                else
-                {
-                    ImGui::Text("PLEASE PLUG YOUR CONTROLLER!!\n");
-                    ImGui::Text("Scaning Gamepads");
-                    ImGui::Spinner("scan", 20, 3, col);
-                    C_XinputControllerState = false;
+               
+                if (!JTModule->C_XinputControllerState) {
+                    ImGui::Begin("Error", &JTModule->C_XinputControllerStateError);
+                    ImGui::SetCursorPos(ImVec2(20, 40));
+                    ImGui::Spinner("scan", 20, 3, col);  ImGui::SameLine(); ImGui::SetCursorPos(ImVec2(100, 50)); ImGui::Text("PLEASE PLUG YOUR CONTROLLER!!\n");
+                    JTModule->C_XinputControllerState = false;
+                    ImGui::SetCursorPosX(100);
+                    if (ImGui::Button("OK", ImVec2(100, 30))) {
+                        JTModule->C_XinputControllerState = true;
+                    }
+
+
+                    ImGui::End();
                     //fSndMsg(1);
                 }
-                if (!bShowButtons)
+                if (!JTModule->bShowButtons)
                 {
-                    ImGui::Checkbox("Enable Supported All Gamepads", &Gamepad_enable);
                     if (ImGui::Button("\tJOYSTICKTEST", ImVec2(170.0f, 50.0f)))
                     {
-                        fJEFrame = true;
-                        bShowButtons = true;
+                        JTModule->fJEFrame = true;
+                        JTModule->bShowButtons = true;
                     }
                     ImGui::SameLine();
                     if (ImGui::Button("\tVisit Github", ImVec2(170.0f, 50.0f)))
@@ -1045,66 +1195,75 @@ int main(int, char**)
                 //
                // ImGui::ColorButton("JoyStickTest", ImVec4(0.90f, 0.65f, 0.65f, 0.45f),1,ImVec2(100.0f,50.0f));
                 
-                uint64_t InLatency = fLTime(3);
                 std::string fGPURating[] = {"SHIT","OFFICE DICK","Nice Card","Very Good","Wtf man!! You GPU quantum ?"};
                 static float64_t af = 5.5f;
-                if (bGPUTest) {
-                    InLatency = fLTime(3);
+                if (JTModule->bGPUTest) {
+                    static uint64_t fDelayToCloseFrameCount = 0;
+                   auto InLatency = chrono::high_resolution_clock::now();
                     uint64_t fps_count = io.Framerate;
-                    JEApp.ClearFreeMemory();
-                    ImGui::Begin("GPU TEST", &bGPUTest);
+                    static uint64_t fps_count0 = 0;
+                    JTModule->JEApp.ClearFreeMemory();
+                    ImGui::Begin("GPU TEST", &JTModule->bGPUTest);
                     ImGui::PushFont(font2);
                     ImGui::SetCursorPosX(30.0f);
-                    ImGui::Text("GPU TEST OpenGL");
+                    ImGui::Text("GPU TEST v1.2 OpenGL3.3");
                     ImGui::PopFont();//
-                    if (stopBench)
+                    if (JTModule->stopBench)
                     {
+                        
                         ImGui::PushFont(font2);
                         ImGui::SetCursorPosX(30.0f);
-                        ImGui::TextColored(ImVec4(0.20f, 1.0f, 0.40f, 1.0f), ("score:" + std::to_string((14 * fps_count))).c_str()); ImGui::SameLine();
+                        ImGui::TextColored(ImVec4(0.20f, 1.0f, 0.40f, 1.0f), ("score:" + std::to_string((14 * JTModule->fGPUScore))).c_str()); ImGui::SameLine();
                         ImGui::PopFont();
                         ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.33f, 1.0f), (" " + fGPURating[id]).c_str());
+                        ImGui::SetCursorPos(ImVec2(30.0f,100));
+                        ImGui::Text(("\ntime: " + std::to_string(JTModule->fGPUScore0) + "ms").c_str());
 
                     }
                     ImGui::SetCursorPosX(30.0f);
                     ImGui::SetCursorPosY((ImGui::GetWindowHeight() - 40) / 2);
                     if (ImGui::Button("BENCH", ImVec2(130.0f, 40.0f)))
                     {
-                        renderFrame = true;
-                        stopBench = false;
+                        fDelayToCloseFrameCount = 0;
+                        JTModule->renderFrame = true;
+                        JTModule->stopBench = false;
+
                         
                     }
          
-                    uint64_t imgLoaded = 0;
-                    ImGui::SliderInt("Count:", &imgCountToRender, 100, 100000, NULL, 1);
+                   static  uint64_t imgLoaded = 0;
+                    ImGui::SliderInt("Count:", &JTModule->imgCountToRender, 100, 100000, NULL, 1);
                     ImGui::Text("Resolution");
                     ImGui::PushItemWidth(100.0f);
                     ImGui::InputInt("SizeX:", &Ix, 10, 1); ImGui::SameLine(); ImGui::InputInt("SizeY:", &Iy, 10, 1);
                     ImGui::PopItemWidth();
-                    if (renderFrame) {
-                        ImGui::Begin("Render", &renderFrame);
-                        fps_count = io.Framerate;
-                        if (fps_count == 15) {
+                    
+                    if (JTModule->renderFrame) {
+                        JTModule->fGPUScore = ImMax((int)fps_count, (int)fps_count0);
+                        ImGui::Begin("Render", &JTModule->renderFrame);
+                        fps_count0 = io.Framerate;
+                        if (fps_count0 == 15) {
                             id = 2;
                         }
-                        if (fps_count < 15) {
+                        if (fps_count0 < 15) {
                             id = 2;
                         }
-                        if (fps_count <= 5) {
+                        if (fps_count0 <= 5) {
                             id = 0;
                         }
-                        if (fps_count >= 30) {
+                        if (fps_count0 >= 30) {
                             id = 3;
                         }
-                        if (fps_count >= 60) {
+                        if (fps_count0 >= 60) {
                             id = 4;
                         }
                         
                         ImGui::SetWindowSize(ImVec2(800.0f, 480.0f));
-                        ImGui::Text(("GPU:[" + GPU.E_Model+"]\t fps_count:"+std::to_string(fps_count) +"loaded:"+std::to_string(imgLoaded)).c_str());
-                       // ImGui::Text(("AMD AGS Device info:" + std::to_string(device.localMemoryInBytes / (1024 * 1024)) + std::to_string(device.memoryBandwidth / 1024.0f) + std::to_string(device.sharedMemoryInBytes / (1024 * 1024))).c_str());
-                        for (uint64_t imgBufferOffset = 0; imgBufferOffset < imgCountToRender; imgBufferOffset++) {
-                            imgLoaded = (imgBufferOffset) * 14;
+                        ImGui::Text(("GPU:[" + GPU.E_Model+"]\t fps_count:"+std::to_string(fps_count0) +"loaded:["+std::to_string(imgLoaded) +"/" + std::to_string(JTModule->imgCountToRender)+"]"+"dl:"+std::to_string(fDelayToCloseFrameCount)).c_str());
+                      // ImGui::Text(("AMD AGS Device info:" + std::to_string(device.localMemoryInBytes / (1024 * 1024)) + std::to_string(device.memoryBandwidth / 1024.0f) + std::to_string(device.sharedMemoryInBytes / (1024 * 1024))).c_str());
+                        for (uint64_t imgBufferOffset = 0; imgBufferOffset <= JTModule->imgCountToRender; imgBufferOffset++) {
+                           // ImGui::Text(("GPU:[" + GPU.E_Model + "]\t fps_count:" + std::to_string(fps_count) + "loaded:[" + std::to_string(imgLoaded) + "/" + std::to_string(JTModule->imgCountToRender) + "]").c_str());
+                            imgLoaded = imgBufferOffset;
                             ImGui::Image((void*)(intptr_t)GLArrayBuffer, ImVec2(Ix, Iy));
                             ImGui::SameLine();
                             ImGui::Image((void*)(intptr_t)GLArrayBuffer, ImVec2(Ix, Iy));
@@ -1131,32 +1290,52 @@ int main(int, char**)
                             ImGui::Image((void*)(intptr_t)GLArrayBuffer, ImVec2(Ix, Iy));
                             ImGui::SameLine();
                             ImGui::Image((void*)(intptr_t)GLArrayBuffer, ImVec2(Ix, Iy));
-                            OutLatency = fLTime(3);
-                            if (!stopBench) {
-                                fGPUScore = OutLatency - InLatency;
+                            if (imgBufferOffset == JTModule->imgCountToRender) {
+                                break;
                             }
+
                        }
-                        stopBench = true;
-                        fGPUScore = fGPUScore;
-                        //renderFrame = false;
+                        fDelayToCloseFrameCount++;
+                        if (fDelayToCloseFrameCount > 100) {
+                            fDelayToCloseFrameCount = 100;
+                            JTModule->renderFrame = false;
+
+                        }
+                        //JTModule->renderFrame = false;
+                        JTModule->stopBench = true;
+                        auto OutLatency = chrono::high_resolution_clock::now();
+                        JTModule->fGPUScore0 = chrono::duration_cast<chrono::milliseconds>(OutLatency - InLatency).count();
                         ImGui::End();
                     }
                     ImGui::End();
                 } 
                 if (fJEUpdate)
                 {
-                    JEApp.ClearFreeMemory();
+                    JTModule->JEApp.ClearFreeMemory();
                     // LPBINDSTATUSCALLBACK st_b;
                     const TCHAR dURL[] = _T("https://github.com/HCPP20334/JoyStickTest/releases/download/JoyStickTest_x64_OpenGL_1.1/JoyStickTest_x64_OpenGL3SSE4.2.zip");
                     const TCHAR dFllePath[] = _T("JoyStickTest_x64_OpenGL3SSE4.2.zip");
                     int64_t fDwChannel_0 = URLDownloadToFile(NULL, NULL, dFllePath, 0, NULL);
                     static bool v_bDown = false;
                     static bool v_bStatus = false;
-                    std::string btn_name = "DOWNLOAD";
+                    static bool WindowReadBool = false;
+                    static  std::string btn_name;
+                    static std::string strdata;
                     ImGui::Begin("\tUPDATE CENTER", &fJEUpdate, ImGuiWindowFlags_NoCollapse);
+                    ImGui::Text("Read Readme.md to Latest Build!");
                     ImGui::Text("UPDATE CENTER - UPDATE JE TO GITHUB SERVER");
+                    ImGui::TextRGBABool((btn_name).c_str(),ImVec4(0,255,120,255),ImVec4(255,0,130,255), v_bStatus);
                     // std::cout << st_b << std::endl;
-                    if (ImGui::Button((btn_name).c_str(), ImVec2(100.f, 50.0f)))
+                    if (WindowReadBool) {
+                        ImGui::Begin("README.MD", &WindowReadBool);
+                        ImGui::Text((strdata).c_str());
+                        ImGui::End();
+                    }
+                    if (ImGui::Button("Check README.md", ImVec2(160.f, 30.0f))) {
+                        WindowReadBool = GUI->OpenMDRelease(&strdata);
+                    }
+                    ImGui::SameLine();
+                    if (ImGui::Button("DOWNLOAD", ImVec2(100.f, 30.0f)))
                     {
                         btn_name = "CONNECTING..";
                         Sleep(13);
@@ -1165,14 +1344,13 @@ int main(int, char**)
                     if (!v_bStatus)
                     {
 
-                        ImGui::Text(("UPDATE FATAL ERROR!!" + std::to_string(fDwChannel_0)).c_str());
+                        btn_name = "UPDATE FATAL ERROR!!";
                     }
                     if (v_bStatus)
                     {
                         btn_name = "DOWNLOAD OK";
-                        ImGui::Text("UPDATE SUCCEEDED!\t\t\nSAVED TO: ./JEx64_OpenGL3_SSE4.2cpp20");
+                        btn_name = "UPDATE SUCCEEDED!\t\t\nSAVED TO : . / JEx64_OpenGL3_SSE4.2cpp20";
                         Sleep(13);
-                        btn_name = "DOWNLOAD";
                         v_bDown = false;
                     }
                     if (v_bDown)
@@ -1182,174 +1360,263 @@ int main(int, char**)
                         {
                             v_bStatus = true;
 
-                            Sleep(3000);
+                          
                             v_bDown = false;
 
                         }
                         if (FAILED(fDwChannel_0))
                         {
                             v_bStatus = false;
-                            Sleep(1000);
+                         
                             v_bDown = false;
 
                         }
                     }
                     ImGui::End();
                 }
-                if (Gamepad_enable)
-                {
-                  
+                if (JTModule->Gamepad_enable)
+                { 
+                    ImGuiKeyData* fLS_left = ImGui::GetKeyData(ImGuiKey_GamepadLStickLeft);
+                    ImGuiKeyData* fLS_Right = ImGui::GetKeyData(ImGuiKey_GamepadLStickRight);
+                    ImGuiKeyData* fLS_Up = ImGui::GetKeyData(ImGuiKey_GamepadLStickUp);
+                    ImGuiKeyData* fLS_Down = ImGui::GetKeyData(ImGuiKey_GamepadLStickDown);
+                    //
+                    ImGuiKeyData* fRS_left = ImGui::GetKeyData(ImGuiKey_GamepadRStickLeft);
+                    ImGuiKeyData* fRS_Right = ImGui::GetKeyData(ImGuiKey_GamepadRStickRight);
+                    ImGuiKeyData* fRS_Up = ImGui::GetKeyData(ImGuiKey_GamepadRStickUp);
+                    ImGuiKeyData* fRS_Down = ImGui::GetKeyData(ImGuiKey_GamepadRStickDown);
+                    ImGuiKeyData* fLTv = ImGui::GetKeyData(ImGuiKey_GamepadL2);
+                    ImGuiKeyData* fRTv = ImGui::GetKeyData(ImGuiKey_GamepadR2);
+                    JTModule->fLX = fLS_Right->AnalogValue - fLS_left->AnalogValue;
+                    JTModule->fLY = fLS_Down->AnalogValue - fLS_Up->AnalogValue;
+                    JTModule->fRY = fRS_Down->AnalogValue - fRS_Up->AnalogValue;
+                    JTModule->fRX = fRS_Right->AnalogValue - fRS_left->AnalogValue;
+                    fRTv->Down ? JTModule->fRT += 10 : JTModule->fRT -= 10;
+                    fLTv->Down ? JTModule->fLT += 10 : JTModule->fLT -= 10;
+                    if (JTModule->fRT > 255) {
+                        JTModule->fRT = 255;
+                    }
+                    if (JTModule->fLT > 255) {
+                        JTModule->fLT = 255;
+                    }
+                    if (JTModule->fRT <= 0) {
+                        JTModule->fRT = 0;
+                    }
+                    if (JTModule->fLT <= 0) {
+                        JTModule->fLT = 0;
+                    }
+                    if (io.KeysDown[ImGuiKey_GamepadFaceRight]) { JTModule->fB_b = JTModule->fB_b + 0.1f; if (JTModule->fB_b > 1.000f) { JTModule->fB_b = 1.000f; } }
+                    if (io.KeysDown[ImGuiKey_GamepadFaceDown]) { JTModule->fB_a = JTModule->fB_a + 0.1f; if (JTModule->fB_a > 1.000f) { JTModule->fB_a = 1.000f; } }
+                    if (io.KeysDown[ImGuiKey_GamepadFaceLeft]) { JTModule->fB_x = JTModule->fB_x + 0.1f; if (JTModule->fB_x > 1.000f) { JTModule->fB_x = 1.000f; } }
+                    if (io.KeysDown[ImGuiKey_GamepadFaceUp]) { JTModule->fB_y = JTModule->fB_y + 0.1f; if (JTModule->fB_y > 1.000f) { JTModule->fB_y = 1.000f; } }
+                    if (io.KeysDown[ImGuiKey_GamepadR1]) { JTModule->fB_rs = JTModule->fB_rs + 0.1f; if (JTModule->fB_rs > 1.000f) { JTModule->fB_rs = 1.000f; } }
+                    if (io.KeysDown[ImGuiKey_GamepadL1]) { JTModule->fB_ls = JTModule->fB_ls + 0.1f; if (JTModule->fB_ls > 1.000f) { JTModule->fB_ls = 1.000f; } }
+                    if (io.KeysDown[ImGuiKey_GamepadDpadUp]) { JTModule->fB_du = JTModule->fB_du + 0.1f; if (JTModule->fB_du > 1.000f) { JTModule->fB_du = 1.000f; } }
+                    if (io.KeysDown[ImGuiKey_GamepadDpadDown]) { JTModule->fB_dd = JTModule->fB_dd + 0.1f; if (JTModule->fB_dd > 1.000f) { JTModule->fB_dd = 1.000f; } }
+                    if (io.KeysDown[ImGuiKey_GamepadDpadLeft]) { JTModule->fB_dl = JTModule->fB_dl + 0.1f; if (JTModule->fB_dl > 1.000f) { JTModule->fB_dl = 1.000f; } }
+                    if (io.KeysDown[ImGuiKey_GamepadDpadRight]) { JTModule->fB_dr = JTModule->fB_dr + 0.1f; if (JTModule->fB_dr > 1.000f) { JTModule->fB_dr = 1.000f; } }
+                    if (io.KeysDown[ImGuiKey_GamepadStart]) { JTModule->b_Start = true; }
+                    if (io.KeysDown[ImGuiKey_GamepadBack]) { JTModule->b_Back = true; }
+                    //
+                    if (!io.KeysDown[ImGuiKey_GamepadFaceRight]) { JTModule->fB_b = JTModule->fB_b - 0.1f; if (JTModule->fB_b < 0.1f) { JTModule->fB_b = 0.0f; } }
+                    if (!io.KeysDown[ImGuiKey_GamepadFaceDown]) { JTModule->fB_a = JTModule->fB_a - 0.1f; if (JTModule->fB_a < 0.1f) { JTModule->fB_a = 0.0f; } }
+                    if (!io.KeysDown[ImGuiKey_GamepadFaceLeft]) { JTModule->fB_x = JTModule->fB_x - 0.1f; if (JTModule->fB_x < 0.1f) { JTModule->fB_x = 0.0f; } }
+                    if (!io.KeysDown[ImGuiKey_GamepadFaceUp]) { JTModule->fB_y = JTModule->fB_y - 0.1f; if (JTModule->fB_y < 0.1f) { JTModule->fB_y = 0.0f; } }
+                    if (!io.KeysDown[ImGuiKey_GamepadR1]) { JTModule->fB_rs = JTModule->fB_rs - 0.1f; if (JTModule->fB_rs < 0.1f) { JTModule->fB_rs = 0.0f; } }
+                    if (!io.KeysDown[ImGuiKey_GamepadL1]) { JTModule->fB_ls = JTModule->fB_ls - 0.1f; if (JTModule->fB_ls < 0.1f) { JTModule->fB_ls = 0.0f; } }
+                    if (!io.KeysDown[ImGuiKey_GamepadDpadUp]) { JTModule->fB_du = JTModule->fB_du - 0.1f; if (JTModule->fB_du < 0.1f) { JTModule->fB_du = 0.0f; } }
+                    if (!io.KeysDown[ImGuiKey_GamepadDpadDown]) { JTModule->fB_dd = JTModule->fB_dd - 0.1f; if (JTModule->fB_dd < 0.1f) { JTModule->fB_dd = 0.0f; } }
+                    if (!io.KeysDown[ImGuiKey_GamepadDpadLeft]) { JTModule->fB_dl = JTModule->fB_dl - 0.1f; if (JTModule->fB_dl < 0.1f) { JTModule->fB_dl = 0.0f; } }
+                    if (!io.KeysDown[ImGuiKey_GamepadDpadRight]) { JTModule->fB_dr = JTModule->fB_dr - 0.1f; if (JTModule->fB_dr < 0.1f) { JTModule->fB_dr = 0.0f; } }
+                    if (!io.KeysDown[ImGuiKey_GamepadStart]) { JTModule->b_Start = false; }
+                    if (!io.KeysDown[ImGuiKey_GamepadBack]) { JTModule->b_Back = false; }
                 }
-                if (!Gamepad_enable)
+                if (!JTModule->Gamepad_enable)
                 {
                     //button
                     //  detector
-                    fLX = (xController1->GetState().Gamepad.sThumbLX / 100);
-                    fLY = (xController1->GetState().Gamepad.sThumbLY / 100);
-                    fRX = (xController1->GetState().Gamepad.sThumbRX / 100);
-                    fRY = (xController1->GetState().Gamepad.sThumbRY / 100);
-                    fLT = (xController1->GetState().Gamepad.bLeftTrigger);
-                    fRT = (xController1->GetState().Gamepad.bRightTrigger);
-                    if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_B) { fB_b = fB_b + 0.1f; if (fB_b > 1.000f) { fB_b = 1.000f; } }
-                    if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A) { fB_a = fB_a + 0.1f; if (fB_a > 1.000f) { fB_a = 1.000f; } }
-                    if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_X) { fB_x = fB_x + 0.1f; if (fB_x > 1.000f) { fB_x = 1.000f; } }
-                    if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_Y) { fB_y = fB_y + 0.1f; if (fB_y > 1.000f) { fB_y = 1.000f; } }
-                    if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) { fB_rs = fB_rs + 0.1f; if (fB_rs > 1.000f) { fB_rs = 1.000f; } }
-                    if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) { fB_ls = fB_ls + 0.1f; if (fB_ls > 1.000f) { fB_ls = 1.000f; } }
-                    if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) { fB_du = fB_du + 0.1f; if (fB_du > 1.000f) { fB_du = 1.000f; } }
-                    if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) { fB_dd = fB_dd + 0.1f; if (fB_dd > 1.000f) { fB_dd = 1.000f; } }
-                    if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) { fB_dl = fB_dl + 0.1f; if (fB_dl > 1.000f) { fB_dl = 1.000f; } }
-                    if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) { fB_dr = fB_dr + 0.1f; if (fB_dr > 1.000f) { fB_dr = 1.000f; } }
-                    if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_START) { b_Start = true; }
-                    if (xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_BACK) { b_Back = true; }
+                    JTModule->fLX = (JTModule->xController1->GetState().Gamepad.sThumbLX / 32768.0f);
+                    JTModule->fLY = (JTModule->xController1->GetState().Gamepad.sThumbLY / 32768.0f);
+                    JTModule->fRX = (JTModule->xController1->GetState().Gamepad.sThumbRX / 32768.0f);
+                    JTModule->fRY = (JTModule->xController1->GetState().Gamepad.sThumbRY / 32768.0f);
+                    JTModule->fLT = (JTModule->xController1->GetState().Gamepad.bLeftTrigger);
+                    JTModule->fRT = (JTModule->xController1->GetState().Gamepad.bRightTrigger);
+                    if (JTModule->xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_B) { JTModule->fB_b = JTModule->fB_b + 0.1f; if (JTModule->fB_b > 1.000f) { JTModule->fB_b = 1.000f; } }
+                    if (JTModule->xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A) { JTModule->fB_a = JTModule->fB_a + 0.1f; if (JTModule->fB_a > 1.000f) { JTModule->fB_a = 1.000f; } }
+                    if (JTModule->xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_X) { JTModule->fB_x = JTModule->fB_x + 0.1f; if (JTModule->fB_x > 1.000f) { JTModule->fB_x = 1.000f; } }
+                    if (JTModule->xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_Y) { JTModule->fB_y = JTModule->fB_y + 0.1f; if (JTModule->fB_y > 1.000f) { JTModule->fB_y = 1.000f; } }
+                    if (JTModule->xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) { JTModule->fB_rs = JTModule->fB_rs + 0.1f; if (JTModule->fB_rs > 1.000f) { JTModule->fB_rs = 1.000f; } }
+                    if (JTModule->xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) { JTModule->fB_ls = JTModule->fB_ls + 0.1f; if (JTModule->fB_ls > 1.000f) { JTModule->fB_ls = 1.000f; } }
+                    if (JTModule->xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) { JTModule->fB_du = JTModule->fB_du + 0.1f; if (JTModule->fB_du > 1.000f) { JTModule->fB_du = 1.000f; } }
+                    if (JTModule->xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) { JTModule->fB_dd = JTModule->fB_dd + 0.1f; if (JTModule->fB_dd > 1.000f) { JTModule->fB_dd = 1.000f; } }
+                    if (JTModule->xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) { JTModule->fB_dl = JTModule->fB_dl + 0.1f; if (JTModule->fB_dl > 1.000f) { JTModule->fB_dl = 1.000f; } }
+                    if (JTModule->xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) { JTModule->fB_dr = JTModule->fB_dr + 0.1f; if (JTModule->fB_dr > 1.000f) { JTModule->fB_dr = 1.000f; } }
+                    if (JTModule->xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_START) { JTModule->b_Start = true; }
+                    if (JTModule->xController1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_BACK) { JTModule->b_Back = true; }
                     //
-                    if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_B) { fB_b = fB_b - 0.1f; if (fB_b < 0.1f) { fB_b = 0.0f; } }
-                    if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_A) { fB_a = fB_a - 0.1f; if (fB_a < 0.1f) { fB_a = 0.0f; } }
-                    if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_X) { fB_x = fB_x - 0.1f; if (fB_x < 0.1f) { fB_x = 0.0f; } }
-                    if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_Y) { fB_y = fB_y - 0.1f; if (fB_y < 0.1f) { fB_y = 0.0f; } }
-                    if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_RIGHT_SHOULDER) {
-                        fB_rs = fB_rs - 0.1f; if (fB_rs < 0.1f) {
-                            fB_rs = 0.0f;
-                        }
-                    }
-                    if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_LEFT_SHOULDER) {
-                        fB_ls = fB_ls - 0.1f; if (fB_ls < 0.1f) {
-                            fB_ls = 0.0f;
-                        }
-                    }
-                    if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_DPAD_UP) {
-                        fB_du = fB_du - 0.1f; if (fB_du < 0.1f) {
-                            fB_du = 0.0f;
-                        }
-                    }
-                    if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_DPAD_DOWN) {
-                        fB_dd = fB_dd - 0.1f; if (fB_dd < 0.1f) {
-                            fB_dd = 0.0f;
-                        }
-                    }
-                    if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_DPAD_LEFT) {
-                        fB_dl = fB_dl - 0.1f; if (fB_dl < 0.1f) {
-                            fB_dl = 0.0f;
-                        }
-                    }
-                    if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_DPAD_RIGHT) { fB_dr = fB_dr - 0.1f; if (fB_dr < 0.1f) { fB_dr = 0.0f; } }
-                    if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_START) { b_Start = false; }
-                    if (xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_BACK) { b_Back = false; }
+                    if (JTModule->xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_B) { JTModule->fB_b = JTModule->fB_b - 0.1f; if (JTModule->fB_b < 0.1f) { JTModule->fB_b = 0.0f; } }
+                    if (JTModule->xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_A) { JTModule->fB_a = JTModule->fB_a - 0.1f; if (JTModule->fB_a < 0.1f) { JTModule->fB_a = 0.0f; } }
+                    if (JTModule->xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_X) { JTModule->fB_x = JTModule->fB_x - 0.1f; if (JTModule->fB_x < 0.1f) { JTModule->fB_x = 0.0f; } }
+                    if (JTModule->xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_Y) { JTModule->fB_y = JTModule->fB_y - 0.1f; if (JTModule->fB_y < 0.1f) { JTModule->fB_y = 0.0f; } }
+                    if (JTModule->xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_RIGHT_SHOULDER) {JTModule->fB_rs = JTModule->fB_rs - 0.1f; if (JTModule->fB_rs < 0.1f) {JTModule->fB_rs = 0.0f;}}
+                    if (JTModule->xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_LEFT_SHOULDER) {JTModule->fB_ls = JTModule->fB_ls - 0.1f; if (JTModule->fB_ls < 0.1f) {JTModule->fB_ls = 0.0f;}}
+                    if (JTModule->xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_DPAD_UP) {JTModule->fB_du = JTModule->fB_du - 0.1f; if (JTModule->fB_du < 0.1f) {JTModule->fB_du = 0.0f;}}
+                    if (JTModule->xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_DPAD_DOWN) {JTModule->fB_dd = JTModule->fB_dd - 0.1f; if (JTModule->fB_dd < 0.1f) {JTModule->fB_dd = 0.0f;}}
+                    if (JTModule->xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_DPAD_LEFT) { JTModule->fB_dl = JTModule->fB_dl - 0.1f; if (JTModule->fB_dl < 0.1f) { JTModule->fB_dl = 0.0f;}}
+                    if (JTModule->xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_DPAD_RIGHT) { JTModule->fB_dr = JTModule->fB_dr - 0.1f; if (JTModule->fB_dr < 0.1f) { JTModule->fB_dr = 0.0f; } }
+                    if (JTModule->xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_START) { JTModule->b_Start = false; }
+                    if (JTModule->xController1->GetState().Gamepad.wButtons != XINPUT_GAMEPAD_BACK) { JTModule->b_Back = false; }
                 }
                 //
-                if (fJEFrame)
+                if (JTModule->fJEFrame)
                 {
+                    ImGui::SameLine();
+                    ImGui::SetCursorPosX(700);
+                    if (ImGui::Button("<-", ImVec2(50.0f,50.0f)))                           // Buttons return true when clicked (most widgets return true when edited/activated)
+                    {
+                        JTModule->fJEFrame = false;
+                        JTModule->bShowButtons = false;
+                    }
                     static bool dbg_b = false;
                     if (GetAsyncKeyState('N')) {
-                        fB_a    = 1;
-                        fB_x    = 1;
-                        fB_y    = 1;
-                        fB_b    = 1;
-                        fB_rs   = 1;
-                        fB_ls   = 1;
-                        fB_du   = 1;
-                        fB_dd   = 1;
-                        fLY     = 327.0f;
-                        fRY     = 327.0f;
-                        fLX     = 327.0f;
-                        fRX     = 327.0f;
-                        fLT     = 255.0f;
-                        fRT     = 255.0f;
-                        fB_dl   = 1;
-                        fB_dr   = 1;
+                        JTModule->fB_a  = RD->frand(1);
+                        JTModule->fB_x  = RD->frand(1);
+                        JTModule->fB_y  = RD->frand(1);
+                        JTModule->fB_b  = RD->frand(1);
+                        JTModule->fB_rs = RD->frand(1);
+                        JTModule->fB_ls = RD->frand(1);
+                        JTModule->fB_du = RD->frand(1);
+                        JTModule->fB_dd = RD->frand(1);
+                        JTModule->fLY   = RD->frand(1);
+                        JTModule->fRY   = RD->frand(1);
+                        JTModule->fLX   = RD->frand(1);
+                        JTModule->fRX   = RD->frand(1);
+                        JTModule->fLT   = RD->frand(255);
+                        JTModule->fRT   = RD->frand(255);
+                        JTModule->fB_dl = RD->frand(1);
+                        JTModule->fB_dr = RD->frand(1);
                         dbg_b = true;
-                        b_Start = dbg_b ? true : false;
-                        b_Back = dbg_b ? true : false;
+                        JTModule->b_Start = dbg_b ? true : false;
+                        JTModule->b_Back = dbg_b ? true : false;
                     }
                     //
-                    JEApp.ClearFreeMemory();
+                    static bool bSliders = true;
+                    JTModule->JEApp.ClearFreeMemory();
                     //bShowButtons = false;
-                    ImGui::Text(" BUTTONS ");
-                    ImGui::MenuItem("START", "", &b_Start, b_Start);
-                    ImGui::SameLine();
-                    ImGui::MenuItem("BACK", "", &b_Back, b_Back);
-                    ImGui::PushItemWidth(200.0f);
-                    ImGui::SliderFloat("A \t", &fB_a, 0.0f, 1.0f); ImGui::SameLine(); ImGui::SliderFloat("\tLY", &fLY, -327.0f, 327.0f);
-                    ImGui::SliderFloat("X \t", &fB_x, 0.0f, 1.0f);  ImGui::SameLine(); ImGui::SliderFloat("\tRY", &fRY, -327.0f, 327.0f);
-                    ImGui::SliderFloat("Y \t", &fB_y, 0.0f, 1.0f);  ImGui::SameLine(); ImGui::SliderFloat("\tRX", &fRX, -327.0f, 327.0f);
-                    ImGui::SliderFloat("B \t", &fB_b, 0.0f, 1.0f);  ImGui::SameLine(); ImGui::SliderFloat("\tLX", &fLX, -327.0f, 327.0f);
-                    ImGui::SliderFloat("RB\t", &fB_rs, 0.0f, 1.0f); ImGui::SameLine(); ImGui::SliderFloat("\tRT", &fRT, 0.0f, 255.0f);
-                    ImGui::SliderFloat("LB\t", &fB_ls, 0.0f, 1.0f); ImGui::SameLine(); ImGui::SliderFloat("\tLT", &fLT, 0.0f, 255.0f);
-                    ImGui::SliderFloat("UP\t", &fB_du, 0.0f, 1.0f); ImGui::SameLine(); ImGui::SliderFloat("\t L", &fB_dl, 0.0f, 1.0f);
-                    ImGui::SliderFloat("D \t", &fB_dd, 0.0f, 1.0f); ImGui::SameLine();ImGui::SliderFloat("\t R", &fB_dr, 0.0f, 1.0f);
-                    ImGui::PopItemWidth();
-                    ImGui::Checkbox("Lmotor", &fL_motor);
-                    ImGui::SameLine();
-                    ImGui::Checkbox("Rmotor", &fR_motor);
-                    if (v_bInvertVibValue)
+                    ImGui::SetCursorPosX(128); ImGui::SetCursorPosY(30);
+                    ImGui::CustomToggle("Lmotor", &JTModule->fL_motor); ImGui::SameLine(); ImGui::CustomToggle("Rmotor", &JTModule->fR_motor); ImGui::SameLine(); ImGui::CustomToggle("Sliders:", &bSliders);
+                    ImGui::SetCursorPosY(60);
+                    ImGui::SetCursorPosX(220);
+                    ImGui::CircleAxisXY("LS", JTModule->fLX, (!JTModule->fInvertYBool ? JTModule->fLY* (-1): JTModule->fLY)); ImGui::SameLine();
+                    ImGui::CircleAxisXY("RS", JTModule->fRX , (!JTModule->fInvertYBool ? JTModule->fRY * (-1) : JTModule->fRY));
+                    ImGui::SetCursorPosX(128); ImGui::SetCursorPosY(220);
+                    if (bSliders) {
+                    ImGui::TextToBool("START",JTModule->b_Start); ImGui::SameLine(); ImGui::SetCursorPosY(220); ImGui::TextToBool("BACK",  JTModule->b_Back);
+                        ImGui::PushItemWidth(200.0f);
+                        ImGui::SetCursorPosX(128); ImGui::SliderFloat("A  ", &JTModule->fB_a, 0.0f, 1.0f);  ImGui::SameLine(); ImGui::SliderFloat("RT", &JTModule->fRT, 0.0f, 255.0f);
+                        ImGui::SetCursorPosX(128); ImGui::SliderFloat("X  ", &JTModule->fB_x, 0.0f, 1.0f);  ImGui::SameLine(); ImGui::SliderFloat("LT", &JTModule->fLT, 0.0f, 255.0f);
+                        ImGui::SetCursorPosX(128); ImGui::SliderFloat("Y  ", &JTModule->fB_y, 0.0f, 1.0f);  ImGui::SameLine(); ImGui::SliderFloat(" L", &JTModule->fB_dl, 0.0f, 1.0f);
+                        ImGui::SetCursorPosX(128); ImGui::SliderFloat("B  ", &JTModule->fB_b, 0.0f, 1.0f);  ImGui::SameLine(); ImGui::SliderFloat(" R", &JTModule->fB_dr, 0.0f, 1.0f);
+                        ImGui::SetCursorPosX(128); ImGui::SliderFloat("RB ", &JTModule->fB_rs, 0.0f, 1.0f); ImGui::SameLine(); ImGui::SliderFloat("UP", &JTModule->fB_du, 0.0f, 1.0f);
+                        ImGui::SetCursorPosX(128); ImGui::SliderFloat("LB ", &JTModule->fB_ls, 0.0f, 1.0f); ImGui::SameLine(); ImGui::SliderFloat(" D", &JTModule->fB_dd, 0.0f, 1.0f);
+                        ImGui::PopItemWidth();
+                    }
+                    else {
+                        ImGui::BeginChild("Controls", ImVec2(400, 200), ImGuiChildFlags_Border | ImGuiChildFlags_FrameStyle);
+                        {
+                            const float button_size = 32.0f;
+                            const float spacing = 10.0f;
+                            const float center_x = ImGui::GetWindowWidth() * 0.5f;
+
+                            // Верхние триггеры (LB/LT и RB/RT)
+                            ImGui::SetCursorPos(ImVec2(center_x - 150.0f - spacing, 10.0f));
+                            ImGui::ButtonGamepad("LB", JTModule->fB_ls);
+                            ImGui::SameLine(0, 200.0f);
+                            ImGui::ButtonGamepad("RB", JTModule->fB_rs);
+
+                            ImGui::SetCursorPos(ImVec2(center_x - 150.0f - spacing, 50.0f));
+                            ImGui::ButtonGamepad("LT", JTModule->fLT);
+                            ImGui::SameLine(0, 200.0f);
+                            ImGui::ButtonGamepad("RT", JTModule->fRT);
+
+                            // Центральная область (крестовина и кнопки ABXY)
+                            ImVec2 dpad_pos(center_x - 150.0f, 80.0f);
+                            ImVec2 buttons_pos(center_x + 40.0f, 80.0f);
+
+                            // Крестовина (D-pad)
+                            ImGui::SetCursorPos(ImVec2(dpad_pos.x + button_size, dpad_pos.y));
+                            ImGui::ButtonGamepad("U", JTModule->fB_du);
+                            ImGui::SetCursorPos(ImVec2(dpad_pos.x, dpad_pos.y+30));
+                            ImGui::ButtonGamepad("L", JTModule->fB_dl);
+                            ImGui::SameLine();
+                            ImGui::SetCursorPosX(dpad_pos.x + button_size * 2);
+                            ImGui::ButtonGamepad("R", JTModule->fB_dr);
+                            ImGui::SetCursorPos(ImVec2(dpad_pos.x + button_size, dpad_pos.y + button_size * 2));
+                            ImGui::ButtonGamepad("D", JTModule->fB_dd);
+
+                            // Кнопки ABXY
+                            ImGui::SetCursorPos(buttons_pos);
+                            ImGui::ButtonGamepad("Y", JTModule->fB_y);
+                            ImGui::SetCursorPos(ImVec2(buttons_pos.x - button_size, buttons_pos.y + button_size));
+                            ImGui::ButtonGamepad("X", JTModule->fB_x);
+                            ImGui::SameLine();
+                            ImGui::SetCursorPosX(buttons_pos.x + button_size);
+                            ImGui::ButtonGamepad("B", JTModule->fB_b);
+                            ImGui::SetCursorPos(ImVec2(buttons_pos.x, buttons_pos.y + button_size * 2));
+                            ImGui::ButtonGamepad("A", JTModule->fB_a);
+
+                            // Нижние кнопки (Start/Back)
+                            ImGui::SetCursorPos(ImVec2(center_x - 40.0f, 160.0f));
+                            ImGui::TextToBool("START", JTModule->b_Start);
+                            ImGui::SameLine(0, 80.0f);
+                            ImGui::TextToBool("BACK", JTModule->b_Back);
+                        }
+                        ImGui::EndChild();
+                    }
+                    if (JTModule->v_bInvertVibValue)
                     {
                         //WriteConfigJE.is_open();
 
-                        xController1->Vibrate(v_Lmotor, v_Rmotor);
+                        JTModule->xController1->Vibrate(JTModule->v_Lmotor, JTModule->v_Rmotor);
                     }
                     else
                     {
-                        xController1->Vibrate((v_Lmotor * -1), (v_Rmotor * -1));
+                        JTModule->xController1->Vibrate((JTModule->v_Lmotor * -1), (JTModule->v_Rmotor * -1));
 
                     }
 
-                    if (fR_motor)
+                    if (JTModule->fR_motor)
                     {
                         // ImGui::InputInt("Rduration", &v_Rmotor, 1, 100);
-                        ImGui::PushItemWidth(200.0f);
-                        ImGui::SliderInt("Rduration", &v_Rmotor, 0.0f, 1000.0f);
+                        ImGui::PushItemWidth(150.0f);
+                        ImGui::SetCursorPosX(365); ImGui::SliderInt("Rduration", &JTModule->v_Rmotor, 0.0f, 1000.0f);
                         ImGui::SameLine();
                         ImGui::PopItemWidth();
                     }
-                    if (fL_motor)
+                    if (JTModule->fL_motor)
                     {
-                        ImGui::PushItemWidth(200.0f);
-                        ImGui::SliderInt("Lduration", &v_Lmotor, 0.0f, 1000.0f);
+                        ImGui::PushItemWidth(150.0f);
+                        ImGui::SetCursorPosX(128); ImGui::SliderInt("Lduration", &JTModule->v_Lmotor, 0.0f, 1000.0f);
                         ImGui::PopItemWidth();
                         //ImGui::InputInt("Lduration", &v_Lmotor, 1, 100);
                     }
-                    if (!fL_motor || !fR_motor)
+                    if (!JTModule->fL_motor || !JTModule->fR_motor)
                     {
-                        v_Lmotor = 0;
-                        v_Rmotor = 0;
-                    }
-                    if (ImGui::Button("Back to menu", ImVec2(150.0f, 60.0f)))                           // Buttons return true when clicked (most widgets return true when edited/activated)
-                    {
-                        fJEFrame = false;
-                        bShowButtons = false;
+                        JTModule->v_Lmotor = 0;
+                        JTModule->v_Rmotor = 0;
                     }
                 }
                 // static bool bCPUTest = false;
-                 //ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+                 //ImGui::ColorEdit3("clear color", (float*)&JTModule->clear_color); // Edit 3 floats representing a color
                  // io.Fonts->AddFontFromFileTTF("./WhiteRabbit.ttf", 15.0f);
                 
            
                 ImGui::End();
             
         }
-        if (fCAboutW)
+        if (JTModule->fCAboutW)
         {
-            ImGui::Begin("\tAbout", &fCAboutW, ImGuiWindowFlags_NoCollapse);  
+            ImGui::Begin("\tAbout", &JTModule->fCAboutW, ImGuiWindowFlags_NoCollapse);
             ImGui::PushFont(font2);
             ImGui::TextColored(ImVec4(0.20f, 1.0f, 0.40f,1.0f), "JOYSTICKTEST");//Build 1.1\n
             ImGui::PopFont();
@@ -1360,12 +1627,12 @@ int main(int, char**)
           
             
            // std::cout << &fJ_vendor << &fJ_rendered << "\n";
-            if (ImGui::Button("OK")){ fCAboutW = false; }
+            if (ImGui::Button("OK")){ JTModule->fCAboutW = false; }
             ImGui::Text("Optimized"); ImGui::SameLine();
             ImGui::Image((void*)(intptr_t)GLArrayBuffer_1, ImVec2(128.0f, 64.0f));
             ImGui::End();
         }
-        if (bCPUTest)
+        if (JTModule->bCPUTest)
         {
             static int64_t v_Cscore = 0;
             static int64_t v_CFirst = 0;
@@ -1374,19 +1641,19 @@ int main(int, char**)
             static int64_t fc_0 = 0;
             static bool cp_state = false;
             std::string fDebugData;
-            ImGui::Begin("\tCPU Test", &bCPUTest, ImGuiWindowFlags_NoCollapse);
+            ImGui::Begin("\tCPU Test", &JTModule->bCPUTest, ImGuiWindowFlags_NoCollapse);
 
             // ImGui::Text(("cores: " + std::to_string(dDataCPU(3)) + "\nThreads: " + std::to_string(dDataCPU(4))).c_str());
             ImGui::TextColored(ImVec4(0.118f, 0.881f, 0.43f, 1.10f), "Test CPU");
             ImGui::PushFont(font2);
-            ImGui::Text(("\t\t" + fBuffer_data).c_str());
+            ImGui::Text(("\t\t" + JTModule->fBuffer_data).c_str());
             ImGui::PopFont();
             ImGui::Text(("\ninfo:\n" + fDebugData).c_str());
             //std::cout << "Cycle:" << fT_cpuSpeed << "Score" << v_Cscore << std::endl;
             ImGui::SetCursorPosX((ImGui::GetWindowWidth() - 130) / 2);
             if (ImGui::Button("BENCH", ImVec2(130.0f, 40.0f)))
             {
-                v_Cscore = ld_V(&fBuffer_data, &fDebugData);
+                v_Cscore = ld_V(&JTModule->fBuffer_data, &fDebugData);
 
             }
             
@@ -1399,7 +1666,7 @@ int main(int, char**)
         // Rendering
       ImGui::Render();
         glViewport(0, 0, 400, 800);
-        glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+        glClearColor(JTModule->clear_color.x, JTModule->clear_color.y, JTModule->clear_color.z, JTModule->clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

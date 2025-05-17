@@ -1,2 +1,2 @@
 fJETheme=0;
-fJEVsync=true;
+fJEVsync=false;

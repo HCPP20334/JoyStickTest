@@ -59,7 +59,7 @@ int64_t fPerfomanceInfo(int64_t fPdataId)
 		return fPdata0A.PageSize;
 	}
 	if(fPdataId == 8){
-		return (fPdata0A.PhysicalAvailable) / 1024;
+		return (fPdata0A.PhysicalAvailable) / 1000;
 	}
 	if(fPdataId == 9){
 		return fPdata0A.PhysicalTotal;

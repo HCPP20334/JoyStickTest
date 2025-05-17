@@ -1,4 +1,4 @@
-## JoyStickTest 1.2.1 (latest)
+## JoyStickTest 1.2.4 (latest)
 ```bash
 FiXed
 * Fix Sliders to Test Gamepsad
